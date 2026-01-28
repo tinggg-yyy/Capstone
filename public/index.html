@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <link rel="manifest" href="manifest.json" />
+    <title>PET · Social App</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="lib/p5.js"></script>
+    <script src="lib/p5.sound.js"></script>
+  </head>
+  <body>
+    <!-- Launch Page -->
+    <section id="launch" class="page active">
+      <div class="phone">
+        <h1 class="logo">PET</h1>
+        <p class="subtitle">为您的宠物寻找朋友 / Find friends for your pet</p>
+        <button onclick="goTo('login')">开始 / START</button>
+      </div>
+    </section>
+
+    <!-- Login / Sign up -->
+    <section id="login" class="page">
+      <div class="phone">
+        <h2>注册 / 登录 / Sign Up / Login</h2>
+        <input type="text" placeholder="电话 / Email / Phone / Email" />
+        <input type="password" placeholder="密码 / Password" />
+        <button onclick="goTo('profile-nickname')">进入 / Enter</button>
+      </div>
+    </section>
+
+    <!-- Pet Profile - Nickname -->
+    <section id="profile-nickname" class="page">
+      <div class="phone">
+        <h2>宠物档案 / Pet Profile</h2>
+        <label>昵称 / Nickname</label>
+        <input
+          id="petNickname"
+          type="text"
+          placeholder="给你的宠物起个昵称 / Give your pet a nickname"
+        />
+
+        <button onclick="goTo('profile-name')">下一步 / Next</button>
+      </div>
+    </section>
+
+    <!-- Pet Profile - Name -->
+    <section id="profile-name" class="page">
+      <div class="phone">
+        <h2>宠物档案 / Pet Profile</h2>
+
+        <label>名字 / Name</label>
+        <input
+          id="petName"
+          type="text"
+          placeholder="你的宠物叫什么？ / What is your pet's name?"
+        />
+
+        <button onclick="goTo('profile-breed')">下一步 / Next</button>
+      </div>
+    </section>
+
+    <!-- Pet Profile - Breed -->
+    <section id="profile-breed" class="page">
+      <div class="phone">
+        <h2>宠物档案 / Pet Profile</h2>
+
+        <label>宠物品种 / Pet Breed</label>
+        <select id="petBreed">
+          <option>狗 / DOG</option>
+          <option>猫 / CAT</option>
+          <option>兔子 / RABBIT</option>
+          <option>鸟类 / BIRD</option>
+          <option>爬行动物 / REPTILE</option>
+          <option>节肢动物 / Arthropod</option>
+          <option>其他 / Other</option>
+        </select>
+
+        <button onclick="goTo('profile-gender')">下一步 / Next</button>
+      </div>
+    </section>
+
+    <!-- Pet Profile - Gender -->
+    <section id="profile-gender" class="page">
+      <div class="phone">
+        <h2>宠物档案 / Pet Profile</h2>
+
+        <label>性别 / GENDER / 出生日期 / BIRTH DATE</label>
+        <select>
+          <option>公 / Male</option>
+          <option>母 / Female</option>
+          <option>未知 / Unknown</option>
+        </select>
+
+        <button onclick="goTo('profile-sterilized')">下一步 / Next</button>
+      </div>
+    </section>
+
+    <!-- Pet Profile - Sterilized -->
+    <section id="profile-sterilized" class="page">
+      <div class="phone">
+        <h2>宠物档案 / Pet Profile</h2>
+
+        <label>是否绝育 / Sterilized or not</label>
+        <select>
+          <option>是 / Yes</option>
+          <option>否 / No</option>
+        </select>
+
+        <button onclick="goTo('profile-daily-life')">下一步 / Next</button>
+      </div>
+    </section>
+
+    <!-- Pet Profile - Daily Life -->
+    <section id="profile-daily-life" class="page">
+      <div class="phone">
+        <h2>宠物档案 / Pet Profile</h2>
+
+        <label>日常生活 / Daily Life</label>
+        <textarea
+          placeholder="一天几顿饭？多久洗一次澡？ / How many meals a day? How often to bathe?"
+        ></textarea>
+
+        <button onclick="goTo('profile-hobbies')">下一步 / Next</button>
+      </div>
+    </section>
+
+    <!-- Pet Profile - Hobbies -->
+    <section id="profile-hobbies" class="page">
+      <div class="phone">
+        <h2>宠物档案 / Pet Profile</h2>
+
+        <label>兴趣爱好 / Hobbies</label>
+        <textarea
+          placeholder="遛弯 / 社交 / 睡觉 / 咬人 / Walking / Socializing / Sleeping / Biting"
+        ></textarea>
+
+        <button onclick="createCard()">生成档案卡 / Generate Profile</button>
+      </div>
+    </section>
+
+    <!-- Profile Card -->
+    <section id="card" class="page">
+      <div class="phone">
+        <div id="petCard" class="card"></div>
+        <button onclick="goTo('profile')">返回编辑 / Return to Edit</button>
+      </div>
+    </section>
+
+
+        <div class="main-wrapper">
+      <!-- <h1>Project Title</h1> -->
+
+      <!-- the following div will contain the p5 canvas. -->
+      <div id="p5-canvas-container">
+        <!-- p5 canvas will be appended here. -->
+      </div>
+
+      <!-- <p>Project Description</p> -->
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
