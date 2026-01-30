@@ -8,7 +8,18 @@
     />
     <link rel="manifest" href="manifest.json" />
     <title>PET · Social App</title>
+
+    <!-- NES -->
+    <link rel="stylesheet" href="../node_modules/nes.css/css/nes.min.css" />
+    <!-- minify -->
+    <!-- <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" /> -->
+    <!-- latest -->
+    <!-- <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet" /> -->
+    <!-- core style only -->
+    <!-- <link href="https://unpkg.com/nes.css/css/nes-core.min.css" rel="stylesheet" /> -->
+
     <link rel="stylesheet" href="style.css" />
+
     <script src="lib/p5.js"></script>
     <script src="lib/p5.sound.js"></script>
   </head>
@@ -18,7 +29,7 @@
       <div class="phone">
         <h1 class="logo">PET</h1>
         <p class="subtitle">为您的宠物寻找朋友 / Find friends for your pet</p>
-        <button onclick="goTo('login')">开始 / START</button>
+        <button class="nes-btn" onclick="goTo('login')">开始 / START</button>
       </div>
     </section>
 
@@ -28,7 +39,9 @@
         <h2>注册 / 登录 / Sign Up / Login</h2>
         <input type="text" placeholder="电话 / Email / Phone / Email" />
         <input type="password" placeholder="密码 / Password" />
-        <button onclick="goTo('profile-nickname')">进入 / Enter</button>
+        <button class="nes-btn" onclick="goTo('profile-nickname')">
+          进入 / Enter
+        </button>
       </div>
     </section>
 
@@ -43,7 +56,9 @@
           placeholder="给你的宠物起个昵称 / Give your pet a nickname"
         />
 
-        <button onclick="goTo('profile-name')">下一步 / Next</button>
+        <button class="nes-btn" onclick="goTo('profile-name')">
+          下一步 / Next
+        </button>
       </div>
     </section>
 
@@ -59,7 +74,9 @@
           placeholder="你的宠物叫什么？ / What is your pet's name?"
         />
 
-        <button onclick="goTo('profile-breed')">下一步 / Next</button>
+        <button class="nes-btn" onclick="goTo('profile-breed')">
+          下一步 / Next
+        </button>
       </div>
     </section>
 
@@ -68,18 +85,22 @@
       <div class="phone">
         <h2>宠物档案 / Pet Profile</h2>
 
-        <label>宠物品种 / Pet Breed</label>
-        <select id="petBreed">
-          <option>狗 / DOG</option>
-          <option>猫 / CAT</option>
-          <option>兔子 / RABBIT</option>
-          <option>鸟类 / BIRD</option>
-          <option>爬行动物 / REPTILE</option>
-          <option>节肢动物 / Arthropod</option>
-          <option>其他 / Other</option>
-        </select>
-
-        <button onclick="goTo('profile-gender')">下一步 / Next</button>
+        <label for="petBreed">宠物品种 / Pet Breed</label>
+        <div class="nes-select">
+          <select id="petBreed">
+            <option value="" disabled selected hidden>Select...</option>
+            <option value="0">狗 / DOG</option>
+            <option value="1">猫 / CAT</option>
+            <option value="2">兔子 / RABBIT</option>
+            <option value="3">鸟类 / BIRD</option>
+            <option value="4">爬行动物 / REPTILE</option>
+            <option value="5">节肢动物 / Arthropod</option>
+            <option value="6">其他 / Other</option>
+          </select>
+        </div>
+        <button class="nes-btn" onclick="goTo('profile-gender')">
+          下一步 / Next
+        </button>
       </div>
     </section>
 
@@ -95,7 +116,9 @@
           <option>未知 / Unknown</option>
         </select>
 
-        <button onclick="goTo('profile-sterilized')">下一步 / Next</button>
+        <button class="nes-btn" onclick="goTo('profile-sterilized')">
+          下一步 / Next
+        </button>
       </div>
     </section>
 
@@ -110,7 +133,9 @@
           <option>否 / No</option>
         </select>
 
-        <button onclick="goTo('profile-daily-life')">下一步 / Next</button>
+        <button class="nes-btn" onclick="goTo('profile-daily-life')">
+          下一步 / Next
+        </button>
       </div>
     </section>
 
@@ -119,12 +144,16 @@
       <div class="phone">
         <h2>宠物档案 / Pet Profile</h2>
 
-        <label>日常生活 / Daily Life</label>
+        <label for="textarea_field">日常生活 / Daily Life</label>
         <textarea
+          id="textarea_field"
+          class="nes-textarea"
           placeholder="一天几顿饭？多久洗一次澡？ / How many meals a day? How often to bathe?"
         ></textarea>
 
-        <button onclick="goTo('profile-hobbies')">下一步 / Next</button>
+        <button class="nes-btn" onclick="goTo('profile-hobbies')">
+          下一步 / Next
+        </button>
       </div>
     </section>
 
@@ -133,12 +162,34 @@
       <div class="phone">
         <h2>宠物档案 / Pet Profile</h2>
 
-        <label>兴趣爱好 / Hobbies</label>
+        <label for="textarea_field">兴趣爱好 / Hobbies</label>
         <textarea
+          id="textarea_field"
+          class="nes-textarea"
           placeholder="遛弯 / 社交 / 睡觉 / 咬人 / Walking / Socializing / Sleeping / Biting"
         ></textarea>
+        <button class="nes-btn" onclick="goTo('profile-photo')">
+          下一步 / Next
+        </button>
+      </div>
+    </section>
 
-        <button onclick="createCard()">生成档案卡 / Generate Profile</button>
+    <!-- Profile Photo -->
+    <section id="profile-photo" class="page">
+      <div class="phone">
+        <h2>宠物档案 / Pet Profile</h2>
+        <h1>创造你的宠物照片 / Create Your Pet Photo</h1>
+        <div class="main-wrapper">
+          <h1>你的宠物 Your Pet</h1>
+          <!-- the following div will contain the p5 canvas. -->
+          <div id="p5-canvas-container">
+            <!-- p5 canvas will be appended here. -->
+          </div>
+          <!-- <p>Project Description</p> -->
+        </div>
+        <button class="nes-btn" onclick="createCard()">
+          生成档案卡 / Generate Profile
+        </button>
       </div>
     </section>
 
@@ -146,22 +197,13 @@
     <section id="card" class="page">
       <div class="phone">
         <div id="petCard" class="card"></div>
-        <button onclick="goTo('profile')">返回编辑 / Return to Edit</button>
+        <button class="nes-btn" onclick="goTo('profile')">
+          返回编辑 / Return to Edit
+        </button>
       </div>
     </section>
 
-
-        <div class="main-wrapper">
-      <!-- <h1>Project Title</h1> -->
-
-      <!-- the following div will contain the p5 canvas. -->
-      <div id="p5-canvas-container">
-        <!-- p5 canvas will be appended here. -->
-      </div>
-
-      <!-- <p>Project Description</p> -->
-    </div>
-
+    <script src="sketch.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

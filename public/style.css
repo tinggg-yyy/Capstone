@@ -1,12 +1,37 @@
+/* Font */
+@font-face {
+  font-family: "Zpix";
+  src: url("./fonts/Zpix.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Color Palette */
+:root {
+  --bg: #9eb19c;
+  --h-title: #181a18;
+  --c-bg: #9eb19c;
+  --c-text: #181a18;
+  --c-btn-bg: #64775ff0;
+  --c-btn-shadow: #3d4a3af0;
+  --c-btn-text: #bbcdb2;
+  --t-bg:#9eb19c;
+  --t-text: #181a18;
+  --t-text-placeholder: #3d4a3af0;
+}
+
+/* Global Styles */
 * {
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  font-family: "Zpix", monospace;
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
 }
 
 body {
   margin: 0;
-  background: #111;
-  color: #000;
+  background: var(--bg);
+  color: var(--c-text);
   padding: 0;
   overflow: hidden;
 }
@@ -14,8 +39,11 @@ body {
 .page {
   display: none;
   justify-content: center;
-  align-items: center;
+  /* align-items: center; */
   min-height: 100vh;
+  width: 100vw;
+  border: 5px solid #000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .page.active {
@@ -23,14 +51,9 @@ body {
 }
 
 .phone {
-  width: 360px;
-  height: 640px;
-  background: #f5f5f5;
-  border-radius: 24px;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .scroll {
@@ -49,22 +72,38 @@ body {
 }
 
 button {
-  margin-top: auto;
-  padding: 12px;
-  border: none;
-  border-radius: 12px;
-  background: #ff4d3f;
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
+  background-color: var(--c-btn-bg) !important;
+  color: var(--c-btn-text) !important;
+  /* box-shadow: inset -4px -4px var(--c-btn-shadow) !important; */
 }
 
-input, select, textarea {
+button::after {
+  box-shadow: inset -4px -4px var(--c-btn-shadow) !important;
+}
+
+button:active {
+  box-shadow: 0 2px #202220;
+  transform: translateY(2px);
+}
+
+input,
+select,
+textarea {
   padding: 8px;
   border-radius: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--t-text);
+  background-color: var(--t-bg);
   width: 100%;
+  color:var(--t-text);
 }
+
+input::placeholder {
+  color: var(--t-text-placeholder);
+} 
+
+textarea::placeholder {
+  color: var(--t-text-placeholder);
+} 
 
 textarea {
   resize: none;
@@ -72,14 +111,15 @@ textarea {
 }
 
 .card {
-  background: #fff;
+  background: #ffcc00; /* Bright yellow for card */
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  font-family: "Zpix", monospace;
 }
 
 canvas {
   display: block;
-  -webkit-user-select:none;
+  -webkit-user-select: none;
   user-select: none;
 }
