@@ -10,9 +10,12 @@
     <title>PET · Social App</title>
 
     <!-- NES -->
-    <link rel="stylesheet" href="../node_modules/nes.css/css/nes.min.css" />
+    <!-- <link rel="stylesheet" href="../node_modules/nes.css/css/nes.css" /> -->
     <!-- minify -->
-    <!-- <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" /> -->
+    <link
+      href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css"
+      rel="stylesheet"
+    />
     <!-- latest -->
     <!-- <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet" /> -->
     <!-- core style only -->
@@ -37,27 +40,22 @@
     <section id="login" class="page">
       <div class="phone">
         <h2>注册 / 登录 / Sign Up / Login</h2>
-        <input type="text" placeholder="电话 / Email / Phone / Email" />
-        <input type="password" placeholder="密码 / Password" />
-        <button class="nes-btn" onclick="goTo('profile-nickname')">
-          进入 / Enter
-        </button>
-      </div>
-    </section>
-
-    <!-- Pet Profile - Nickname -->
-    <section id="profile-nickname" class="page">
-      <div class="phone">
-        <h2>宠物档案 / Pet Profile</h2>
-        <label>昵称 / Nickname</label>
-        <input
-          id="petNickname"
-          type="text"
-          placeholder="给你的宠物起个昵称 / Give your pet a nickname"
-        />
-
+        <div class="nes-field">
+          <label for="name_field">用户名 / Username</label>
+          <input
+            class="nes-input"
+            type="text"
+            placeholder="用户名 / Username"
+          />
+          <label for="name_field">密码 / Password</label>
+          <input
+            class="nes-input"
+            type="password"
+            placeholder="密码 / Password"
+          />
+        </div>
         <button class="nes-btn" onclick="goTo('profile-name')">
-          下一步 / Next
+          进入 / Enter
         </button>
       </div>
     </section>
@@ -65,17 +63,21 @@
     <!-- Pet Profile - Name -->
     <section id="profile-name" class="page">
       <div class="phone">
-        <h2>宠物档案 / Pet Profile</h2>
-
-        <label>名字 / Name</label>
-        <input
-          id="petName"
-          type="text"
-          placeholder="你的宠物叫什么？ / What is your pet's name?"
-        />
+        <div class="nes-field">
+          <label for="name_field">名字 / Name</label>
+          <input
+            id="petName"
+            class="nes-input"
+            type="text"
+            placeholder="你的宠物叫什么？ / What is your pet's name?"
+          />
+        </div>
 
         <button class="nes-btn" onclick="goTo('profile-breed')">
           下一步 / Next
+        </button>
+        <button class="nes-btn" onclick="goTo('login')">
+          上一步 / Previous
         </button>
       </div>
     </section>
@@ -83,23 +85,24 @@
     <!-- Pet Profile - Breed -->
     <section id="profile-breed" class="page">
       <div class="phone">
-        <h2>宠物档案 / Pet Profile</h2>
-
         <label for="petBreed">宠物品种 / Pet Breed</label>
         <div class="nes-select">
           <select id="petBreed">
             <option value="" disabled selected hidden>Select...</option>
-            <option value="0">狗 / DOG</option>
-            <option value="1">猫 / CAT</option>
-            <option value="2">兔子 / RABBIT</option>
-            <option value="3">鸟类 / BIRD</option>
-            <option value="4">爬行动物 / REPTILE</option>
-            <option value="5">节肢动物 / Arthropod</option>
-            <option value="6">其他 / Other</option>
+            <option value="狗 / DOG">狗 / DOG</option>
+            <option value="猫 / CAT">猫 / CAT</option>
+            <option value="兔子 / RABBIT">兔子 / RABBIT</option>
+            <option value="鸟类 / BIRD">鸟类 / BIRD</option>
+            <option value="爬行动物 / REPTILE">爬行动物 / REPTILE</option>
+            <option value="节肢动物 / Arthropod">节肢动物 / Arthropod</option>
+            <option value="其他 / Other ">其他 / Other</option>
           </select>
         </div>
         <button class="nes-btn" onclick="goTo('profile-gender')">
           下一步 / Next
+        </button>
+        <button class="nes-btn" onclick="goTo('profile-name')">
+          上一步 / Previous
         </button>
       </div>
     </section>
@@ -107,17 +110,20 @@
     <!-- Pet Profile - Gender -->
     <section id="profile-gender" class="page">
       <div class="phone">
-        <h2>宠物档案 / Pet Profile</h2>
-
         <label>性别 / GENDER / 出生日期 / BIRTH DATE</label>
-        <select>
-          <option>公 / Male</option>
-          <option>母 / Female</option>
-          <option>未知 / Unknown</option>
-        </select>
+        <div class="nes-select">
+          <select id="petGender">
+            <option value="公/Male">公 / Male</option>
+            <option value="母/Female">母 / Female</option>
+            <option value="未知/Unknown">未知 / Unknown</option>
+          </select>
+        </div>
 
         <button class="nes-btn" onclick="goTo('profile-sterilized')">
           下一步 / Next
+        </button>
+        <button class="nes-btn" onclick="goTo('profile-breed')">
+          上一步 / Previous
         </button>
       </div>
     </section>
@@ -125,16 +131,65 @@
     <!-- Pet Profile - Sterilized -->
     <section id="profile-sterilized" class="page">
       <div class="phone">
-        <h2>宠物档案 / Pet Profile</h2>
-
         <label>是否绝育 / Sterilized or not</label>
-        <select>
-          <option>是 / Yes</option>
-          <option>否 / No</option>
-        </select>
+        <div class="nes-select">
+          <select id="petSterilized">
+            <option value="是/Yes">是 / Yes</option>
+            <option value="否/No">否 / No</option>
+          </select>
+        </div>
+
+        <button class="nes-btn" onclick="goTo('profile-mbti')">
+          下一步 / Next
+        </button>
+        <button class="nes-btn" onclick="goTo('profile-gender')">
+          上一步 / Previous
+        </button>
+      </div>
+    </section>
+
+    <!-- Pet Profile - MBTI -->
+    <section id="profile-mbti" class="page">
+      <div class="phone">
+        <label for="petMbti">MBTI类型 / MBTI Type</label>
+
+        <div class="nes-select">
+          <select id="petMbti1">
+            <option value="" disabled selected hidden>I/E</option>
+            <option value="I">I</option>
+            <option value="E">E</option>
+          </select>
+        </div>
+
+        <div class="nes-select">
+          <select id="petMbti2">
+            <option value="" disabled selected hidden>N/S</option>
+            <option value="N">N</option>
+            <option value="S">S</option>
+          </select>
+        </div>
+
+        <div class="nes-select">
+          <select id="petMbti3">
+            <option value="" disabled selected hidden>T/F</option>
+            <option value="T">T</option>
+            <option value="F">F</option>
+          </select>
+        </div>
+
+        <div class="nes-select">
+          <select id="petMbti4">
+            <option value="" disabled selected hidden>J/P</option>
+            <option value="J">J</option>
+            <option value="P">P</option>
+          </select>
+        </div>
 
         <button class="nes-btn" onclick="goTo('profile-daily-life')">
           下一步 / Next
+        </button>
+        <button class="nes-btn" onclick="goTo('profile-sterilized')">
+          上一步 / Previous
         </button>
       </div>
     </section>
@@ -142,11 +197,9 @@
     <!-- Pet Profile - Daily Life -->
     <section id="profile-daily-life" class="page">
       <div class="phone">
-        <h2>宠物档案 / Pet Profile</h2>
-
-        <label for="textarea_field">日常生活 / Daily Life</label>
+        <label for="dailylife">日常生活 / Daily Life</label>
         <textarea
-          id="textarea_field"
+          id="dailylife"
           class="nes-textarea"
           placeholder="一天几顿饭？多久洗一次澡？ / How many meals a day? How often to bathe?"
         ></textarea>
@@ -154,22 +207,26 @@
         <button class="nes-btn" onclick="goTo('profile-hobbies')">
           下一步 / Next
         </button>
+        <button class="nes-btn" onclick="goTo('profile-mbti')">
+          上一步 / Previous
+        </button>
       </div>
     </section>
 
     <!-- Pet Profile - Hobbies -->
     <section id="profile-hobbies" class="page">
       <div class="phone">
-        <h2>宠物档案 / Pet Profile</h2>
-
-        <label for="textarea_field">兴趣爱好 / Hobbies</label>
+        <label for="hobby">兴趣爱好 / Hobbies</label>
         <textarea
-          id="textarea_field"
+          id="hobby"
           class="nes-textarea"
           placeholder="遛弯 / 社交 / 睡觉 / 咬人 / Walking / Socializing / Sleeping / Biting"
         ></textarea>
         <button class="nes-btn" onclick="goTo('profile-photo')">
           下一步 / Next
+        </button>
+        <button class="nes-btn" onclick="goTo('profile-daily-life')">
+          上一步 / Previous
         </button>
       </div>
     </section>
@@ -177,18 +234,39 @@
     <!-- Profile Photo -->
     <section id="profile-photo" class="page">
       <div class="phone">
-        <h2>宠物档案 / Pet Profile</h2>
         <h1>创造你的宠物照片 / Create Your Pet Photo</h1>
         <div class="main-wrapper">
           <h1>你的宠物 Your Pet</h1>
           <!-- the following div will contain the p5 canvas. -->
-          <div id="p5-canvas-container">
-            <!-- p5 canvas will be appended here. -->
-          </div>
+          <section class="pixeldraw">
+            <div id="p5-canvas-container">
+              <!-- p5 canvas will be appended here. -->
+            </div>
+            <div id="tools">
+              <button class="nes-btn" onclick="setBrush()">画笔/BRUSH</button>
+              <button class="nes-btn is-error" onclick="setEraser()">
+                橡皮擦/ERASER
+              </button>
+              <div id="text-tools">
+                <input
+                  id="text-input"
+                  class="nes-input"
+                  type="text"
+                  placeholder="输入文字 / Enter text"
+                />
+                <button class="nes-btn" onclick="drawText()">
+                  绘制文字 / Draw Text
+                </button>
+              </div>
+            </div>
+          </section>
           <!-- <p>Project Description</p> -->
         </div>
         <button class="nes-btn" onclick="createCard()">
           生成档案卡 / Generate Profile
+        </button>
+        <button class="nes-btn" onclick="goTo('profile-hobbies')">
+          上一步 / Previous
         </button>
       </div>
     </section>
@@ -197,9 +275,18 @@
     <section id="card" class="page">
       <div class="phone">
         <div id="petCard" class="card"></div>
-        <button class="nes-btn" onclick="goTo('profile')">
-          返回编辑 / Return to Edit
-        </button>
+        <button class="nes-btn" onclick="goTo('swipe')">Start Swiping!</button>
+      </div>
+    </section>
+
+    <!-- Other's Profile -->
+    <section id="swipe" class="page">
+      <div class="phone">
+        <div id="petCard" class="card"></div>
+      </div>
+      <div class="swipebutton">
+        <button class="nes-btn" onclick="goTo('')">💗</button>
+        <button class="nes-btn" onclick="goTo('')">❌</button>
       </div>
     </section>
 

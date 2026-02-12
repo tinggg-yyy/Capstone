@@ -15,7 +15,7 @@
   --c-btn-bg: #64775ff0;
   --c-btn-shadow: #3d4a3af0;
   --c-btn-text: #bbcdb2;
-  --t-bg:#9eb19c;
+  --t-bg: #9eb19c;
   --t-text: #181a18;
   --t-text-placeholder: #3d4a3af0;
 }
@@ -37,10 +37,12 @@ body {
 }
 
 .page {
+  background: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 3px;
   display: none;
   justify-content: center;
   /* align-items: center; */
-  min-height: 100vh;
+  height: 100dvh;
   width: 100vw;
   border: 5px solid #000;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -71,39 +73,29 @@ body {
   opacity: 0.6;
 }
 
-button {
-  background-color: var(--c-btn-bg) !important;
-  color: var(--c-btn-text) !important;
-  /* box-shadow: inset -4px -4px var(--c-btn-shadow) !important; */
+.nes-btn {
+  background-color: var(--c-btn-bg);
+  color: var(--c-btn-text);
 }
 
-button::after {
-  box-shadow: inset -4px -4px var(--c-btn-shadow) !important;
+.nes-btn::after {
+  box-shadow: inset -4px -4px var(--c-btn-shadow);
 }
 
-button:active {
-  box-shadow: 0 2px #202220;
-  transform: translateY(2px);
-}
-
-input,
-select,
-textarea {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid var(--t-text);
+.nes-input,
+.nes-textarea,
+.nes-select select {
   background-color: var(--t-bg);
-  width: 100%;
-  color:var(--t-text);
+  color: var(--t-text);
 }
 
 input::placeholder {
   color: var(--t-text-placeholder);
-} 
+}
 
 textarea::placeholder {
   color: var(--t-text-placeholder);
-} 
+}
 
 textarea {
   resize: none;
@@ -123,3 +115,25 @@ canvas {
   -webkit-user-select: none;
   user-select: none;
 }
+
+.pixeldraw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/*  float 抖动 像素
+li.other .words {
+  letter-spacing: 2px;
+  animation: float 1.5s infinite alternate;
+}
+
+@keyframes float {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2px);
+  }
+} */
