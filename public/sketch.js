@@ -10,7 +10,6 @@ function setup() {
   background(176, 206, 173);
   petCanvas = createGraphics(32, 32);
   petCanvas.clear();
-  createInput("name");
 
   for (let y = 0; y < 32; y++) {
     grid[y] = [];
