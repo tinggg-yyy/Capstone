@@ -58,9 +58,25 @@ function setEraser() {
   tool = "eraser";
 }
 
+function setClear() {
+  // Clear
+  for (let y = 0; y < 32; y++) {
+    for (let x = 0; x < 32; x++) {
+      grid[y][x] = null;
+    }
+  }
+  petCanvas.clear();
+}
+
 function touchStarted() {}
 
 function touchMoved() {
+  // 只有在画图页面才拦截触摸
+  const photoPage = document.getElementById("profile-photo");
+  if (!photoPage.classList.contains("active")) {
+    return true; // 👈 其他页面放行，允许正常滚动
+  }
+
   if (touches.length === 0) return;
 
   let x = touches[0].x;
@@ -76,6 +92,8 @@ function touchMoved() {
 
   if (petX >= 0 && petX < 32 && petY >= 0 && petY < 32) {
     petCanvas.loadPixels();
+
+    // Brush
     if (tool === "brush") {
       // console.log("Using brush tool");
       // petCanvas.set(petX, petY, color(0));
@@ -84,7 +102,9 @@ function touchMoved() {
       } else {
         grid[petY][petX] = "pixel";
       }
-    } else if (tool === "eraser") {
+    }
+    // Eraser
+    else if (tool === "eraser") {
       // console.log("Using erasor tool");
       // petCanvas.set(petX, petY, color(0, 0, 0, 0));
       grid[petY][petX] = null;
@@ -98,50 +118,56 @@ function touchMoved() {
 function touchEnded() {}
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas((windowWidth * 4) / 5, (windowWidth * 4) / 5);
 }
 
 //generate data url from p5 canvas
 function generateAvatarUrl() {
+  const dataUrl = document
+    .querySelector("#p5-canvas-container canvas")
+    .toDataURL("image/png");
+  return dataUrl;
+
   // const dataUrl = petCanvas.elt.toDataURL("image/png");
   // console.log("Avatar URL:", dataUrl);
   // return dataUrl;
-  let exportCanvas = createGraphics(512, 512);
-  exportCanvas.clear();
 
-  let cellSize = 512 / 32;
+  // let exportCanvas = createGraphics(512, 512);
+  // exportCanvas.clear();
 
-  exportCanvas.textAlign(CENTER, CENTER);
-  exportCanvas.textSize(cellSize);
-  exportCanvas.fill(0);
-  exportCanvas.noStroke();
+  // let cellSize = 512 / 32;
 
-  for (let y = 0; y < 32; y++) {
-    for (let x = 0; x < 32; x++) {
-      let value = grid[y][x];
+  // exportCanvas.textAlign(CENTER, CENTER);
+  // exportCanvas.textSize(cellSize);
+  // exportCanvas.fill(0);
+  // exportCanvas.noStroke();
 
-      if (value !== null) {
-        if (value === "pixel" && currentText !== "") {
-          value = currentText;
-        }
+  // for (let y = 0; y < 32; y++) {
+  //   for (let x = 0; x < 32; x++) {
+  //     let value = grid[y][x];
 
-        exportCanvas.text(
-          value,
-          x * cellSize + cellSize / 2,
-          y * cellSize + cellSize / 2,
-        );
-      }
-    }
-  }
+  //     if (value !== null) {
+  //       if (value === "pixel" && currentText !== "") {
+  //         value = currentText;
+  //       }
 
-  return exportCanvas.elt.toDataURL("image/png");
+  //       exportCanvas.text(
+  //         value,
+  //         x * cellSize + cellSize / 2,
+  //         y * cellSize + cellSize / 2,
+  //       );
+  //     }
+  //   }
+  // }
+
+  // return exportCanvas.elt.toDataURL("image/png");
 }
 
 function drawText() {
   let input = document.getElementById("text-input").value.trim();
 
   if (input !== "") {
-    currentText = input[0]; // 只取第一个字
+    currentText = input;
   }
 
   // 把所有 pixel 变成这个字

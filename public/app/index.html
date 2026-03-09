@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover"
     />
-    <link rel="manifest" href="manifest.json" />
+    <link rel="manifest" href="../manifest.json" />
     <title>PET · Social App</title>
 
     <!-- NES -->
@@ -23,8 +23,8 @@
 
     <link rel="stylesheet" href="style.css" />
 
-    <script src="lib/p5.js"></script>
-    <script src="lib/p5.sound.js"></script>
+    <script src="../lib/p5.js"></script>
+    <script src="../lib/p5.sound.js"></script>
   </head>
   <body>
     <!-- Launch Page -->
@@ -33,6 +33,9 @@
         <h1 class="logo">PET</h1>
         <p class="subtitle">为您的宠物寻找朋友 / Find friends for your pet</p>
         <button class="nes-btn" onclick="goTo('login')">开始 / START</button>
+        <!-- <button class="nes-btn" onclick="createSwipeCard()">
+          直接划 / SWIPE
+        </button> -->
       </div>
     </section>
 
@@ -43,20 +46,20 @@
         <div class="nes-field">
           <label for="name_field">用户名 / Username</label>
           <input
+            id="username"
             class="nes-input"
             type="text"
             placeholder="用户名 / Username"
           />
           <label for="name_field">密码 / Password</label>
           <input
+            id="password"
             class="nes-input"
             type="password"
             placeholder="密码 / Password"
           />
         </div>
-        <button class="nes-btn" onclick="goTo('profile-name')">
-          进入 / Enter
-        </button>
+        <button class="nes-btn" onclick="handleLogin()">进入 / Enter</button>
       </div>
     </section>
 
@@ -110,13 +113,44 @@
     <!-- Pet Profile - Gender -->
     <section id="profile-gender" class="page">
       <div class="phone">
-        <label>性别 / GENDER / 出生日期 / BIRTH DATE</label>
+        <label>性别 / GENDER </label>
         <div class="nes-select">
           <select id="petGender">
             <option value="公/Male">公 / Male</option>
             <option value="母/Female">母 / Female</option>
             <option value="未知/Unknown">未知 / Unknown</option>
           </select>
+        </div>
+
+        <div class="nes-field">
+          <label>出生日期 / BIRTH DATE</label>
+          <input
+            id="birthDisplay"
+            class="nes-input"
+            type="text"
+            placeholder="YYYY-MM-DD"
+            readonly
+            onclick="openDatePicker()"
+          />
+
+          <div id="datePicker" class="date-picker hidden">
+            <div class="wheel" id="yearWheel"></div>
+            <div class="wheel" id="monthWheel"></div>
+            <div class="wheel" id="dayWheel"></div>
+            <button class="nes-btn is-primary" onclick="confirmDate()">
+              确定
+            </button>
+          </div>
+
+          <div class="nes-field">
+            <label for="name_field">户籍/Hukou</label>
+            <input
+              id="petHukou"
+              class="nes-input"
+              type="text"
+              placeholder="你的宠物户籍是？ / What is your pet's hukou?"
+            />
+          </div>
         </div>
 
         <button class="nes-btn" onclick="goTo('profile-sterilized')">
@@ -155,19 +189,21 @@
 
         <div class="nes-select">
           <select id="petMbti1">
-            <option value="" disabled selected hidden>I/E</option>
-            <option value="I">I</option>
+            <option value="" disabled selected hidden>E/I</option>
             <option value="E">E</option>
+            <option value="I">I</option>
           </select>
         </div>
+        <p>E (外向Extraversion) / I (内向Introversion)</p>
 
         <div class="nes-select">
           <select id="petMbti2">
-            <option value="" disabled selected hidden>N/S</option>
-            <option value="N">N</option>
+            <option value="" disabled selected hidden>S/N</option>
             <option value="S">S</option>
+            <option value="N">N</option>
           </select>
         </div>
+        <p>S (感觉Sensing) / N (直觉Intuition)</p>
 
         <div class="nes-select">
           <select id="petMbti3">
@@ -176,6 +212,7 @@
             <option value="F">F</option>
           </select>
         </div>
+        <p>T (思考Thinking) / F (情感Feeling)</p>
 
         <div class="nes-select">
           <select id="petMbti4">
@@ -184,6 +221,7 @@
             <option value="P">P</option>
           </select>
         </div>
+        <p>J (判断Judging) / P (知觉Perceiving)</p>
 
         <button class="nes-btn" onclick="goTo('profile-daily-life')">
           下一步 / Next
@@ -203,6 +241,15 @@
           class="nes-textarea"
           placeholder="一天几顿饭？多久洗一次澡？ / How many meals a day? How often to bathe?"
         ></textarea>
+
+        <!-- <label for="achievement">
+          ${name}干过最厉害的事 / ${name}'s Most Impressive Achievement</label
+        >
+        <textarea
+          id="achievement"
+          class="nes-textarea"
+          placeholder="比如：咬过最大的敌人 / For example: The biggest enemy it has bitten"
+        ></textarea> -->
 
         <button class="nes-btn" onclick="goTo('profile-hobbies')">
           下一步 / Next
@@ -247,6 +294,9 @@
               <button class="nes-btn is-error" onclick="setEraser()">
                 橡皮擦/ERASER
               </button>
+              <button class="nes-btn is-success" onclick="setClear()">
+                清空/CLEAR
+              </button>
               <div id="text-tools">
                 <input
                   id="text-input"
@@ -275,18 +325,34 @@
     <section id="card" class="page">
       <div class="phone">
         <div id="petCard" class="card"></div>
-        <button class="nes-btn" onclick="goTo('swipe')">Start Swiping!</button>
+        <button class="nes-btn" onclick="createSwipeCard()">
+          Start Swiping!
+        </button>
       </div>
     </section>
 
     <!-- Other's Profile -->
-    <section id="swipe" class="page">
+    <section id="swipe-page" class="page">
       <div class="phone">
-        <div id="petCard" class="card"></div>
+        <div class="scroll">
+          <div id="swipe-container"></div>
+        </div>
       </div>
+
       <div class="swipebutton">
-        <button class="nes-btn" onclick="goTo('')">💗</button>
-        <button class="nes-btn" onclick="goTo('')">❌</button>
+        <button class="nes-btn" onclick="like()">💗</button>
+        <div id="text-tools">
+          <input
+            id="impression"
+            class="nes-input"
+            type="text"
+            placeholder="你的印象 / Your Impression"
+          />
+          <button class="nes-btn" id="impression-btn" onclick="impression()">
+            评论 / Comment
+          </button>
+        </div>
+        <button class="nes-btn" onclick="skip()">❌</button>
       </div>
     </section>
 

@@ -7,7 +7,6 @@ const fs = require("fs");
 
 const app = express(); // the server "app", the server behaviour
 
-
 const portHTTPS = 3000; // port for https
 // const portHTTP = 3001; // port for http
 
@@ -56,6 +55,59 @@ app.post("/profiles", function (req, res) {
   fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
   // its a good practice return the final message to the client
   res.json(profile);
+});
+
+// POST /like — 记录一个 like
+app.post("/like", function (req, res) {
+  const { likerUsername, likerPetName, likedUsername } = req.body;
+
+  // 找到被 like 的 profile
+  let likedProfile = profiles.find((p) => p.username === likedUsername);
+  if (!likedProfile)
+    return res.status(404).json({ error: "Profile not found" });
+
+  // 初始化 likes 数组
+  if (!likedProfile.likes) likedProfile.likes = [];
+
+  // 避免同一人重复 like
+  if (!likedProfile.likes.includes(likerPetName)) {
+    likedProfile.likes.push(likerPetName);
+  }
+
+  // 保存到文件
+  fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
+  res.json({ success: true, likesCount: likedProfile.likes.length });
+});
+
+// GET /notifications/:username — 获取被 like 的通知
+app.get("/notifications/:username", function (req, res) {
+  const username = req.params.username;
+  const profile = profiles.find((p) => p.username === username);
+  if (!profile) return res.status(404).json({ error: "Not found" });
+
+  res.json({
+    likesCount: profile.likes ? profile.likes.length : 0,
+    likedBy: profile.likes || [],
+  });
+});
+
+// POST /impression — 记录一个印象
+app.post("/impression", function (req, res) {
+  const { likedUsername, commenterName, impression } = req.body;
+
+  let profile = profiles.find((p) => p.username === likedUsername);
+  if (!profile) return res.status(404).json({ error: "Not found" });
+
+  if (!profile.impressions) profile.impressions = [];
+
+  profile.impressions.push({
+    from: commenterName,
+    impression: impression,
+    date: new Date().toISOString(),
+  });
+
+  fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
+  res.json({ success: true });
 });
 
 // Creating object of key and certificate

@@ -1,0 +1,267 @@
+/* Font */
+@font-face {
+  font-family: "Zpix";
+  src: url("../fonts/zpix.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Color Palette */
+:root {
+  --bg: #9eb19c;
+  --h-title: #181a18;
+  --c-bg: #9eb19c;
+  --c-text: #181a18;
+  --c-btn-bg: #64775ff0;
+  --c-btn-shadow: #3d4a3af0;
+  --c-btn-text: #bbcdb2;
+  --t-bg: #9eb19c;
+  --t-text: #181a18;
+  --t-text-placeholder: #3d4a3af0;
+}
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
+  font-family: "Zpix", monospace;
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--c-text);
+  padding: 0;
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.page {
+  display: none;
+  flex-direction: column;
+  min-height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.page.active {
+  display: flex;
+}
+
+.phone {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+
+.logo {
+  font-size: 48px;
+  text-align: center;
+  margin-top: 100px;
+}
+
+.subtitle {
+  text-align: center;
+  opacity: 0.6;
+}
+
+.nes-btn {
+  background-color: var(--c-btn-bg);
+  color: var(--c-btn-text);
+}
+
+.nes-btn::after {
+  box-shadow: inset -4px -4px var(--c-btn-shadow);
+}
+
+.nes-input,
+.nes-textarea,
+.nes-select select {
+  background-color: var(--t-bg);
+  color: var(--t-text);
+}
+
+input::placeholder {
+  color: var(--t-text-placeholder);
+}
+
+textarea::placeholder {
+  color: var(--t-text-placeholder);
+}
+
+textarea {
+  resize: none;
+  height: 60px;
+}
+
+.pixeldraw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/*  float 抖动 像素
+li.other .words {
+  letter-spacing: 2px;
+  animation: float 1.5s infinite alternate;
+}
+
+@keyframes float {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2px);
+  }
+} */
+
+#swipe-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+#swipe-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#swipe-page .phone {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.card {
+  background: #a8c0a0;
+  padding: 20px;
+  border-radius: 10px;
+  font-family: sans-serif;
+}
+
+.avatar-box {
+  background: #bcd3b4;
+  padding: 20px;
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center;
+}
+
+.avatar {
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+}
+
+.section,
+.cell {
+  position: relative;
+  background: #bcd3b4;
+  min-height: 90px;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 3px 0;
+}
+
+.label {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.value {
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.value.big {
+  font-size: 56px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.swipebutton {
+  display: flex;
+  justify-content: space-around;
+  padding: 12px;
+  background: var(--bg);
+  border-top: 3px solid #000;
+  position: sticky;
+  bottom: 0;
+}
+
+.date-picker {
+  margin-top: 10px;
+  padding: 10px;
+  background: #bcd3b4;
+  border: 3px solid #000;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.wheel {
+  width: 80px;
+  height: 120px;
+  overflow-y: scroll;
+  text-align: center;
+  border: 2px solid #000;
+  background: #9eb19c;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior: contain;
+}
+
+.wheel div {
+  padding: 6px 0;
+  font-size: 14px;
+  scroll-snap-align: center;
+}
+
+.wheel div.selected {
+  background: #000;
+  color: #bcd3b4;
+}
