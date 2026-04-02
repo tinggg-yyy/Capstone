@@ -1,3 +1,5 @@
+const socket = io();
+
 async function loadRanking() {
   const res = await fetch("/profiles");
   const data = await res.json();
@@ -11,7 +13,6 @@ async function loadRanking() {
   renderGrid(sorted.slice(1, 5)); // No.2~5
   renderList(sorted.slice(5)); // No.6+
 }
-
 
 // avatarHTML
 function avatarHTML(p, big = false) {
@@ -100,6 +101,5 @@ function renderList(pets) {
     )
     .join("");
 }
-
 
 loadRanking();

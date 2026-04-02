@@ -175,8 +175,12 @@ const options = {
   cert: fs.readFileSync("localhost.pem"),
 };
 
+const HTTPSserver = https.createServer(options, app);
+const { Server } = require("socket.io");
+const io = new Server(HTTPSserver);
+
 // Creating servers and make them listen at their ports:
-https.createServer(options, app).listen(portHTTPS, function (req, res) {
+HTTPSserver.listen(portHTTPS, function (req, res) {
   console.log("HTTPS Server started at port", portHTTPS);
 });
 
