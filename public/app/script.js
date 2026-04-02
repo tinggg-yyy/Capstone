@@ -1,5 +1,3 @@
-const socket = io();
-
 let currentUser = null;
 
 // Login Function
