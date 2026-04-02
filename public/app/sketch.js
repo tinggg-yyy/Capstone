@@ -4,10 +4,15 @@ let tool = "brush";
 let grid = [];
 let currentText = "";
 
+let history = []; // 每一笔的 diff 列表
+let currentStroke = []; // 当前这笔中被修改的格子 {x, y, oldVal}
+let strokeCells = new Set(); // 当前笔中已记录的格子，避免重复记录
+
 function setup() {
   let canvas = createCanvas((windowWidth * 4) / 5, (windowWidth * 4) / 5);
   canvas.parent("p5-canvas-container");
-  background(176, 206, 173);
+  //  background(176, 206, 173);
+  background(0);
   petCanvas = createGraphics(32, 32);
   petCanvas.clear();
 
@@ -24,7 +29,8 @@ function setup() {
 }
 
 function draw() {
-  background(176, 206, 173);
+  //  background(176, 206, 173);
+  background(0);
   // fill(0);
   // image(petCanvas, 0, 0, width, height);
 
@@ -32,20 +38,40 @@ function draw() {
 
   for (let y = 0; y < 32; y++) {
     for (let x = 0; x < 32; x++) {
-      let value = grid[y][x];
+      let cell = grid[y][x];
 
-      if (value === "pixel") {
-        fill(0);
+      if (cell === "pixel") {
+        // fill(0);
+        fill(57, 255, 20);
         noStroke();
         rect(x * cellSize, y * cellSize, cellSize, cellSize);
-      } else if (value !== null) {
-        fill(0);
+      } else if (cell === "text") {
+        // fill(0);
+        fill(57, 255, 20);
         textAlign(CENTER, CENTER);
         textSize(cellSize);
-        text(value, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+        text(
+          currentText,
+          x * cellSize + cellSize / 2,
+          y * cellSize + cellSize / 2,
+        );
+      } else if (cell !== null) {
+        // fill(0);
+        fill(57, 255, 20);
+        textAlign(CENTER, CENTER);
+        textSize(cellSize);
+        text(cell, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
       }
     }
   }
+  // 网格线（可选，增加LCD感）
+  stroke(57, 255, 20, 20);
+  strokeWeight(0.5);
+  for (let i = 0; i <= 32; i++) {
+    line(i * cellSize, 0, i * cellSize, height);
+    line(0, i * cellSize, width, i * cellSize);
+  }
+  noStroke();
 }
 
 // P5 touch events: https://p5js.org/reference/#Touch
@@ -59,7 +85,6 @@ function setEraser() {
 }
 
 function setClear() {
-  // Clear
   for (let y = 0; y < 32; y++) {
     for (let x = 0; x < 32; x++) {
       grid[y][x] = null;
@@ -68,13 +93,25 @@ function setClear() {
   petCanvas.clear();
 }
 
-function touchStarted() {}
+function setUndo() {
+  if (history.length === 0) return;
+  const stroke = history.pop();
+  for (const { x, y, oldVal } of stroke) {
+    grid[y][x] = oldVal;
+  }
+}
 
+// Touch start: Reset current stroke data
+function touchStarted() {
+  currentStroke = [];
+  strokeCells = new Set();
+}
+
+// Touch move: Modify cells based on tool type and record changes
 function touchMoved() {
-  // 只有在画图页面才拦截触摸
   const photoPage = document.getElementById("profile-photo");
   if (!photoPage.classList.contains("active")) {
-    return true; // 👈 其他页面放行，允许正常滚动
+    return true;
   }
 
   if (touches.length === 0) return;
@@ -86,19 +123,25 @@ function touchMoved() {
   if (x < 0 || x > width || y < 0 || y > height) {
     return false;
   }
-
+  // Map touch coordinates to grid coordinates
   let petX = floor((x / width) * 32);
   let petY = floor((y / height) * 32);
-
   if (petX >= 0 && petX < 32 && petY >= 0 && petY < 32) {
     petCanvas.loadPixels();
+
+    // Undo Function: 记录被修改的格子和它们的旧值
+    const key = `${petX},${petY}`;
+    if (!strokeCells.has(key)) {
+      strokeCells.add(key);
+      currentStroke.push({ x: petX, y: petY, oldVal: grid[petY][petX] });
+    }
 
     // Brush
     if (tool === "brush") {
       // console.log("Using brush tool");
       // petCanvas.set(petX, petY, color(0));
       if (currentText !== "") {
-        grid[petY][petX] = currentText;
+        grid[petY][petX] = "text";
       } else {
         grid[petY][petX] = "pixel";
       }
@@ -115,7 +158,14 @@ function touchMoved() {
   return false;
 }
 
-function touchEnded() {}
+// Touch end: add the current stroke to the history stack and reset it for the next stroke.
+function touchEnded() {
+  if (currentStroke.length > 0) {
+    history.push(currentStroke);
+    currentStroke = [];
+    strokeCells = new Set();
+  }
+}
 
 function windowResized() {
   resizeCanvas((windowWidth * 4) / 5, (windowWidth * 4) / 5);
@@ -144,15 +194,15 @@ function generateAvatarUrl() {
 
   // for (let y = 0; y < 32; y++) {
   //   for (let x = 0; x < 32; x++) {
-  //     let value = grid[y][x];
+  //     let cell = grid[y][x];
 
-  //     if (value !== null) {
-  //       if (value === "pixel" && currentText !== "") {
-  //         value = currentText;
+  //     if (cell !== null) {
+  //       if (cell === "pixel" && currentText !== "") {
+  //         cell = currentText;
   //       }
 
   //       exportCanvas.text(
-  //         value,
+  //         cell,
   //         x * cellSize + cellSize / 2,
   //         y * cellSize + cellSize / 2,
   //       );
@@ -163,6 +213,7 @@ function generateAvatarUrl() {
   // return exportCanvas.elt.toDataURL("image/png");
 }
 
+// draw text on canvas based on currentText and update grid state
 function drawText() {
   let input = document.getElementById("text-input").value.trim();
 
@@ -170,11 +221,10 @@ function drawText() {
     currentText = input;
   }
 
-  // 把所有 pixel 变成这个字
   for (let y = 0; y < 32; y++) {
     for (let x = 0; x < 32; x++) {
       if (grid[y][x] === "pixel") {
-        grid[y][x] = currentText;
+        grid[y][x] = "text";
       }
     }
   }

@@ -1,3 +1,5 @@
+const socket = io();
+
 let currentUser = null;
 
 // Login Function
@@ -119,6 +121,74 @@ function getPetAge() {
   }
 }
 
+// Breed data
+const breedData = {
+  "哺乳类 / Mammals": [
+    "狗 / Dog",
+    "猫 / Cat",
+    "兔子 / Rabbit",
+    "仓鼠 / Hamster",
+    "豚鼠 / Guinea Pig",
+    "雪貂 / Ferret",
+    "狐狸 / Fox",
+    "浣熊 / Raccoon",
+    "刺猬 / Hedgehog",
+    "龙猫 / Chinchilla",
+    "其他哺乳类 / Other Mammal",
+  ],
+  "鸟类 / Birds": [
+    "鹦鹉 / Parrot",
+    "金丝雀 / Canary",
+    "文鸟 / Finch",
+    "鸽子 / Pigeon",
+    "猫头鹰 / Owl",
+    "乌鸦 / Crow",
+    "八哥 / Myna",
+    "其他鸟类 / Other Bird",
+  ],
+  "爬行类 / Reptiles": [
+    "蜥蜴 / Lizard",
+    "壁虎 / Gecko",
+    "变色龙 / Chameleon",
+    "蛇 / Snake",
+    "龟 / Turtle",
+    "鳄蜥 / Crocodile Skink",
+    "其他爬行类 / Other Reptile",
+  ],
+  "两栖类 / Amphibians": [
+    "青蛙 / Frog",
+    "蝾螈 / Salamander",
+    "蟾蜍 / Toad",
+    "钝口螈 / Axolotl",
+    "其他两栖类 / Other Amphibian",
+  ],
+  "节肢动物 / Arthropods": [
+    "蜘蛛 / Spider",
+    "蝎子 / Scorpion",
+    "螃蟹 / Crab",
+    "蜈蚣 / Centipede",
+    "蚱蜢 / Grasshopper",
+    "其他节肢动物 / Other Arthropod",
+  ],
+};
+
+function onBreedClassChange() {
+  const cls = document.getElementById("petBreedClass").value;
+  const select = document.getElementById("petBreed");
+  const wrapper = document.getElementById("breedSpecificWrapper");
+
+  select.innerHTML =
+    '<option value="" disabled selected hidden>选择品种 / Select breed...</option>';
+  (breedData[cls] || []).forEach((b) => {
+    const opt = document.createElement("option");
+    opt.value = b;
+    opt.textContent = b;
+    select.appendChild(opt);
+  });
+
+  wrapper.classList.remove("hidden");
+}
+
 // Create Profile & Swipe Function
 let profiles = [];
 let currentIndex = 0;
@@ -126,8 +196,14 @@ function createCard() {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
   const name = document.getElementById("petName").value;
-  const breed = document.getElementById("petBreed").value;
+  const breedClass = document.getElementById("petBreedClass").value;
+  const breedSpecific = document.getElementById("petBreed").value;
+  const breed =
+    breedClass && breedSpecific
+      ? `${breedClass} · ${breedSpecific}`
+      : breedSpecific || breedClass;
   const gender = document.getElementById("petGender").value;
+  const orientation = document.getElementById("petOrientation").value;
   const age = getPetAge();
   const hukou = document.getElementById("petHukou").value;
   const sterilized = document.getElementById("petSterilized").value;
@@ -139,6 +215,9 @@ function createCard() {
   const mbti = mbti1 + mbti2 + mbti3 + mbti4;
   const dailylife = document.getElementById("dailylife").value;
   const hobby = document.getElementById("hobby").value;
+  const edu = document.getElementById("petEdu").value;
+  const occupation = document.getElementById("petOccupation").value;
+  const income = document.getElementById("petIncome").value;
   const avatarUrl = generateAvatarUrl();
   console.log("Avatar URL from createCard:", avatarUrl);
 
@@ -148,13 +227,19 @@ function createCard() {
     name: name,
     breed: breed,
     gender: gender,
+    orientation: orientation,
     age: age,
     hukou: hukou,
     sterilized: sterilized,
     mbti: mbti,
     dailylife: dailylife,
     hobby: hobby,
+    edu: edu,
+    occupation: occupation,
+    income: income,
     avatar: avatarUrl,
+    grid: grid,
+    gridText: currentText,
   };
 
   // send the profile data to the server
@@ -173,11 +258,11 @@ function createCard() {
 
   // create the card content
   const card = `
-  <img src="${avatarUrl}" alt="Pet Avatar" style="width:100px; height:100px;" />
-    <h3>${name || "未命名宠物 / Unnamed Pet"}</h3>
-    <p>品种 / Breed: ${breed}</p>
+  <img src="${avatarUrl}" alt="Fursona" style="width:100px; height:100px;" />
+    <h3>${name || "无名兽人 / Unnamed Anthro"}</h3>
+    <p>物种 / Species: ${breed}</p>
     <p style="opacity:0.6; font-size:14px;">
-      ${gender} · ${age}岁 · 户口${hukou}· ${sterilized}绝育 ·  MBTI: ${mbti} <br />
+      ${gender} · ${age} · 领地 ${hukou} · ${sterilized} · MBTI: ${mbti} <br />
       日常生活 / Daily Life: ${dailylife} <br />
       爱好 / Hobby: ${hobby}
     </p>
@@ -188,8 +273,24 @@ function createCard() {
   goTo("card");
 }
 
+function matchesOrientation(viewer, target) {
+  const o = (viewer.orientation || "").split("/")[0]; // e.g. "异性恋"
+  const vg = (viewer.gender || "").split("/")[0]; // e.g. "雄"
+  const tg = (target.gender || "").split("/")[0]; // e.g. "雌"
+
+  if (o === "异性恋") {
+    if (vg === "雄") return tg === "雌";
+    if (vg === "雌") return tg === "雄";
+    return true; // 非二元 viewer 看全部
+  }
+  if (o === "同性恋") {
+    return tg === vg;
+  }
+  // 双性恋 / 泛性恋 / 无性恋 / 其他 / 不透露 / 未填 → 全部显示
+  return true;
+}
+
 function createSwipeCard() {
-  // currentUser 为空时阻止继续
   if (!currentUser) {
     alert("请先登录 / Please login first");
     goTo("login");
@@ -207,10 +308,25 @@ function createSwipeCard() {
       // Remove the current user's profile from the list
       profiles = profiles.filter((p) => p.username !== currentUser.username);
 
+      // Filter by orientation
+      profiles = profiles.filter((p) => matchesOrientation(currentUser, p));
+
       currentIndex = 0;
       showProfile();
       goTo("swipe-page");
     });
+}
+
+let currentProfileInterpretations = {};
+let longPressJustFired = false;
+
+function renderValue(profile, field, valueText, extraClass = "") {
+  const raw = profile.interpretations && profile.interpretations[field];
+  const interps = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  if (interps.length > 0) {
+    return `<span class="value ${extraClass} has-interpretations" data-field="${field}">${valueText}</span>`;
+  }
+  return `<span class="value ${extraClass}" data-field="${field}">${valueText}</span>`;
 }
 
 function showProfile() {
@@ -218,80 +334,251 @@ function showProfile() {
   container.innerHTML = "";
 
   if (currentIndex >= profiles.length) {
-    container.innerHTML = "<h1>没有更多宠物了 🐾</h1>";
+    container.innerHTML = "<h1>没有更多兽人了 🐾</h1>";
     return;
   }
 
   const profile = profiles[currentIndex];
+  currentProfileInterpretations = profile.interpretations || {};
 
   container.innerHTML = `
 <div class="card">
 
   <div class="avatar-box">
-    <img src="${profile.avatar}" class="avatar">
+    <img src="${profile.grid ? renderGridAsAvatar(profile.grid, profile.gridText) : profile.avatar}" class="avatar">
   </div>
 
   <div class="section">
     <span class="label">名字</span>
-    <span class="value big">${profile.name}</span>
+    ${renderValue(profile, "name", profile.name, "big")}
   </div>
 
   <div class="grid-3">
     <div class="cell">
       <span class="label">性别</span>
-      <span class="value">${profile.gender}</span>
+      ${renderValue(profile, "gender", profile.gender)}
     </div>
     <div class="cell">
       <span class="label">年龄</span>
-      <span class="value">${profile.age}</span>
+      ${renderValue(profile, "age", profile.age)}
     </div>
     <div class="cell">
       <span class="label">户籍</span>
-      <span class="value">${profile.hukou}</span>
+      ${renderValue(profile, "hukou", profile.hukou)}
     </div>
   </div>
 
   <div class="section">
+    <span class="label">性取向</span>
+    ${renderValue(profile, "orientation", profile.orientation || "—")}
+  </div>
+
+  <div class="section">
     <span class="label">MBTI</span>
-    <span class="value big">${profile.mbti}</span>
+    ${renderValue(profile, "mbti", profile.mbti, "big")}
   </div>
 
   <div class="grid-2">
     <div class="cell">
       <span class="label">婚育状况</span>
-      <span class="value">${profile.sterilized}</span>
+      ${renderValue(profile, "sterilized", profile.sterilized)}
     </div>
     <div class="cell">
       <span class="label">交友目的</span>
-      <span class="value">${profile.goal}</span>
+      ${renderValue(profile, "goal", profile.goal)}
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="cell">
+      <span class="label">学历</span>
+      ${renderValue(profile, "edu", profile.edu || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">职业</span>
+      ${renderValue(profile, "occupation", profile.occupation || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">月收入</span>
+      ${renderValue(profile, "income", profile.income || "—")}
     </div>
   </div>
 
   <div class="grid-2">
     <div class="cell">
       <span class="label">兴趣爱好</span>
-      <span class="value">${profile.hobby}</span>
+      ${renderValue(profile, "hobby", profile.hobby)}
     </div>
     <div class="cell">
       <span class="label">日常生活</span>
-      <span class="value">${profile.dailylife}</span>
+      ${renderValue(profile, "dailylife", profile.dailylife)}
     </div>
   </div>
 
-        <div class="section">
-        <span class="label">被喜欢</span>
-        <span class="value big"
-          >${profile.likes ? profile.likes.length : 0} 💗</span
-        >
-      </div>
+  <div class="section">
+    <span class="label">被喜欢</span>
+    <span class="value big">${profile.likes ? profile.likes.length : 0} 💗</span>
+  </div>
 
 </div>
   `;
+
+  attachLabelHandlers(profile.username);
   console.log("Showing profile:", profile);
   console.log("Current index:", currentIndex);
 }
 
-// like 时发送到服务器
+// Long press + tap handlers for labels
+let longPressTimer = null;
+let interpTarget = { field: null, profileUsername: null, labelText: null };
+let touchStartX = 0;
+let touchStartY = 0;
+
+function attachLabelHandlers(profileUsername) {
+  const container = document.getElementById("swipe-container");
+
+  // Remove old listeners by replacing the container node's cloned handlers
+  // (simpler: just use a flag so we don't double-bind across showProfile calls)
+  if (container._labelHandlersBound) {
+    container.removeEventListener("touchstart", container._onTouchStart);
+    container.removeEventListener("touchend", container._onTouchEnd);
+    container.removeEventListener("touchcancel", container._onTouchCancel);
+    container.removeEventListener("touchmove", container._onTouchMove);
+    container.removeEventListener("click", container._onClick);
+  }
+
+  container._onTouchStart = (e) => {
+    const label = e.target.closest(".value[data-field]");
+    if (!label) return;
+
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+
+    // Lock these now — DOM may re-render before timer fires
+    const fieldLocked = label.dataset.field;
+    const labelTextLocked = label.textContent.trim();
+
+    longPressTimer = setTimeout(() => {
+      longPressTimer = null;
+      longPressJustFired = true;
+      openInterpPopup(fieldLocked, profileUsername, labelTextLocked);
+    }, 500);
+  };
+
+  container._onTouchEnd = () => {
+    if (longPressTimer === null) return; // long press already fired, ignore
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  };
+
+  container._onTouchCancel = () => {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  };
+
+  container._onTouchMove = (e) => {
+    if (longPressTimer === null) return;
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    if (Math.sqrt(dx * dx + dy * dy) > 10) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  };
+
+  // Short tap: cycle original(green) → interp1(red) → interp2(red) → original …
+  container._onClick = (e) => {
+    if (longPressJustFired) {
+      longPressJustFired = false;
+      return;
+    }
+
+    const span = e.target.closest(".value[data-field]");
+    if (!span) return;
+
+    const field = span.dataset.field;
+    const raw = currentProfileInterpretations[field];
+    const interpList = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    if (interpList.length === 0) return;
+
+    // Save original text on first tap
+    if (!span.dataset.original) span.dataset.original = span.textContent;
+
+    let idx = parseInt(span.dataset.cycleIndex ?? "-1");
+    idx = idx + 1 > interpList.length - 1 ? -1 : idx + 1;
+    span.dataset.cycleIndex = idx;
+
+    if (idx === -1) {
+      span.textContent = span.dataset.original;
+      span.classList.remove("label-toggled");
+    } else {
+      span.textContent = interpList[idx].text;
+      span.classList.add("label-toggled");
+    }
+  };
+
+  container.addEventListener("touchstart", container._onTouchStart, {
+    passive: true,
+  });
+  container.addEventListener("touchend", container._onTouchEnd, {
+    passive: true,
+  });
+  container.addEventListener("touchcancel", container._onTouchCancel, {
+    passive: true,
+  });
+  container.addEventListener("touchmove", container._onTouchMove, {
+    passive: true,
+  });
+  container.addEventListener("click", container._onClick);
+  container._labelHandlersBound = true;
+}
+
+function openInterpPopup(field, profileUsername, labelText) {
+  interpTarget = { field, profileUsername, labelText };
+  document.getElementById("interpret-label-name").textContent =
+    `"${labelText}" 对你来说意味着什么？`;
+  document.getElementById("interpret-input").value = "";
+  document.getElementById("interpret-popup").classList.remove("hidden");
+  document.getElementById("interpret-input").focus();
+}
+
+function closeInterpPopup() {
+  document.getElementById("interpret-popup").classList.add("hidden");
+  interpTarget = { field: null, profileUsername: null, labelText: null };
+}
+
+function submitInterpretation() {
+  const text = document.getElementById("interpret-input").value.trim();
+  if (!text || !interpTarget.field) return;
+
+  fetch("/interpretation", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      profileUsername: interpTarget.profileUsername,
+      field: interpTarget.field,
+      text,
+      addedBy: currentUser.username,
+    }),
+  })
+    .then((res) => res.json())
+    .then(() => {
+      closeInterpPopup();
+      const currentUsername = profiles[currentIndex]?.username;
+      fetch("/profiles")
+        .then((res) => res.json())
+        .then((data) => {
+          profiles = data.filter((p) => p.username !== currentUser.username);
+          const newIndex = profiles.findIndex(
+            (p) => p.username === currentUsername,
+          );
+          if (newIndex >= 0) currentIndex = newIndex;
+          showProfile();
+        });
+    });
+}
+
+// send like to server
 function like() {
   if (currentIndex < profiles.length) {
     const likedUsername = profiles[currentIndex].username;
@@ -310,7 +597,7 @@ function like() {
   showProfile();
 }
 
-// 进入 app 时检查通知
+// CheckNotifications
 function checkNotifications() {
   if (!currentUser) return;
 
@@ -319,7 +606,7 @@ function checkNotifications() {
     .then((data) => {
       if (data.likesCount > 0) {
         alert(
-          `💗 你有 ${data.likesCount} 个宠物喜欢你！\n来自: ${data.likedBy.join(", ")}`,
+          `💗 你有 ${data.likesCount} 个兽人喜欢你！\n来自: ${data.likedBy.join(", ")}`,
         );
       }
     });
@@ -330,26 +617,197 @@ function skip() {
   showProfile();
 }
 
+function onEditBreedClassChange() {
+  const cls = document.getElementById("edit-breedClass").value;
+  const select = document.getElementById("edit-breed");
+  const wrapper = document.getElementById("edit-breedSpecificWrapper");
+
+  select.innerHTML =
+    '<option value="" disabled selected hidden>选择物种 / Select species...</option>';
+  (breedData[cls] || []).forEach((b) => {
+    const opt = document.createElement("option");
+    opt.value = b;
+    opt.textContent = b;
+    select.appendChild(opt);
+  });
+  wrapper.classList.remove("hidden");
+}
+
+function goToMyProfile() {
+  if (!currentUser) return;
+  const u = currentUser;
+
+  document.getElementById("edit-name").value = u.name || "";
+  document.getElementById("edit-hukou").value = u.hukou || "";
+  document.getElementById("edit-occupation").value = u.occupation || "";
+  document.getElementById("edit-dailylife").value = u.dailylife || "";
+  document.getElementById("edit-hobby").value = u.hobby || "";
+
+  const setSelect = (id, val) => {
+    const el = document.getElementById(id);
+    if (val) el.value = val;
+  };
+
+  setSelect("edit-gender", u.gender);
+  setSelect("edit-orientation", u.orientation);
+  setSelect("edit-sterilized", u.sterilized);
+  setSelect("edit-edu", u.edu);
+  setSelect("edit-income", u.income);
+
+  if (u.mbti && u.mbti.length === 4) {
+    setSelect("edit-mbti1", u.mbti[0]);
+    setSelect("edit-mbti2", u.mbti[1]);
+    setSelect("edit-mbti3", u.mbti[2]);
+    setSelect("edit-mbti4", u.mbti[3]);
+  }
+
+  // Breed: stored as "大类 · 物种"
+  if (u.breed) {
+    const parts = u.breed.split(" · ");
+    const cls = parts[0];
+    const specific = parts[1];
+    const classSelect = document.getElementById("edit-breedClass");
+    classSelect.value = cls;
+    onEditBreedClassChange();
+    if (specific) {
+      setTimeout(() => {
+        document.getElementById("edit-breed").value = specific;
+      }, 0);
+    }
+  }
+
+  document.getElementById("profile-edit").classList.remove("hidden");
+}
+
+function closeMyProfile() {
+  document.getElementById("profile-edit").classList.add("hidden");
+}
+
+function saveMyProfile() {
+  const mbti = ["edit-mbti1", "edit-mbti2", "edit-mbti3", "edit-mbti4"]
+    .map((id) => document.getElementById(id).value)
+    .join("");
+
+  const breedClass = document.getElementById("edit-breedClass").value;
+  const breedSpecific = document.getElementById("edit-breed").value;
+  const breed =
+    breedClass && breedSpecific
+      ? `${breedClass} · ${breedSpecific}`
+      : breedSpecific || breedClass;
+
+  const updates = {
+    name: document.getElementById("edit-name").value,
+    breed,
+    gender: document.getElementById("edit-gender").value,
+    orientation: document.getElementById("edit-orientation").value,
+    hukou: document.getElementById("edit-hukou").value,
+    sterilized: document.getElementById("edit-sterilized").value,
+    mbti,
+    dailylife: document.getElementById("edit-dailylife").value,
+    hobby: document.getElementById("edit-hobby").value,
+    edu: document.getElementById("edit-edu").value,
+    occupation: document.getElementById("edit-occupation").value,
+    income: document.getElementById("edit-income").value,
+  };
+
+  fetch(`/profiles/${currentUser.username}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updates),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      currentUser = data;
+      closeMyProfile();
+    });
+}
+
 // Impression Function
 function impression() {
   const impression = document.getElementById("impression").value.trim();
   if (!impression) return;
 
-  // 已经划完了，没有当前 profile
+  // No more pets
   if (currentIndex >= profiles.length) {
-    alert("没有更多宠物可以评论了 / No more pets to comment on");
+    alert("没有更多兽人可以评论了 / No more anthros to comment on");
     return;
   }
+
+  const currentUsername = profiles[currentIndex].username;
 
   fetch("/impression", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      likedUsername: profiles[currentIndex].username,
+      likedUsername: currentUsername,
       commenterName: currentUser.name,
       impression: impression,
     }),
-  }).then(() => {
-    document.getElementById("impression").value = ""; // 清空输入框
-  });
+  })
+    .then((res) => res.json())
+    .then(() => {
+      // 重新fetch最新profile数据，刷新显示
+      fetch("/profiles")
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          profiles = data.filter((p) => p.username !== currentUser.username);
+          currentIndex = profiles.findIndex(
+            (p) => p.username === currentUsername,
+          );
+          document.getElementById("impression").value = "";
+          showProfile(); // 重新渲染当前profile
+        });
+    });
 }
+
+function renderGridAsAvatar(grid, gridText) {
+  const canvas = document.createElement("canvas");
+  const size = 300;
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+
+  const cellSize = size / 32;
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, size, size);
+
+  ctx.fillStyle = "rgb(57, 255, 20)";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `${cellSize}px monospace`;
+
+  for (let y = 0; y < 32; y++) {
+    for (let x = 0; x < 32; x++) {
+      const cell = grid[y][x];
+      if (cell === "pixel") {
+        ctx.fillStyle = "rgb(57, 255, 20)";
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      } else if (cell === "text") {
+        ctx.fillStyle = "rgb(57, 255, 20)";
+        ctx.fillText(
+          gridText,
+          x * cellSize + cellSize / 2,
+          y * cellSize + cellSize / 2,
+        );
+      } else if (cell !== null) {
+        ctx.fillStyle = "rgb(57, 255, 20)";
+        ctx.fillText(
+          cell,
+          x * cellSize + cellSize / 2,
+          y * cellSize + cellSize / 2,
+        );
+      }
+    }
+  }
+
+  return canvas.toDataURL();
+}
+
+// 键盘收起时强制页面回弹
+document.getElementById("text-input").addEventListener("blur", () => {
+  setTimeout(() => {
+    //window.scrollTo(0, 0);
+  }, 100);
+});

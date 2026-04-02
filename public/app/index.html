@@ -7,19 +7,13 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover"
     />
     <link rel="manifest" href="../manifest.json" />
-    <title>PET · Social App</title>
+    <title>PREDATE</title>
 
     <!-- NES -->
-    <!-- <link rel="stylesheet" href="../node_modules/nes.css/css/nes.css" /> -->
-    <!-- minify -->
     <link
       href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css"
       rel="stylesheet"
     />
-    <!-- latest -->
-    <!-- <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet" /> -->
-    <!-- core style only -->
-    <!-- <link href="https://unpkg.com/nes.css/css/nes-core.min.css" rel="stylesheet" /> -->
 
     <link rel="stylesheet" href="style.css" />
 
@@ -30,12 +24,9 @@
     <!-- Launch Page -->
     <section id="launch" class="page active">
       <div class="phone">
-        <h1 class="logo">PET</h1>
-        <p class="subtitle">为您的宠物寻找朋友 / Find friends for your pet</p>
+        <h1 class="logo">PREDATE</h1>
+        <p class="subtitle">兽人世界的交友平台 / Furry dating in the anthro world</p>
         <button class="nes-btn" onclick="goTo('login')">开始 / START</button>
-        <!-- <button class="nes-btn" onclick="createSwipeCard()">
-          直接划 / SWIPE
-        </button> -->
       </div>
     </section>
 
@@ -63,16 +54,16 @@
       </div>
     </section>
 
-    <!-- Pet Profile - Name -->
+    <!-- Profile - Name -->
     <section id="profile-name" class="page">
       <div class="phone">
         <div class="nes-field">
-          <label for="name_field">名字 / Name</label>
+          <label for="name_field">你的名字 / Your Name</label>
           <input
             id="petName"
             class="nes-input"
             type="text"
-            placeholder="你的宠物叫什么？ / What is your pet's name?"
+            placeholder="你在兽人世界里叫什么？ / What's your anthro name?"
           />
         </div>
 
@@ -85,21 +76,27 @@
       </div>
     </section>
 
-    <!-- Pet Profile - Breed -->
+    <!-- Profile - Species -->
     <section id="profile-breed" class="page">
       <div class="phone">
-        <label for="petBreed">宠物品种 / Pet Breed</label>
+        <label>种族大类 / Species Class</label>
         <div class="nes-select">
-          <select id="petBreed">
-            <option value="" disabled selected hidden>Select...</option>
-            <option value="狗 / DOG">狗 / DOG</option>
-            <option value="猫 / CAT">猫 / CAT</option>
-            <option value="兔子 / RABBIT">兔子 / RABBIT</option>
-            <option value="鸟类 / BIRD">鸟类 / BIRD</option>
-            <option value="爬行动物 / REPTILE">爬行动物 / REPTILE</option>
-            <option value="节肢动物 / Arthropod">节肢动物 / Arthropod</option>
-            <option value="其他 / Other ">其他 / Other</option>
+          <select id="petBreedClass" onchange="onBreedClassChange()">
+            <option value="" disabled selected hidden>选择大类 / Select class...</option>
+            <option value="哺乳类 / Mammals">哺乳类 / Mammals</option>
+            <option value="鸟类 / Birds">鸟类 / Birds</option>
+            <option value="爬行类 / Reptiles">爬行类 / Reptiles</option>
+            <option value="两栖类 / Amphibians">两栖类 / Amphibians</option>
+            <option value="节肢动物 / Arthropods">节肢动物 / Arthropods</option>
           </select>
+        </div>
+        <div id="breedSpecificWrapper" class="hidden">
+          <label>物种 / Species</label>
+          <div class="nes-select">
+            <select id="petBreed">
+              <option value="" disabled selected hidden>选择物种 / Select species...</option>
+            </select>
+          </div>
         </div>
         <button class="nes-btn" onclick="goTo('profile-gender')">
           下一步 / Next
@@ -110,15 +107,29 @@
       </div>
     </section>
 
-    <!-- Pet Profile - Gender -->
+    <!-- Profile - Gender -->
     <section id="profile-gender" class="page">
       <div class="phone">
-        <label>性别 / GENDER </label>
+        <label>性别 / GENDER</label>
         <div class="nes-select">
           <select id="petGender">
-            <option value="公/Male">公 / Male</option>
-            <option value="母/Female">母 / Female</option>
-            <option value="未知/Unknown">未知 / Unknown</option>
+            <option value="雄/Male">雄 / Male</option>
+            <option value="雌/Female">雌 / Female</option>
+            <option value="非二元/Non-binary">非二元 / Non-binary</option>
+          </select>
+        </div>
+
+        <label>性取向 / Sexual Orientation</label>
+        <div class="nes-select">
+          <select id="petOrientation">
+            <option value="" disabled selected hidden>选择 / Select...</option>
+            <option value="异性恋/Straight">异性恋 / Straight</option>
+            <option value="同性恋/Gay·Lesbian">同性恋 / Gay · Lesbian</option>
+            <option value="双性恋/Bisexual">双性恋 / Bisexual</option>
+            <option value="泛性恋/Pansexual">泛性恋 / Pansexual</option>
+            <option value="无性恋/Asexual">无性恋 / Asexual</option>
+            <option value="其他/Other">其他 / Other</option>
+            <option value="不透露/Prefer not to say">不透露 / Prefer not to say</option>
           </select>
         </div>
 
@@ -143,12 +154,12 @@
           </div>
 
           <div class="nes-field">
-            <label for="name_field">户籍/Hukou</label>
+            <label for="name_field">领地 / Territory</label>
             <input
               id="petHukou"
               class="nes-input"
               type="text"
-              placeholder="你的宠物户籍是？ / What is your pet's hukou?"
+              placeholder="你来自哪片领地？ / Which territory are you from?"
             />
           </div>
         </div>
@@ -162,14 +173,15 @@
       </div>
     </section>
 
-    <!-- Pet Profile - Sterilized -->
+    <!-- Profile - Sterilized -->
     <section id="profile-sterilized" class="page">
       <div class="phone">
-        <label>是否绝育 / Sterilized or not</label>
+        <label>婚育状况 / Mating Status</label>
         <div class="nes-select">
           <select id="petSterilized">
-            <option value="是/Yes">是 / Yes</option>
-            <option value="否/No">否 / No</option>
+            <option value="单身/Single">单身 / Single</option>
+            <option value="已配对/Mated">已配对 / Mated</option>
+            <option value="开放关系/Open">开放关系 / Open</option>
           </select>
         </div>
 
@@ -182,7 +194,7 @@
       </div>
     </section>
 
-    <!-- Pet Profile - MBTI -->
+    <!-- Profile - MBTI -->
     <section id="profile-mbti" class="page">
       <div class="phone">
         <label for="petMbti">MBTI类型 / MBTI Type</label>
@@ -232,24 +244,15 @@
       </div>
     </section>
 
-    <!-- Pet Profile - Daily Life -->
+    <!-- Profile - Daily Life -->
     <section id="profile-daily-life" class="page">
       <div class="phone">
         <label for="dailylife">日常生活 / Daily Life</label>
         <textarea
           id="dailylife"
           class="nes-textarea"
-          placeholder="一天几顿饭？多久洗一次澡？ / How many meals a day? How often to bathe?"
+          placeholder="你一天怎么过？ / What does your day look like?"
         ></textarea>
-
-        <!-- <label for="achievement">
-          ${name}干过最厉害的事 / ${name}'s Most Impressive Achievement</label
-        >
-        <textarea
-          id="achievement"
-          class="nes-textarea"
-          placeholder="比如：咬过最大的敌人 / For example: The biggest enemy it has bitten"
-        ></textarea> -->
 
         <button class="nes-btn" onclick="goTo('profile-hobbies')">
           下一步 / Next
@@ -260,16 +263,16 @@
       </div>
     </section>
 
-    <!-- Pet Profile - Hobbies -->
+    <!-- Profile - Hobbies -->
     <section id="profile-hobbies" class="page">
       <div class="phone">
         <label for="hobby">兴趣爱好 / Hobbies</label>
         <textarea
           id="hobby"
           class="nes-textarea"
-          placeholder="遛弯 / 社交 / 睡觉 / 咬人 / Walking / Socializing / Sleeping / Biting"
+          placeholder="狩猎 / 筑巢 / 群居 / 独行 / Hunting / Nesting / Pack life / Solo"
         ></textarea>
-        <button class="nes-btn" onclick="goTo('profile-photo')">
+        <button class="nes-btn" onclick="goTo('profile-edu')">
           下一步 / Next
         </button>
         <button class="nes-btn" onclick="goTo('profile-daily-life')">
@@ -278,12 +281,58 @@
       </div>
     </section>
 
-    <!-- Profile Photo -->
+    <!-- Profile - Education & Occupation -->
+    <section id="profile-edu" class="page">
+      <div class="phone">
+        <label>学历 / Education</label>
+        <div class="nes-select">
+          <select id="petEdu">
+            <option value="" disabled selected hidden>选择学历 / Select...</option>
+            <option value="小学/Primary">小学 / Primary</option>
+            <option value="初中/Middle School">初中 / Middle School</option>
+            <option value="高中/High School">高中 / High School</option>
+            <option value="大专/Associate">大专 / Associate</option>
+            <option value="本科/Bachelor">本科 / Bachelor</option>
+            <option value="硕士/Master">硕士 / Master</option>
+            <option value="博士/PhD">博士 / PhD</option>
+            <option value="其他/Other">其他 / Other</option>
+          </select>
+        </div>
+        <div class="nes-field">
+          <label for="petOccupation">职业 / Occupation</label>
+          <input
+            id="petOccupation"
+            class="nes-input"
+            type="text"
+            placeholder="你的工作是什么？ / What do you do?"
+          />
+        </div>
+        <label>月收入 / Monthly Income</label>
+        <div class="nes-select">
+          <select id="petIncome">
+            <option value="" disabled selected hidden>选择范围 / Select range...</option>
+            <option value="<3k">3k 以下</option>
+            <option value="3k–8k">3k – 8k</option>
+            <option value="8k–15k">8k – 15k</option>
+            <option value="15k–30k">15k – 30k</option>
+            <option value="30k+">30k 以上</option>
+            <option value="不透露/Prefer not to say">不透露 / Prefer not to say</option>
+          </select>
+        </div>
+        <button class="nes-btn" onclick="goTo('profile-photo')">
+          下一步 / Next
+        </button>
+        <button class="nes-btn" onclick="goTo('profile-hobbies')">
+          上一步 / Previous
+        </button>
+      </div>
+    </section>
+
+    <!-- Profile - Fursona -->
     <section id="profile-photo" class="page">
       <div class="phone">
-        <h1>创造你的宠物照片 / Create Your Pet Photo</h1>
+        <h1>创造你的兽人形象 / Create Your Fursona</h1>
         <div class="main-wrapper">
-          <h1>你的宠物 Your Pet</h1>
           <!-- the following div will contain the p5 canvas. -->
           <section class="pixeldraw">
             <div id="p5-canvas-container">
@@ -293,6 +342,9 @@
               <button class="nes-btn" onclick="setBrush()">画笔/BRUSH</button>
               <button class="nes-btn is-error" onclick="setEraser()">
                 橡皮擦/ERASER
+              </button>
+              <button class="nes-btn is-warning" onclick="setUndo()">
+                撤销/UNDO
               </button>
               <button class="nes-btn is-success" onclick="setClear()">
                 清空/CLEAR
@@ -310,7 +362,6 @@
               </div>
             </div>
           </section>
-          <!-- <p>Project Description</p> -->
         </div>
         <button class="nes-btn" onclick="createCard()">
           生成档案卡 / Generate Profile
@@ -326,14 +377,17 @@
       <div class="phone">
         <div id="petCard" class="card"></div>
         <button class="nes-btn" onclick="createSwipeCard()">
-          Start Swiping!
+          进入配对 / Start Matching!
         </button>
       </div>
     </section>
 
-    <!-- Other's Profile -->
+    <!-- Swipe Page -->
     <section id="swipe-page" class="page">
       <div class="phone">
+        <div id="swipe-topbar">
+          <button class="nes-btn" onclick="goToMyProfile()">我的档案 / Me</button>
+        </div>
         <div class="scroll">
           <div id="swipe-container"></div>
         </div>
@@ -355,6 +409,144 @@
         <button class="nes-btn" onclick="skip()">❌</button>
       </div>
     </section>
+
+    <!-- My Profile Edit Overlay -->
+    <div id="profile-edit" class="hidden">
+      <div class="edit-overlay-inner">
+        <h2>编辑档案 / Edit Profile</h2>
+        <div class="scroll">
+
+          <div class="nes-field">
+            <label>名字 / Name</label>
+            <input id="edit-name" class="nes-input" type="text" />
+          </div>
+
+          <label>种族大类 / Species Class</label>
+          <div class="nes-select">
+            <select id="edit-breedClass" onchange="onEditBreedClassChange()">
+              <option value="" disabled selected hidden>选择大类 / Select class...</option>
+              <option value="哺乳类 / Mammals">哺乳类 / Mammals</option>
+              <option value="鸟类 / Birds">鸟类 / Birds</option>
+              <option value="爬行类 / Reptiles">爬行类 / Reptiles</option>
+              <option value="两栖类 / Amphibians">两栖类 / Amphibians</option>
+              <option value="节肢动物 / Arthropods">节肢动物 / Arthropods</option>
+            </select>
+          </div>
+          <div id="edit-breedSpecificWrapper" class="hidden">
+            <label>物种 / Species</label>
+            <div class="nes-select">
+              <select id="edit-breed">
+                <option value="" disabled selected hidden>选择物种 / Select species...</option>
+              </select>
+            </div>
+          </div>
+
+          <label>性别 / Gender</label>
+          <div class="nes-select">
+            <select id="edit-gender">
+              <option value="雄/Male">雄 / Male</option>
+              <option value="雌/Female">雌 / Female</option>
+              <option value="非二元/Non-binary">非二元 / Non-binary</option>
+            </select>
+          </div>
+
+          <label>性取向 / Sexual Orientation</label>
+          <div class="nes-select">
+            <select id="edit-orientation">
+              <option value="异性恋/Straight">异性恋 / Straight</option>
+              <option value="同性恋/Gay·Lesbian">同性恋 / Gay · Lesbian</option>
+              <option value="双性恋/Bisexual">双性恋 / Bisexual</option>
+              <option value="泛性恋/Pansexual">泛性恋 / Pansexual</option>
+              <option value="无性恋/Asexual">无性恋 / Asexual</option>
+              <option value="其他/Other">其他 / Other</option>
+              <option value="不透露/Prefer not to say">不透露 / Prefer not to say</option>
+            </select>
+          </div>
+
+          <div class="nes-field">
+            <label>领地 / Territory</label>
+            <input id="edit-hukou" class="nes-input" type="text" />
+          </div>
+
+          <label>婚育状况 / Mating Status</label>
+          <div class="nes-select">
+            <select id="edit-sterilized">
+              <option value="单身/Single">单身 / Single</option>
+              <option value="已配对/Mated">已配对 / Mated</option>
+              <option value="开放关系/Open">开放关系 / Open</option>
+            </select>
+          </div>
+
+          <label>MBTI</label>
+          <div class="nes-select"><select id="edit-mbti1"><option value="E">E</option><option value="I">I</option></select></div>
+          <div class="nes-select"><select id="edit-mbti2"><option value="S">S</option><option value="N">N</option></select></div>
+          <div class="nes-select"><select id="edit-mbti3"><option value="T">T</option><option value="F">F</option></select></div>
+          <div class="nes-select"><select id="edit-mbti4"><option value="J">J</option><option value="P">P</option></select></div>
+
+          <label>学历 / Education</label>
+          <div class="nes-select">
+            <select id="edit-edu">
+              <option value="小学/Primary">小学 / Primary</option>
+              <option value="初中/Middle School">初中 / Middle School</option>
+              <option value="高中/High School">高中 / High School</option>
+              <option value="大专/Associate">大专 / Associate</option>
+              <option value="本科/Bachelor">本科 / Bachelor</option>
+              <option value="硕士/Master">硕士 / Master</option>
+              <option value="博士/PhD">博士 / PhD</option>
+              <option value="其他/Other">其他 / Other</option>
+            </select>
+          </div>
+
+          <div class="nes-field">
+            <label>职业 / Occupation</label>
+            <input id="edit-occupation" class="nes-input" type="text" />
+          </div>
+
+          <label>月收入 / Monthly Income</label>
+          <div class="nes-select">
+            <select id="edit-income">
+              <option value="<3k">3k 以下</option>
+              <option value="3k–8k">3k – 8k</option>
+              <option value="8k–15k">8k – 15k</option>
+              <option value="15k–30k">15k – 30k</option>
+              <option value="30k+">30k 以上</option>
+              <option value="不透露/Prefer not to say">不透露 / Prefer not to say</option>
+            </select>
+          </div>
+
+          <label>日常生活 / Daily Life</label>
+          <textarea id="edit-dailylife" class="nes-textarea"></textarea>
+
+          <label>兴趣爱好 / Hobbies</label>
+          <textarea id="edit-hobby" class="nes-textarea"></textarea>
+
+        </div>
+
+        <button class="nes-btn is-success" onclick="saveMyProfile()">保存 / Save</button>
+        <button class="nes-btn" onclick="closeMyProfile()">返回 / Back</button>
+      </div>
+    </div>
+
+    <!-- Interpretation Popup -->
+    <div id="interpret-popup" class="hidden">
+      <div class="interpret-box">
+        <p id="interpret-label-name">你的解读 / Your Interpretation</p>
+        <input
+          id="interpret-input"
+          class="nes-input"
+          type="text"
+          placeholder="输入你的解读.../Enter your interpretation..."
+        />
+        <div class="interpret-btn-row">
+          <button class="nes-btn is-success" onclick="submitInterpretation()">
+            确定 / Confirm
+          </button>
+          <button class="nes-btn" onclick="closeInterpPopup()">
+            取消 / Cancel
+          </button>
+        </div>
+      </div>
+    </div>
 
     <script src="sketch.js"></script>
     <script src="script.js"></script>

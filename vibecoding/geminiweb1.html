@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>COLD INTIMACY | PUBLIC RANKING</title>
+    <style>
+        @font-face { font-family: "Zpix"; src: url("https://cdn.jsdelivr.net/gh/owaen/zpix-webfont@latest/dist/zpix.woff2") format("woff2"); }
+        :root { --hot-pink: #ff0055; --money-green: #39FF14; --gold: #f5c518; --lcd-bg: #1a1a1a; }
+        * { box-sizing: border-box; font-family: "Zpix", monospace; cursor: crosshair; }
+        body { background: #000; color: var(--money-green); overflow: hidden; height: 100vh; display: flex; justify-content: center; }
+        
+        /* CRT 扫描线 */
+        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none; }
+        
+        /* 9:16 比例容器 */
+        .board { width: 56.25vh; height: 100vh; background: var(--lcd-bg); border: 8px solid #333; display: flex; flex-direction: column; position: relative; border-image: linear-gradient(to bottom, var(--hot-pink), var(--gold)) 1; }
+        
+        /* Header: 相亲节目感 */
+        header { background: var(--hot-pink); color: white; padding: 20px; text-align: center; box-shadow: 0 0 20px var(--hot-pink); }
+        .live-tag { animation: blink 1s step-end infinite; background: red; padding: 2px 5px; font-size: 12px; }
+        
+        /* TOP 1: 头牌展示 */
+        .top-host { height: 40%; position: relative; border-bottom: 4px double var(--gold); background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); }
+        .host-badge { position: absolute; top: 20px; left: 20px; background: var(--gold); color: black; padding: 10px; font-size: 24px; transform: rotate(-10deg); z-index: 5; }
+        .avatar-main { font-size: 180px; text-align: center; margin-top: 40px; filter: drop-shadow(0 0 15px var(--gold)); }
+        
+        /* 属性槽位 */
+        .stats-overlay { position: absolute; bottom: 10px; width: 100%; padding: 10px; background: rgba(0,0,0,0.7); }
+        .hp-bar { width: 100%; height: 15px; border: 2px solid var(--money-green); margin-top: 5px; position: relative; }
+        .hp-fill { height: 100%; background: var(--hot-pink); width: 85%; transition: width 0.5s; }
+
+        /* 排行榜列表 */
+        .rank-list { flex: 1; overflow: hidden; padding: 10px; }
+        .rank-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #333; background: rgba(57, 255, 20, 0.05); margin-bottom: 5px; }
+        .rank-item.shame { filter: grayscale(1) opacity(0.5); border-left: 4px solid red; }
+        .rank-item .num { font-size: 24px; width: 40px; color: var(--gold); }
+        .rank-item .info { flex: 1; margin-left: 10px; }
+        .rank-item .likes { color: var(--hot-pink); font-size: 18px; }
+
+        /* 弹幕/滚动提示 */
+        .ticker { background: var(--gold); color: black; font-size: 14px; padding: 5px; overflow: hidden; white-space: nowrap; }
+        .ticker-text { display: inline-block; animation: scroll 20s linear infinite; }
+
+        @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+        @keyframes blink { 50% { opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div class="crt"></div>
+    <div class="board">
+        <header>
+            <span class="live-tag">● LIVE</span>
+            <h1 style="font-size: 28px;">💖 终极配对：资产清算榜 💖</h1>
+            <p style="font-size: 10px;">STRUCTURAL COLDNESS HIDDEN BEHIND PASSION</p>
+        </header>
+
+        <div class="ticker">
+            <div class="ticker-text">
+                [系统公告] 用户 0x421 因为发送 3 次空心心碎，HP 掉落至 10%... [资产警告] 房价归零，五环外用户已被自动打标“老破小遗民”... [实时] 旺财 刚刚收到了 99 朵电子玫瑰...
+            </div>
+        </div>
+
+        <div class="top-host">
+            <div class="host-badge">NO.1 头牌</div>
+            <div class="avatar-main">🐶</div>
+            <div class="stats-overlay">
+                <div style="display:flex; justify-content:space-between;">
+                    <span>旺财 [SSS级资产]</span>
+                    <span style="color:var(--hot-pink)">💗 1,204</span>
+                </div>
+                <div class="hp-bar"><div class="hp-fill"></div></div>
+                <div style="font-size:9px; color:var(--gold); margin-top:5px;">标签：资产废纸 / 极端雌性主义 / 监控奴隶</div>
+            </div>
+        </div>
+
+        <div class="rank-list">
+            <div class="rank-item">
+                <div class="num">2</div>
+                <div class="info">咪咪 [纯种名媛]<br><small>标签：洗剪吹难民 (疑似粉饰)</small></div>
+                <div class="likes">💗982</div>
+            </div>
+            <div class="rank-item">
+                <div class="num">3</div>
+                <div class="info">小白 [普信男]<br><small>标签：扶弟魔 / 理想主义</small></div>
+                <div class="likes">💗451</div>
+            </div>
+            <div class="rank-item shame">
+                <div class="num">99</div>
+                <div class="info">小仓 [垃圾回收区]<br><small>理由：长期未获得回复，已被透明化</small></div>
+                <div class="likes">💔-50</div>
+            </div>
+        </div>
+
+        <footer style="padding:10px; font-size:8px; text-align:center; opacity:0.6;">
+            DATA SYNC: 2026-03-12 | CASINO ALGORITHM V4.2 | 仪式感掩盖结构性寒冷
+        </footer>
+    </div>
+</body>
+</html>

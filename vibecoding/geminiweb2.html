@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>COLD INTIMACY | LIVE SPECTACLE</title>
+    <style>
+        @font-face { font-family: "Zpix"; src: url("https://cdn.jsdelivr.net/gh/owaen/zpix-webfont@latest/dist/zpix.woff2") format("woff2"); }
+        :root { --ceremony-red: #d32f2f; --ceremony-gold: #ffc107; --pixel-green: #4caf50; --bg: #121212; }
+        * { box-sizing: border-box; font-family: "Zpix", monospace; }
+        body { background: var(--bg); color: #fff; overflow: hidden; margin: 0; display: flex; justify-content: center; }
+
+        /* 模拟 1920x1080 竖屏 */
+        .stage { width: 56.25vh; height: 100vh; border: 10px double var(--ceremony-gold); position: relative; display: flex; flex-direction: column; background: radial-gradient(circle, #2c0000 0%, #121212 100%); }
+        
+        /* 像素牡丹背景装饰 */
+        .peony-bg { position: absolute; top: 0; width: 100%; height: 100%; opacity: 0.15; pointer-events: none; background: url('https://img.icons8.com/pixel-low/512/lotus.png') center repeat; filter: sepia(1) hue-rotate(-50deg); }
+
+        /* 顶部：热烈的仪式感 */
+        header { padding: 30px; text-align: center; border-bottom: 2px solid var(--ceremony-gold); background: rgba(211, 47, 47, 0.2); }
+        .live-status { animation: blink 0.8s infinite; color: var(--ceremony-gold); font-size: 14px; }
+        h1 { margin: 10px 0; font-size: 32px; letter-spacing: 4px; color: var(--ceremony-gold); text-shadow: 2px 2px #000; }
+
+        /* 核心排名：阶级金字塔 */
+        .ranking-pyramid { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* NO.1 这里的“冷”藏在完美的数据里 */
+        .top-performer { border: 3px solid var(--ceremony-gold); padding: 20px; background: rgba(255, 193, 7, 0.05); position: relative; }
+        .crown { position: absolute; top: -20px; right: -10px; font-size: 40px; transform: rotate(15deg); }
+        .avatar-lg { font-size: 100px; text-align: center; margin: 10px 0; filter: drop-shadow(0 0 10px var(--ceremony-gold)); }
+        
+        /* HP槽：情感磨损度 */
+        .hp-container { margin: 15px 0; font-size: 12px; }
+        .hp-bar { height: 12px; background: #333; border: 1px solid var(--ceremony-gold); margin-top: 5px; overflow: hidden; }
+        .hp-fill { height: 100%; background: linear-gradient(90deg, #ff0055, #ffc107); width: 92%; }
+
+        /* 列表：正在消失的边缘人 */
+        .list-item { display: flex; align-items: center; padding: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); transition: 0.3s; }
+        .list-item.low-rep { opacity: 0.3; filter: grayscale(1); } /* 社交冷漠：不被关注就会变透明 */
+        .rank-num { font-size: 24px; color: var(--ceremony-gold); width: 45px; }
+        .user-info { flex: 1; }
+        .user-info .name { font-size: 16px; color: #ffeb3b; }
+        .user-info .meta { font-size: 10px; opacity: 0.6; margin-top: 4px; }
+        .social-stats { text-align: right; font-size: 12px; color: #ff0055; }
+
+        /* 底部动态：仪式播报 */
+        footer { padding: 15px; font-size: 10px; text-align: center; border-top: 2px solid var(--ceremony-gold); background: #000; }
+        .match-alert { color: var(--ceremony-gold); animation: flash 1s infinite; }
+
+        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes flash { 0%, 100% { background: transparent; } 50% { background: rgba(255, 193, 7, 0.2); } }
+    </style>
+</head>
+<body>
+    <div class="stage">
+        <div class="peony-bg"></div>
+        <header>
+            <div class="live-status">● 正在进行：全城匹配仪式</div>
+            <h1>心动排行榜</h1>
+            <div style="font-size: 10px; opacity: 0.7;">亲密关系是可被量化的社会资本</div>
+        </header>
+
+        <div class="ranking-pyramid">
+            <div class="top-performer">
+                <div class="crown">👑</div>
+                <div class="avatar-lg">🐶</div>
+                <div class="user-info" style="text-align: center;">
+                    <div class="name">旺财 (顶级受赏者)</div>
+                    <div class="hp-container">
+                        情感储备值 (HP): 92%
+                        <div class="hp-bar"><div class="hp-fill"></div></div>
+                    </div>
+                    <div class="meta">
+                        <span>#北京五环</span> <span>#布偶血统</span> <span>#精英伴侣</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list-item">
+                <div class="rank-num">2</div>
+                <div class="user-info">
+                    <div class="name">咪咪</div>
+                    <div class="meta">收到 12 颗喜糖 | 互动强度：高</div>
+                </div>
+                <div class="social-stats">💖 988</div>
+            </div>
+
+            <div class="list-item">
+                <div class="rank-num">3</div>
+                <div class="user-info">
+                    <div class="name">小白</div>
+                    <div class="meta">HP 正在缓慢下降 | 尚未匹配</div>
+                </div>
+                <div class="social-stats">💖 452</div>
+            </div>
+
+            <div class="list-item low-rep">
+                <div class="rank-num">--</div>
+                <div class="user-info">
+                    <div class="name">无名氏</div>
+                    <div class="meta">警告：由于长期无人扫码，个人属性已模糊</div>
+                </div>
+                <div class="social-stats">💔 -20</div>
+            </div>
+        </div>
+
+        <footer class="match-alert">
+            🔔 仪式通报：旺财 & 咪咪 匹配成功！ 正在发放电子喜糖...
+        </footer>
+    </div>
+</body>
+</html>

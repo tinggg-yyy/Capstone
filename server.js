@@ -7,7 +7,7 @@ const fs = require("fs");
 
 const app = express(); // the server "app", the server behaviour
 
-const portHTTPS = 3000; // port for https
+const portHTTPS = 4000; // port for https
 // const portHTTP = 3001; // port for http
 
 // returning to the client anything that is
@@ -105,6 +105,64 @@ app.post("/impression", function (req, res) {
     impression: impression,
     date: new Date().toISOString(),
   });
+
+  if (profile.grid && impression) {
+    // 收集所有非null的格子
+    let filledCells = [];
+    for (let y = 0; y < 32; y++) {
+      for (let x = 0; x < 32; x++) {
+        if (profile.grid[y][x] !== null) {
+          filledCells.push({ x, y });
+        }
+      }
+    }
+
+    // 随机选5个替换
+    for (let i = 0; i < 5; i++) {
+      if (filledCells.length === 0) break;
+      const idx = Math.floor(Math.random() * filledCells.length);
+      const { x, y } = filledCells[idx];
+      profile.grid[y][x] = impression[0];
+      filledCells.splice(idx, 1);
+    }
+    console.log("filled cells:", filledCells.length);
+  }
+
+  fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
+  res.json({ success: true });
+});
+
+// PUT /profiles/:username — 更新自己的 profile
+app.put("/profiles/:username", function (req, res) {
+  const username = req.params.username;
+  const updates = req.body;
+  const profile = profiles.find((p) => p.username === username);
+  if (!profile) return res.status(404).json({ error: "Not found" });
+
+  const locked = ["username", "password", "id", "date"];
+  Object.keys(updates).forEach((key) => {
+    if (!locked.includes(key)) profile[key] = updates[key];
+  });
+
+  fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
+  res.json(profile);
+});
+
+// POST /interpretation — 给某个 profile 的某个字段添加解读
+app.post("/interpretation", function (req, res) {
+  const { profileUsername, field, text, addedBy } = req.body;
+
+  let profile = profiles.find((p) => p.username === profileUsername);
+  if (!profile) return res.status(404).json({ error: "Not found" });
+
+  if (!profile.interpretations) profile.interpretations = {};
+  // Support multiple interpretations per field — store as array
+  if (!Array.isArray(profile.interpretations[field])) {
+    profile.interpretations[field] = profile.interpretations[field]
+      ? [profile.interpretations[field]]
+      : [];
+  }
+  profile.interpretations[field].push({ text, addedBy });
 
   fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
   res.json({ success: true });

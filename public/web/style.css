@@ -27,6 +27,21 @@
 
 body {
   background: var(--bg);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.04) 3px,
+      rgba(0, 0, 0, 0.04) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.04) 3px,
+      rgba(0, 0, 0, 0.04) 4px
+    );
   display: flex;
   justify-content: center;
   padding: 16px;
@@ -40,6 +55,9 @@ body {
   flex-direction: column;
   gap: 0;
   border: 4px solid var(--text);
+  box-shadow:
+    inset 0 0 20px rgba(0, 0, 0, 0.08),
+    4px 4px 0 #3d4a3a;
 }
 
 /* ── HEADER ── */
@@ -51,6 +69,13 @@ body {
   justify-content: space-between;
   padding: 8px 12px;
   border-bottom: 4px solid var(--text);
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 5px,
+    rgba(255, 255, 255, 0.03) 5px,
+    rgba(255, 255, 255, 0.03) 6px
+  );
 }
 .board-header .title-left {
   font-size: 7px;
@@ -96,6 +121,29 @@ body {
   justify-content: center;
   font-size: 80px;
   background: var(--cell-bg);
+}
+
+.rank-1-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.06) 2px,
+      rgba(0, 0, 0, 0.06) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.06) 2px,
+      rgba(0, 0, 0, 0.06) 3px
+    );
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* overlay gradient */
@@ -161,6 +209,27 @@ body {
   animation: blink 1.2s step-start infinite;
 }
 
+.r1-name,
+.card-name,
+.list-name,
+.no1-badge,
+.rank-badge {
+  text-shadow:
+    1px 0 0 rgba(0, 0, 0, 0.18),
+    0 1px 0 rgba(0, 0, 0, 0.1);
+  letter-spacing: 1px;
+}
+
+.r1-likes {
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.15),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.card-likes {
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1);
+}
+
 @keyframes blink {
   0%,
   100% {
@@ -185,6 +254,29 @@ body {
   overflow: hidden;
   border-right: 3px solid var(--text);
   border-bottom: 3px solid var(--text);
+}
+
+.rank-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.05) 2px,
+      rgba(0, 0, 0, 0.05) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.05) 2px,
+      rgba(0, 0, 0, 0.05) 3px
+    );
+  pointer-events: none;
+  z-index: 1;
 }
 .rank-card:nth-child(even) {
   border-right: 0;
@@ -285,6 +377,13 @@ body {
   border-bottom: 3px solid var(--text);
   padding: 8px 10px;
   gap: 10px;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 5px,
+    rgba(0, 0, 0, 0.03) 5px,
+    rgba(0, 0, 0, 0.03) 6px
+  );
 }
 .rank-list-row:last-child {
   border-bottom: 0;
@@ -298,6 +397,7 @@ body {
 }
 
 .rank-list-row .list-avatar {
+  box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.2);
   width: 44px;
   height: 44px;
   border: 2px solid var(--text);
@@ -353,4 +453,111 @@ body {
   padding: 7px;
   font-size: 7px;
   opacity: 0.75;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 4px,
+    rgba(255, 255, 255, 0.04) 4px,
+    rgba(255, 255, 255, 0.04) 5px
+  );
+}
+
+/* ── 黑绿 LCD 风格覆盖 ── */
+:root {
+  --bg: #1a1c1a;
+  --card-bg: #111311;
+  --cell-bg: #1a1c1a;
+  --text: #39ff14;
+  --gold: #39ff14;
+  --silver: #00cc00;
+  --bronze: #007700;
+}
+
+body {
+  background: #000;
+  color: var(--text);
+}
+
+/* 扫描线特效 */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.06),
+      rgba(0, 255, 0, 0.02),
+      rgba(0, 0, 255, 0.06)
+    );
+  background-size:
+    100% 4px,
+    3px 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.board {
+  border-color: var(--text);
+  box-shadow: 0 0 50px rgba(57, 255, 20, 0.2);
+}
+
+.board-header {
+  background: #000;
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+
+.board-header .title-main {
+  color: var(--text);
+}
+
+.board-header .title-left,
+.board-header .title-right {
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.rank-1-card,
+.rank-card,
+.rank-list-row {
+  background: var(--cell-bg);
+  border-color: var(--text);
+}
+
+.rank-1-card .r1-likes {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+.rank-list-row .list-avatar {
+  border-color: var(--text);
+  background: #000;
+}
+
+.rank-list-row .list-name {
+  color: var(--text);
+}
+
+.rank-list-row .list-meta {
+  color: rgba(57, 255, 20, 0.6);
+}
+
+.rank-list-row .list-likes {
+  color: var(--text);
+}
+
+.board-footer {
+  background: #000;
+  color: var(--text);
+}
+
+/* ticker 黑绿反色 */
+.ticker {
+  background: var(--text);
+  color: #000;
 }

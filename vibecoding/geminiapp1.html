@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COLD INTIMACY | PROFILE</title>
+    <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
+    <style>
+        @font-face { font-family: "Zpix"; src: url("https://cdn.jsdelivr.net/gh/owaen/zpix-webfont@latest/dist/zpix.woff2") format("woff2"); }
+        body { background: #121212; color: #eee; font-family: "Zpix", sans-serif; padding: 15px; }
+        .app-container { max-width: 420px; margin: 0 auto; background: #222; border: 4px solid var(--gold); border-image: linear-gradient(#ffc107, #d32f2f) 1; padding: 20px; }
+        
+        .creation-zone { background: #000; padding: 20px; border: 1px solid #444; text-align: center; position: relative; }
+        .label-selector { margin-top: 25px; }
+        .social-projection { margin-top: 20px; padding: 10px; background: rgba(211, 47, 47, 0.1); border: 1px dashed #d32f2f; color: #ff5252; font-size: 11px; }
+        
+        .nes-btn.is-ceremony { background-color: #d32f2f; color: white; }
+        .stat-preview { display: flex; justify-content: space-around; margin: 20px 0; font-size: 10px; color: #ffc107; }
+        .stat-item { text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h2 style="text-align:center; color:#ffc107; letter-spacing:2px;">身份构建仪式</h2>
+        <p style="font-size:10px; text-align:center; opacity:0.6;">请诚实暴露你的社会属性，系统将为您计算受众热度</p>
+
+        <div class="creation-zone">
+            <div style="font-size:80px;">🐱</div>
+            <p style="font-size:9px; color:#666;">[ 点击涂鸦：您的审美将影响初始权重 ]</p>
+        </div>
+
+        <div class="label-selector">
+            <p style="font-size:12px; margin-bottom:10px;">选择你的真实标签：</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <label><input type="checkbox" class="nes-checkbox is-dark" checked /> <span>理想主义(穷)</span></label>
+                <label><input type="checkbox" class="nes-checkbox is-dark" /> <span>社交回避</span></label>
+                <label><input type="checkbox" class="nes-checkbox is-dark" /> <span>老破小原住民</span></label>
+                <label><input type="checkbox" class="nes-checkbox is-dark" /> <span>情绪溢价者</span></label>
+            </div>
+        </div>
+
+        <div class="social-projection">
+            <strong>[ 算法预测 ]</strong><br>
+            基于您选择的标签“理想主义”与“老破小”，82% 的高价值用户可能会选择“忽略”。您的初始 HP 值预计下降 15%。
+        </div>
+
+        <div class="stat-preview">
+            <div class="stat-item">预期匹配率<br><strong>0.04%</strong></div>
+            <div class="stat-item">预估排名<br><strong>#1402</strong></div>
+            <div class="stat-item">市场信任度<br><strong>低</strong></div>
+        </div>
+
+        <button class="nes-btn is-ceremony" style="width:100%; font-size:14px;">
+            宣告入场 & 接受评估
+        </button>
+
+        <p style="font-size:8px; margin-top:15px; text-align:center; opacity:0.4;">
+            注意：入场后，您的所有互动数据（拒绝、被拒绝、心碎）都将被大屏实时公示。
+        </p>
+    </div>
+</body>
+</html>

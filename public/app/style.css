@@ -31,6 +31,21 @@
 body {
   margin: 0;
   background: var(--bg);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.04) 3px,
+      rgba(0, 0, 0, 0.04) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.04) 3px,
+      rgba(0, 0, 0, 0.04) 4px
+    );
   color: var(--c-text);
   padding: 0;
   overflow: hidden;
@@ -71,6 +86,37 @@ canvas {
   overscroll-behavior: contain;
 }
 
+#p5-canvas-container {
+  position: relative;
+  outline: 3px solid #3d4a3a;
+  box-shadow:
+    inset 0 0 10px rgba(0, 0, 0, 0.12),
+    2px 2px 0 #3d4a3a;
+}
+
+#p5-canvas-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.06) 2px,
+      rgba(0, 0, 0, 0.06) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.06) 2px,
+      rgba(0, 0, 0, 0.06) 3px
+    );
+  pointer-events: none;
+  z-index: 10;
+}
+
 .logo {
   font-size: 48px;
   text-align: center;
@@ -85,6 +131,10 @@ canvas {
 .nes-btn {
   background-color: var(--c-btn-bg);
   color: var(--c-btn-text);
+  box-shadow:
+    inset -2px -2px 0 var(--c-btn-shadow),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.1);
+  letter-spacing: 1px;
 }
 
 .nes-btn::after {
@@ -96,6 +146,34 @@ canvas {
 .nes-select select {
   background-color: var(--t-bg);
   color: var(--t-text);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 7px,
+      rgba(24, 26, 24, 0.05) 7px,
+      rgba(24, 26, 24, 0.05) 8px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 7px,
+      rgba(24, 26, 24, 0.05) 7px,
+      rgba(24, 26, 24, 0.05) 8px
+    );
+  box-shadow:
+    inset 1px 1px 0 rgba(0, 0, 0, 0.15),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 文字加LCD残影感 */
+.value,
+h1,
+h2,
+label,
+p {
+  text-shadow: 1px 0 0 rgba(24, 26, 24, 0.12);
+  letter-spacing: 1px;
 }
 
 input::placeholder {
@@ -145,6 +223,35 @@ li.other .words {
   overflow: hidden;
 }
 
+#profile-edit {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #000;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.edit-overlay-inner {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#swipe-topbar {
+  display: none;
+}
+
+#swipe-page.active #swipe-topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 0;
+  flex-shrink: 0;
+}
+
 #swipe-page .phone {
   display: flex;
   flex-direction: column;
@@ -159,6 +266,24 @@ li.other .words {
   padding: 20px;
   border-radius: 10px;
   font-family: sans-serif;
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.1),
+    3px 3px 0 #3d4a3a;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.03) 3px,
+      rgba(0, 0, 0, 0.03) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.03) 3px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
 }
 
 .avatar-box {
@@ -179,6 +304,22 @@ li.other .words {
 .cell {
   position: relative;
   background: #bcd3b4;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 5px,
+      rgba(0, 0, 0, 0.04) 5px,
+      rgba(0, 0, 0, 0.04) 6px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 5px,
+      rgba(0, 0, 0, 0.04) 5px,
+      rgba(0, 0, 0, 0.04) 6px
+    );
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2);
   min-height: 90px;
   width: 100%;
   max-width: 100%;
@@ -194,12 +335,19 @@ li.other .words {
   left: 8px;
   font-size: 12px;
   opacity: 0.7;
+  padding: 8px 12px 8px 8px; /* bigger touch area */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none; /* prevent iOS long-press callout */
 }
 
 .value {
   font-size: 28px;
   font-weight: bold;
   text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .value.big {
@@ -219,13 +367,17 @@ li.other .words {
 }
 
 .swipebutton {
-  display: flex;
+  display: none;
   justify-content: space-around;
   padding: 12px;
   background: var(--bg);
   border-top: 3px solid #000;
   position: sticky;
   bottom: 0;
+}
+
+#swipe-page.active .swipebutton {
+  display: flex;
 }
 
 .date-picker {
@@ -264,4 +416,224 @@ li.other .words {
 .wheel div.selected {
   background: #000;
   color: #bcd3b4;
+}
+
+/* ── 黑绿 LCD 风格覆盖 ── */
+:root {
+  --bg: #0a0a0a;
+  --h-title: #39ff14;
+  --c-bg: #0a0a0a;
+  --c-text: #39ff14;
+  --c-btn-bg: #003300;
+  --c-btn-shadow: #001a00;
+  --c-btn-text: #39ff14;
+  --t-bg: #0d0d0d;
+  --t-text: #39ff14;
+  --t-text-placeholder: rgba(57, 255, 20, 0.4);
+}
+
+body {
+  background: #000;
+  color: #39ff14;
+}
+
+/* 扫描线 */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.04),
+      rgba(0, 255, 0, 0.02),
+      rgba(0, 0, 255, 0.04)
+    );
+  background-size:
+    100% 4px,
+    3px 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* glow 效果 */
+h1,
+h2,
+label,
+.logo {
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+  color: #39ff14;
+}
+
+.card {
+  background: #0d0d0d;
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.8),
+    3px 3px 0 #003300;
+  border: 1px solid #39ff14;
+}
+
+.avatar-box {
+  background: #111;
+}
+
+.section,
+.cell {
+  background: #111;
+  border: 1px solid rgba(57, 255, 20, 0.3);
+}
+
+.label {
+  color: rgba(57, 255, 20, 0.6);
+}
+
+.value {
+  color: #39ff14;
+}
+
+#p5-canvas-container {
+  outline-color: #39ff14;
+  box-shadow:
+    inset 0 0 10px rgba(0, 0, 0, 0.8),
+    2px 2px 0 #003300,
+    0 0 15px rgba(57, 255, 20, 0.2);
+}
+
+.swipebutton {
+  background: #000;
+  border-top-color: #39ff14;
+}
+
+.date-picker {
+  background: #111;
+  border-color: #39ff14;
+}
+
+.wheel {
+  background: #0a0a0a;
+  border-color: #39ff14;
+  color: #39ff14;
+}
+
+.wheel div.selected {
+  background: #39ff14;
+  color: #000;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(57, 255, 20, 0.4);
+}
+
+/* ── 画图区域 黑底绿色像素风 ── */
+#p5-canvas-container {
+  outline: 3px solid #39ff14;
+  box-shadow:
+    inset 0 0 10px rgba(0, 0, 0, 0.8),
+    2px 2px 0 #003300,
+    0 0 20px rgba(57, 255, 20, 0.3);
+  background: #000;
+}
+
+.pixeldraw {
+  background: #050505;
+  border: 2px solid rgba(57, 255, 20, 0.4);
+  padding: 12px;
+  box-shadow: 0 0 25px rgba(57, 255, 20, 0.15);
+}
+
+#tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Interpretation states on value spans */
+@keyframes glitch {
+  0% {
+    transform: translate(0, 0);
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.4);
+  }
+  8% {
+    transform: translate(-1px, 0);
+    text-shadow:
+      1px 0 0 rgba(255, 0, 60, 0.3),
+      -1px 0 0 rgba(0, 255, 180, 0.2);
+  }
+  9% {
+    transform: translate(0, 0);
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.4);
+  }
+  55% {
+    transform: translate(0, 0);
+  }
+  55.5% {
+    transform: translate(1px, 0);
+    text-shadow: -1px 0 0 rgba(255, 0, 60, 0.25);
+  }
+  56% {
+    transform: translate(0, 0);
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.4);
+  }
+  100% {
+    transform: translate(0, 0);
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.4);
+  }
+}
+
+.has-interpretations {
+  cursor: pointer;
+  border-bottom: 1px dotted rgba(57, 255, 20, 0.5);
+  animation: glitch 4s infinite;
+  animation-timing-function: steps(1);
+}
+
+.label-toggled {
+  color: #ff3333 !important;
+  text-shadow: 0 0 8px rgba(255, 50, 50, 0.8) !important;
+  border-bottom-color: rgba(255, 50, 50, 0.5) !important;
+}
+
+/* Interpretation popup overlay */
+#interpret-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#interpret-popup.hidden {
+  display: none;
+}
+
+.interpret-box {
+  background: #0d0d0d;
+  border: 2px solid #39ff14;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 80vw;
+  max-width: 320px;
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+}
+
+.interpret-box p {
+  color: #39ff14;
+  margin: 0;
+  font-size: 12px;
+}
+
+.interpret-btn-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
 }

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COLD INTIMACY | SETUP</title>
+    <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
+    <style>
+        @font-face { font-family: "Zpix"; src: url("https://cdn.jsdelivr.net/gh/owaen/zpix-webfont@latest/dist/zpix.woff2") format("woff2"); }
+        body { background: #9eb19c; font-family: "Zpix", sans-serif; padding: 10px; }
+        .setup-container { max-width: 400px; margin: 0 auto; background: #bcd3b4; border: 4px solid #000; padding: 15px; }
+        .canvas-area { width: 100%; aspect-ratio: 1; border: 2px dashed #000; background: #fff; display: flex; align-items: center; justify-content: center; position: relative; }
+        .canvas-label { position: absolute; top: 0; left: 0; background: #000; color: #fff; font-size: 8px; padding: 2px; }
+        .label-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .nes-checkbox { font-size: 8px; }
+        .grading-box { margin-top: 20px; border: 4px double #ff0055; padding: 10px; color: #ff0055; text-align: center; }
+        .warning { font-size: 10px; color: #d00; margin-top: 10px; animation: flash 0.5s infinite; }
+        @keyframes flash { 50% { opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <h3 style="text-align:center;">商品上架清单</h3>
+        <p style="font-size:10px; opacity:0.7;">系统检测：你的信用等级为[贫民]，请诚实填写缺陷。</p>
+
+        <div class="canvas-area">
+            <span class="canvas-label">8-BIT 灵魂塑形</span>
+            <span style="font-size:80px;">🐱</span>
+            <div style="position:absolute; bottom:10px; width:90%; font-size:8px; text-align:center; background:rgba(0,0,0,0.1);">[手绘像素：检测到审美残缺]</div>
+        </div>
+
+        <div style="margin-top:20px;">
+            <p style="font-size:12px;">选择你的商品属性 (Bad Labels)：</p>
+            <div class="label-grid">
+                <label><input type="checkbox" class="nes-checkbox is-dark" checked /> <span>拼夕夕胃</span></label>
+                <label><input type="checkbox" class="nes-checkbox is-dark" /> <span>窝里横战神</span></label>
+                <label><input type="checkbox" class="nes-checkbox is-dark" /> <span>资产废纸</span></label>
+                <label><input type="checkbox" class="nes-checkbox is-dark" /> <span>洗剪吹难民</span></label>
+            </div>
+        </div>
+
+        <div class="nes-container with-title is-dark" style="margin-top:20px;">
+            <p class="title" style="font-size:10px;">资产证明</p>
+            <div class="nes-field">
+                <label style="font-size:8px;">主人年薪 (单位：冥币/CNY)</label>
+                <input type="text" class="nes-input" placeholder="输入金额..." value="0.00" />
+            </div>
+        </div>
+
+        <div class="grading-box">
+            <div style="font-size:12px;">当前上架估分：34 / 100</div>
+            <div style="font-size:8px;">[结论：极大概率被直接回收]</div>
+        </div>
+
+        <div class="warning">⚠️ 警告：已有 80% 的用户预设了对该标签的 Dislike</div>
+
+        <button type="button" class="nes-btn is-error" style="width:100%; margin-top:20px;">
+            接受处刑并上架
+        </button>
+    </div>
+</body>
+</html>
