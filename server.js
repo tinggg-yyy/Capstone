@@ -20,15 +20,23 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // array for all profiles
 let profiles;
 
-// this tries to load all the messages from the file
-// messages.json - if this fails, we start with an
-// empty array for messages
 try {
   let data = fs.readFileSync("profiles.json");
   profiles = JSON.parse(data);
   console.log("Loaded profiles");
 } catch (e) {
   profiles = [];
+}
+
+// array for all messages
+let messages;
+
+try {
+  let data = fs.readFileSync("messages.json");
+  messages = JSON.parse(data);
+  console.log("Loaded messages");
+} catch (e) {
+  messages = [];
 }
 
 app.get("/profiles", function (req, res) {
@@ -165,6 +173,66 @@ app.post("/interpretation", function (req, res) {
   profile.interpretations[field].push({ text, addedBy });
 
   fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
+  res.json({ success: true });
+});
+
+// POST /messages — 发送消息
+app.post("/messages", function (req, res) {
+  const { from, fromName, to, content } = req.body;
+  if (!from || !to || !content)
+    return res.status(400).json({ error: "Missing fields" });
+
+  const msg = {
+    id: messages.length > 0 ? Math.max(...messages.map((m) => m.id)) + 1 : 1,
+    from,
+    fromName,
+    to,
+    content,
+    date: new Date().toISOString(),
+    read: false,
+  };
+
+  messages.push(msg);
+  fs.writeFileSync("messages.json", JSON.stringify(messages, null, 2));
+  res.json(msg);
+});
+
+// GET /messages/:username — 获取某用户收到的消息
+app.get("/messages/:username", function (req, res) {
+  const username = req.params.username;
+  const userMessages = messages.filter((m) => m.to === username);
+  res.json(userMessages);
+});
+
+// GET /allMessages/:username — 获取某用户所有收发消息
+app.get("/allMessages/:username", function (req, res) {
+  const username = req.params.username;
+  const all = messages.filter(
+    (m) => m.from === username || m.to === username
+  );
+  res.json(all);
+});
+
+// GET /conversation/:user1/:user2 — 获取两人之间的完整对话
+app.get("/conversation/:user1/:user2", function (req, res) {
+  const { user1, user2 } = req.params;
+  const convo = messages
+    .filter(
+      (m) =>
+        (m.from === user1 && m.to === user2) ||
+        (m.from === user2 && m.to === user1)
+    )
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  res.json(convo);
+});
+
+// PUT /messages/:id/read — 标记消息为已读
+app.put("/messages/:id/read", function (req, res) {
+  const id = parseInt(req.params.id);
+  const msg = messages.find((m) => m.id === id);
+  if (!msg) return res.status(404).json({ error: "Not found" });
+  msg.read = true;
+  fs.writeFileSync("messages.json", JSON.stringify(messages, null, 2));
   res.json({ success: true });
 });
 

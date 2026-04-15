@@ -247,9 +247,15 @@ li.other .words {
 
 #swipe-page.active #swipe-topbar {
   display: flex;
-  justify-content: flex-end;
-  padding: 8px 0;
-  flex-shrink: 0;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 12px;
+  z-index: 1000;
+  background: var(--bg);
 }
 
 #swipe-page .phone {
@@ -636,4 +642,398 @@ textarea::placeholder {
   display: flex;
   gap: 8px;
   justify-content: center;
+}
+
+/* ── Swipe topbar ── */
+#swipe-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+
+/* 给 swipe 页的滚动区域留出 topbar 的高度 */
+#swipe-page.active .scroll {
+  padding-top: 52px;
+}
+
+/* ── Notification badge ── */
+.notif-badge {
+  display: inline-block;
+  background: #ff3333;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  padding: 0 3px;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+
+.notif-badge.hidden {
+  display: none;
+}
+
+/* ── Messages panel overlay ── */
+#messages-panel {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#messages-panel.hidden {
+  display: none;
+}
+
+.messages-overlay-inner {
+  background: #0d0d0d;
+  border: 2px solid #39ff14;
+  padding: 16px;
+  padding-top: 40px;
+  width: 88vw;
+  max-width: 340px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+  position: relative;
+}
+
+.panel-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #39ff14;
+  font-size: 16px;
+  font-family: inherit;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+}
+
+.panel-close-btn:active {
+  opacity: 0.6;
+}
+
+.messages-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.messages-header h2 {
+  color: #39ff14;
+  margin: 0;
+  font-size: 14px;
+}
+
+.messages-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 45vh;
+}
+
+.messages-list.hidden {
+  display: none;
+}
+
+.messages-header.hidden {
+  display: none;
+}
+
+.msg-item {
+  border: 1px solid #39ff14;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.msg-item:active {
+  background: rgba(57, 255, 20, 0.1);
+}
+
+.msg-unread {
+  border-color: #ff3333;
+  box-shadow: 0 0 6px rgba(255, 51, 51, 0.4);
+}
+
+.msg-from {
+  color: #39ff14;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.msg-unread .msg-from::before {
+  content: "● ";
+  color: #ff3333;
+}
+
+.msg-content {
+  color: #bbcdb2;
+  font-size: 12px;
+  margin: 4px 0;
+  word-break: break-word;
+}
+
+.msg-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.msg-time {
+  color: #3d4a3a;
+  font-size: 10px;
+}
+
+.convo-unread-badge {
+  display: inline-block;
+  background: #ff3333;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  padding: 0 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.msg-reply-btn {
+  background: none;
+  border: 1px solid #39ff14;
+  color: #39ff14;
+  font-size: 10px;
+  font-family: inherit;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.msg-reply-btn:active {
+  background: rgba(57, 255, 20, 0.15);
+}
+
+/* ── Send message form ── */
+.send-msg-form {
+  border-top: 1px solid #39ff14;
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.send-msg-form p {
+  color: #39ff14;
+  margin: 0;
+  font-size: 12px;
+}
+
+/* ── Toast notification ── */
+#toast-notif {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #0d0d0d;
+  border: 1px solid #39ff14;
+  color: #39ff14;
+  padding: 10px 18px;
+  font-size: 12px;
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+#toast-notif.toast-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Conversation thread view ── */
+#convo-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+
+#convo-view.hidden {
+  display: none;
+}
+
+.convo-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #39ff14;
+  padding-bottom: 8px;
+  color: #39ff14;
+  font-size: 12px;
+}
+
+.convo-bubbles {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 38vh;
+  padding: 4px 0;
+}
+
+.convo-empty {
+  text-align: center;
+  opacity: 0.5;
+  font-size: 12px;
+  color: #bbcdb2;
+}
+
+.bubble-row {
+  display: flex;
+}
+
+.bubble-mine {
+  justify-content: flex-end;
+}
+
+.bubble-theirs {
+  justify-content: flex-start;
+}
+
+.bubble {
+  max-width: 72%;
+  padding: 7px 10px;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.bubble-mine .bubble {
+  background: rgba(57, 255, 20, 0.15);
+  border: 1px solid #39ff14;
+  border-radius: 8px 2px 8px 8px;
+}
+
+.bubble-theirs .bubble {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid #3d4a3a;
+  border-radius: 2px 8px 8px 8px;
+}
+
+.bubble-text {
+  color: #bbcdb2;
+}
+
+.bubble-mine .bubble-text {
+  color: #d4ffd4;
+}
+
+.bubble-time {
+  font-size: 9px;
+  color: #3d4a3a;
+  margin-top: 3px;
+  text-align: right;
+}
+
+.convo-input-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  border-top: 1px solid #39ff14;
+  padding-top: 8px;
+}
+
+.convo-input-row .nes-input {
+  flex: 1;
+  font-size: 12px;
+}
+
+/* ── Incoming message popup ── */
+#msg-popup {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  z-index: 99999;
+  width: 84vw;
+  max-width: 320px;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+
+#msg-popup.hidden {
+  display: none;
+}
+
+#msg-popup.popup-slide-in {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.msg-popup-box {
+  background: #0d0d0d;
+  border: 2px solid #39ff14;
+  box-shadow: 0 0 24px rgba(57, 255, 20, 0.5);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msg-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.msg-popup-header span {
+  color: #39ff14;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.msg-popup-close {
+  background: none;
+  border: none;
+  color: #39ff14;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+  font-family: inherit;
+}
+
+.msg-popup-content {
+  color: #bbcdb2;
+  font-size: 13px;
+  word-break: break-word;
+  border-left: 2px solid #39ff14;
+  padding-left: 8px;
+}
+
+.msg-popup-open-btn {
+  font-size: 11px !important;
+  width: 100%;
 }

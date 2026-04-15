@@ -19,6 +19,7 @@ function handleLogin() {
         currentUser = existing;
         // 老用户 → 直接进入 swipe
         checkNotifications();
+        startMessagePolling();
         createSwipeCard();
       } else {
         const userExists = data.find((p) => p.username === username);
@@ -34,7 +35,6 @@ function handleLogin() {
 }
 
 // Page Navigation Function
-
 function goTo(id) {
   document.querySelectorAll(".page").forEach((p) => {
     p.classList.remove("active");
@@ -95,7 +95,6 @@ function confirmDate() {
 }
 
 //Age Calculation
-
 function getPetAge() {
   const value = document.getElementById("birthDisplay").value;
   if (!value) return "未知";
@@ -252,6 +251,7 @@ function createCard() {
     .then((data) => {
       currentUser = data;
       console.log("Saved profile:", data);
+      startMessagePolling();
     });
 
   // create the card content
@@ -595,7 +595,7 @@ function like() {
   showProfile();
 }
 
-// CheckNotifications
+// CheckNotifications (likes)
 function checkNotifications() {
   if (!currentUser) return;
 
@@ -603,11 +603,353 @@ function checkNotifications() {
     .then((res) => res.json())
     .then((data) => {
       if (data.likesCount > 0) {
-        alert(
-          `💗 你有 ${data.likesCount} 个兽人喜欢你！\n来自: ${data.likedBy.join(", ")}`,
-        );
+        showToast(`💗 ${data.likesCount} 个兽人喜欢你！`);
       }
     });
+}
+
+// ── Message System ──────────────────────────────────────────
+
+let msgPollingInterval = null;
+let seenMessageIds = new Set(); // 已经弹过窗的消息 id
+
+function startMessagePolling() {
+  // 第一次先静默加载已有消息 id（不弹窗），之后轮询才弹新消息
+  if (!currentUser) return;
+  fetch(`/messages/${currentUser.username}`)
+    .then((res) => res.json())
+    .then((msgs) => {
+      msgs.forEach((m) => seenMessageIds.add(m.id));
+      updateBadge(msgs);
+    });
+
+  if (msgPollingInterval) clearInterval(msgPollingInterval);
+  msgPollingInterval = setInterval(fetchAndNotify, 15000);
+}
+
+function stopMessagePolling() {
+  if (msgPollingInterval) clearInterval(msgPollingInterval);
+  msgPollingInterval = null;
+}
+
+function fetchAndNotify() {
+  if (!currentUser) return;
+  fetch(`/messages/${currentUser.username}`)
+    .then((res) => res.json())
+    .then((msgs) => {
+      updateBadge(msgs);
+
+      // 找出还没弹过窗的未读新消息
+      const newMsgs = msgs.filter((m) => !m.read && !seenMessageIds.has(m.id));
+      newMsgs.forEach((m) => {
+        seenMessageIds.add(m.id);
+        showMessagePopup(m);
+      });
+    });
+}
+
+function fetchUnreadCount() {
+  if (!currentUser) return;
+  fetch(`/messages/${currentUser.username}`)
+    .then((res) => res.json())
+    .then((msgs) => updateBadge(msgs));
+}
+
+function updateBadge(msgs) {
+  const unread = msgs.filter((m) => !m.read).length;
+  const badge = document.getElementById("msg-notif-count");
+  if (!badge) return;
+  if (unread > 0) {
+    badge.textContent = unread;
+    badge.classList.remove("hidden");
+  } else {
+    badge.textContent = "";
+    badge.classList.add("hidden");
+  }
+}
+
+// ── 弹窗逻辑 ────────────────────────────────────────────────
+
+let popupQueue = [];
+let popupShowing = false;
+
+function showMessagePopup(msg) {
+  popupQueue.push(msg);
+  if (!popupShowing) showNextPopup();
+}
+
+function showNextPopup() {
+  if (popupQueue.length === 0) {
+    popupShowing = false;
+    return;
+  }
+  popupShowing = true;
+  const msg = popupQueue.shift();
+
+  document.getElementById("msg-popup-from").textContent =
+    `✉️ 来自 ${msg.fromName || msg.from}`;
+  document.getElementById("msg-popup-content").textContent = msg.content;
+
+  const popup = document.getElementById("msg-popup");
+  popup.classList.remove("hidden");
+  popup.classList.add("popup-slide-in");
+}
+
+function closeMessagePopup() {
+  const popup = document.getElementById("msg-popup");
+  popup.classList.add("hidden");
+  popup.classList.remove("popup-slide-in");
+  // 如果队列里还有消息，500ms 后显示下一条
+  setTimeout(showNextPopup, 500);
+}
+
+function openMessages() {
+  if (!currentUser) return;
+  // 每次打开都重置到收件箱视图
+  document.getElementById("convo-view").classList.add("hidden");
+  document.getElementById("messages-header").classList.remove("hidden");
+  document.getElementById("messages-list").classList.remove("hidden");
+  convoTarget = null;
+
+  document.getElementById("messages-panel").classList.remove("hidden");
+  loadMessages();
+}
+
+function closeMessages() {
+  document.getElementById("messages-panel").classList.add("hidden");
+  document.getElementById("convo-view").classList.add("hidden");
+  document.getElementById("messages-list").classList.remove("hidden");
+  convoTarget = null;
+  // 等标记已读完成后刷新角标（退出面板回到 swipe 页时角标正确）
+  const p = pendingReadPromise || Promise.resolve();
+  pendingReadPromise = null;
+  p.then(() => fetchUnreadCount());
+}
+
+function loadMessages() {
+  if (!currentUser) return;
+
+  // 同时取收到的（用于角标）和所有收发（用于预览）
+  Promise.all([
+    fetch(`/messages/${currentUser.username}`).then((r) => r.json()),
+    fetch(`/allMessages/${currentUser.username}`).then((r) => r.json()),
+  ]).then(([received, all]) => {
+    // 角标只计收到的未读
+    updateBadge(received);
+
+    const list = document.getElementById("messages-list");
+    if (all.length === 0) {
+      list.innerHTML =
+        '<p style="text-align:center; opacity:0.6;">暂无消息 / No messages yet</p>';
+      return;
+    }
+
+    // 按"对方"分组，最新一条无论谁发都算
+    const grouped = {};
+    all.forEach((m) => {
+      const otherUser = m.from === currentUser.username ? m.to : m.from;
+      const otherName = m.from === currentUser.username
+        ? (m.toName || m.to)
+        : (m.fromName || m.from);
+
+      if (!grouped[otherUser]) {
+        grouped[otherUser] = { username: otherUser, name: otherName, latest: m, unread: 0 };
+      } else if (new Date(m.date) > new Date(grouped[otherUser].latest.date)) {
+        grouped[otherUser].latest = m;
+      }
+    });
+
+    // 未读数单独从 received 统计
+    received.forEach((m) => {
+      if (!m.read && grouped[m.from]) grouped[m.from].unread++;
+    });
+
+    const conversations = Object.values(grouped).sort(
+      (a, b) => new Date(b.latest.date) - new Date(a.latest.date)
+    );
+
+    list.innerHTML = conversations
+      .map((c) => {
+        const time = new Date(c.latest.date).toLocaleString("zh-CN", {
+          month: "numeric",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const nameSafe = escapeHtml(c.name);
+        const userSafe = escapeHtml(c.username);
+        const preview = escapeHtml(c.latest.content);
+        const unreadBadge = c.unread > 0
+          ? `<span class="convo-unread-badge">${c.unread}</span>`
+          : "";
+        return `
+        <div class="msg-item ${c.unread > 0 ? "msg-unread" : "msg-read"}"
+             onclick="openConvoView('${userSafe}', '${nameSafe}')">
+          <div class="msg-from">${nameSafe}${unreadBadge}</div>
+          <div class="msg-content">${preview}</div>
+          <div class="msg-time">${time}</div>
+        </div>`;
+      })
+      .join("");
+  });
+}
+
+function markRead(id, el) {
+  fetch(`/messages/${id}/read`, { method: "PUT" })
+    .then((res) => res.json())
+    .then(() => {
+      el.classList.remove("msg-unread");
+      el.classList.add("msg-read");
+      fetchUnreadCount();
+    });
+}
+
+function openSendMessage() {
+  if (currentIndex >= profiles.length) return;
+  const target = profiles[currentIndex];
+  openMessages();
+  openConvoView(target.username, target.name);
+}
+
+function replyTo(username, name) {
+  openConvoView(username, name);
+}
+
+// ── Conversation thread view ─────────────────────────────────
+
+let convoTarget = null;
+let pendingReadPromise = null; // 追踪标记已读的 PUT 请求
+
+function openConvoView(username, name) {
+  convoTarget = { username, name };
+  document.getElementById("convo-with-name").textContent = name;
+  document.getElementById("messages-header").classList.add("hidden");
+  document.getElementById("messages-list").classList.add("hidden");
+  document.getElementById("convo-view").classList.remove("hidden");
+  loadConvo();
+}
+
+function closeConvoView() {
+  document.getElementById("convo-view").classList.add("hidden");
+  document.getElementById("messages-header").classList.remove("hidden");
+  document.getElementById("messages-list").classList.remove("hidden");
+  convoTarget = null;
+
+  // 等 PUT 请求全部完成后再刷新收件箱和角标
+  const p = pendingReadPromise || Promise.resolve();
+  pendingReadPromise = null;
+  p.then(() => loadMessages());
+}
+
+function loadConvo() {
+  if (!currentUser || !convoTarget) return;
+  fetch(`/conversation/${currentUser.username}/${convoTarget.username}`)
+    .then((res) => res.json())
+    .then((msgs) => {
+      const bubbles = document.getElementById("convo-bubbles");
+
+      // 标记已读，存储 Promise 供 close 时等待
+      const unread = msgs.filter((m) => m.to === currentUser.username && !m.read);
+      pendingReadPromise = Promise.all(
+        unread.map((m) => fetch(`/messages/${m.id}/read`, { method: "PUT" }))
+      );
+
+      if (msgs.length === 0) {
+        bubbles.innerHTML =
+          '<p class="convo-empty">暂无消息 / No messages yet</p>';
+        return;
+      }
+
+      bubbles.innerHTML = msgs
+        .map((m) => {
+          const isMine = m.from === currentUser.username;
+          const time = new Date(m.date).toLocaleString("zh-CN", {
+            month: "numeric",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          return `
+            <div class="bubble-row ${isMine ? "bubble-mine" : "bubble-theirs"}">
+              <div class="bubble">
+                <div class="bubble-text">${escapeHtml(m.content)}</div>
+                <div class="bubble-time">${time}</div>
+              </div>
+            </div>`;
+        })
+        .join("");
+
+      // 滚到底部
+      bubbles.scrollTop = bubbles.scrollHeight;
+      fetchUnreadCount();
+    });
+}
+
+function sendConvoMessage() {
+  if (!convoTarget || !currentUser) return;
+  const input = document.getElementById("convo-input");
+  const content = input.value.trim();
+  if (!content) return;
+
+  // 立即追加气泡，不等服务器
+  input.value = "";
+  appendBubble(content, true);
+
+  fetch("/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: currentUser.username,
+      fromName: currentUser.name,
+      to: convoTarget.username,
+      content,
+    }),
+  });
+}
+
+function appendBubble(content, isMine) {
+  const bubbles = document.getElementById("convo-bubbles");
+
+  // 清除「暂无消息」占位
+  const empty = bubbles.querySelector(".convo-empty");
+  if (empty) empty.remove();
+
+  const now = new Date().toLocaleString("zh-CN", {
+    month: "numeric", day: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+  const row = document.createElement("div");
+  row.className = `bubble-row ${isMine ? "bubble-mine" : "bubble-theirs"}`;
+  row.innerHTML = `
+    <div class="bubble">
+      <div class="bubble-text">${escapeHtml(content)}</div>
+      <div class="bubble-time">${now}</div>
+    </div>`;
+  bubbles.appendChild(row);
+  bubbles.scrollTop = bubbles.scrollHeight;
+}
+
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// ── Toast 通知 ───────────────────────────────────────────────
+
+function showToast(text) {
+  let toast = document.getElementById("toast-notif");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "toast-notif";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = text;
+  toast.classList.add("toast-show");
+  setTimeout(() => toast.classList.remove("toast-show"), 3500);
 }
 
 function skip() {
@@ -760,6 +1102,7 @@ function impression() {
     });
 }
 
+// Avatar Rendering Function
 function renderGridAsAvatar(grid, gridText) {
   const canvas = document.createElement("canvas");
   const size = 300;

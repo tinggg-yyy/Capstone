@@ -389,6 +389,9 @@
       <div class="phone">
         <div id="swipe-topbar">
           <button class="nes-btn" onclick="goToMyProfile()">我的档案 / Me</button>
+          <button class="nes-btn" id="msg-notif-btn" onclick="openMessages()">
+            💬 <span id="msg-notif-count" class="notif-badge hidden">0</span>
+          </button>
         </div>
         <div class="scroll">
           <div id="swipe-container"></div>
@@ -407,6 +410,7 @@
           <button class="nes-btn" id="impression-btn" onclick="impression()">
             评论 / Comment
           </button>
+          <button class="nes-btn is-primary" onclick="openSendMessage()">✉️ 发消息</button>
         </div>
         <button class="nes-btn" onclick="skip()">❌</button>
       </div>
@@ -526,6 +530,46 @@
 
         <button class="nes-btn is-success" onclick="saveMyProfile()">保存 / Save</button>
         <button class="nes-btn" onclick="closeMyProfile()">返回 / Back</button>
+      </div>
+    </div>
+
+    <!-- Incoming Message Popup -->
+    <div id="msg-popup" class="hidden">
+      <div class="msg-popup-box">
+        <div class="msg-popup-header">
+          <span id="msg-popup-from"></span>
+          <button class="msg-popup-close" onclick="closeMessagePopup()">✕</button>
+        </div>
+        <div id="msg-popup-content" class="msg-popup-content"></div>
+        <button class="nes-btn is-primary msg-popup-open-btn" onclick="closeMessagePopup(); openMessages();">
+          查看消息 / Open Inbox
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages Panel -->
+    <div id="messages-panel" class="hidden">
+      <div class="messages-overlay-inner">
+        <button class="panel-close-btn" onclick="closeMessages()">✕</button>
+
+        <div id="messages-header" class="messages-header">
+          <h2>消息 / Messages</h2>
+        </div>
+        <div id="messages-list" class="messages-list scroll"></div>
+
+        <!-- Conversation thread view -->
+        <div id="convo-view" class="hidden">
+          <div class="convo-header">
+            <button class="msg-reply-btn" onclick="closeConvoView()">← 返回</button>
+            <span id="convo-with-name"></span>
+          </div>
+          <div id="convo-bubbles" class="convo-bubbles scroll"></div>
+          <div class="convo-input-row">
+            <input id="convo-input" class="nes-input" type="text" placeholder="回复... / Reply..." />
+            <button class="nes-btn is-primary" onclick="sendConvoMessage()">发送</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
