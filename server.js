@@ -320,9 +320,10 @@ app.put("/messages/:id/read", function (req, res) {
 
 // Creating object of key and certificate
 // for SSL
+const isProd = fs.existsSync("/etc/letsencrypt/live/tinggg.live/privkey.pem");
 const options = {
-  key: fs.readFileSync("localhost-key.pem"),
-  cert: fs.readFileSync("localhost.pem"),
+  key: fs.readFileSync(isProd ? "/etc/letsencrypt/live/tinggg.live/privkey.pem" : "localhost-key.pem"),
+  cert: fs.readFileSync(isProd ? "/etc/letsencrypt/live/tinggg.live/fullchain.pem" : "localhost.pem"),
 };
 
 const HTTPSserver = https.createServer(options, app);
