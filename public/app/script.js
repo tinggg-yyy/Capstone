@@ -1164,6 +1164,16 @@ function onMixedBreedChange() {
   }
 }
 
+function _breed2AddOptions(select, list) {
+  const exclude = document.getElementById("petBreed")?.value || "";
+  list.forEach((b) => {
+    if (b === exclude) return;
+    const opt = document.createElement("option");
+    opt.value = b; opt.textContent = b;
+    select.appendChild(opt);
+  });
+}
+
 function onBreedClass2Change() {
   const cls = document.getElementById("petBreedClass2").value;
   document.getElementById("petBreedSubgroup2").innerHTML =
@@ -1184,12 +1194,7 @@ function onBreedClass2Change() {
     document.getElementById("breedSpecificWrapper2").classList.add("hidden");
   } else {
     document.getElementById("breedSubgroupWrapper2").classList.add("hidden");
-    const select = document.getElementById("petBreed2");
-    (breedData[cls] || []).forEach((b) => {
-      const opt = document.createElement("option");
-      opt.value = b; opt.textContent = b;
-      select.appendChild(opt);
-    });
+    _breed2AddOptions(document.getElementById("petBreed2"), breedData[cls] || []);
     document.getElementById("breedSpecificWrapper2").classList.remove("hidden");
   }
 }
@@ -1216,12 +1221,7 @@ function onBreedSubgroup2Change() {
     document.getElementById("breedSpecificWrapper2").classList.add("hidden");
   } else {
     document.getElementById("breedSubSubgroupWrapper2").classList.add("hidden");
-    const select = document.getElementById("petBreed2");
-    (val || []).forEach((b) => {
-      const opt = document.createElement("option");
-      opt.value = b; opt.textContent = b;
-      select.appendChild(opt);
-    });
+    _breed2AddOptions(document.getElementById("petBreed2"), val || []);
     document.getElementById("breedSpecificWrapper2").classList.remove("hidden");
   }
 }
@@ -1233,11 +1233,7 @@ function onBreedSubSubgroup2Change() {
   const select = document.getElementById("petBreed2");
   select.innerHTML =
     '<option value="" disabled selected hidden>选择物种 / Select species...</option>';
-  (((breedSubgroups[cls] || {})[sg] || {})[ssg] || []).forEach((b) => {
-    const opt = document.createElement("option");
-    opt.value = b; opt.textContent = b;
-    select.appendChild(opt);
-  });
+  _breed2AddOptions(select, ((breedSubgroups[cls] || {})[sg] || {})[ssg] || []);
   document.getElementById("breedSpecificWrapper2").classList.remove("hidden");
   document.getElementById("heightWrapper").classList.add("hidden");
 }
