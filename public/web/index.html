@@ -2,47 +2,31 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover"
-    />
-    <link rel="manifest" href="../manifest.json" />
-    <title>PET · Social App</title>
-
-    <!-- NES -->
-    <!-- <link rel="stylesheet" href="../node_modules/nes.css/css/nes.css" /> -->
-    <!-- minify -->
-    <link
-      href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css"
-      rel="stylesheet"
-    />
-    <!-- latest -->
-    <!-- <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet" /> -->
-    <!-- core style only -->
-    <!-- <link href="https://unpkg.com/nes.css/css/nes-core.min.css" rel="stylesheet" /> -->
-
+    <meta name="viewport" content="width=2160, initial-scale=1.0" />
+    <title>PET · RANKING</title>
+    <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
-
-    <script src="../lib/p5.js"></script>
-    <script src="../lib/p5.sound.js"></script>
   </head>
   <body>
     <div class="board">
-      <!-- HEADER -->
       <div class="board-header">
         <div class="title-left">PET<br />SOCIAL</div>
-        <div class="title-main">💗 人气排行榜<br />RANKING</div>
+        <div class="title-main">💗 人气排行榜 / RANKING</div>
         <div class="title-right">2026<br />LIVE</div>
       </div>
 
-<div class="rank-1-card"></div>
-<div class="rank-grid"></div>
-<div class="rank-list"></div>
+      <div class="spotlight" id="spotlight"></div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
 
       <div class="board-footer">数据实时更新 / LIVE DATA</div>
     </div>
 
-    <script src="sketch.js"></script>
+    <div id="danmaku-layer"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

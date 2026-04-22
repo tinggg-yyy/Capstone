@@ -17,6 +17,17 @@ app.use(express.static("public"));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+// Serialize profiles with grid rows compacted to one line each (32 cells per row)
+function stringifyProfiles(profiles) {
+  let json = JSON.stringify(profiles, null, 2);
+  // Collapse inner grid row arrays to one line (matches any string cell or null)
+  json = json.replace(/\[\n(\s+"[^"]*",?\n)+\s+\]/g, (match) => {
+    const items = match.match(/"[^"]*"/g);
+    return '[' + items.join(',') + ']';
+  });
+  return json;
+}
+
 // array for all profiles
 let profiles;
 
@@ -27,6 +38,29 @@ try {
 } catch (e) {
   profiles = [];
 }
+
+// array for custom hobby tags
+let customHobbies;
+try {
+  customHobbies = JSON.parse(fs.readFileSync("custom-hobbies.json"));
+} catch (e) {
+  customHobbies = [];
+}
+
+app.get("/custom-hobbies", (req, res) => res.json(customHobbies));
+
+app.post("/custom-hobbies", (req, res) => {
+  const { tag, categoryZh, tier } = req.body;
+  if (!tag || typeof tag !== "string") return res.status(400).json({ error: "Missing tag" });
+  const clean = tag.trim().slice(0, 20);
+  if (!clean) return res.json({ success: true, hobbies: customHobbies });
+  const exists = customHobbies.find((t) => (typeof t === "string" ? t : t.tag) === clean);
+  if (exists) return res.json({ success: true, hobbies: customHobbies });
+  const entry = categoryZh ? { tag: clean, categoryZh, tier: tier !== undefined ? tier : 1 } : clean;
+  customHobbies.push(entry);
+  fs.writeFileSync("custom-hobbies.json", JSON.stringify(customHobbies, null, 2));
+  res.json({ success: true, hobbies: customHobbies });
+});
 
 // array for all messages
 let messages;
@@ -60,7 +94,7 @@ app.post("/profiles", function (req, res) {
   // add it the messages array
   profiles.push(profile);
   // and save all current messages to a file (for permanence)
-  fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
+  fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
   // its a good practice return the final message to the client
   res.json(profile);
 });
@@ -83,8 +117,38 @@ app.post("/like", function (req, res) {
   }
 
   // 保存到文件
-  fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
+  fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
+
+  // 实时广播 like 事件
+  io.emit("like-event", {
+    name: likedProfile.name,
+    by: likerPetName,
+    likesCount: likedProfile.likes.length,
+    label: req.body.label || "",
+    reason: req.body.reason || "",
+  });
+
   res.json({ success: true, likesCount: likedProfile.likes.length });
+});
+
+// POST /skip — 记录 skip，广播弹幕
+app.post("/skip", function (req, res) {
+  const { skipperPetName, skippedUsername } = req.body;
+  const skippedProfile = profiles.find((p) => p.username === skippedUsername);
+  if (skippedProfile) {
+    if (!skippedProfile.skips) skippedProfile.skips = [];
+    if (!skippedProfile.skips.includes(skipperPetName)) {
+      skippedProfile.skips.push(skipperPetName);
+    }
+    fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
+    io.emit("skip-event", {
+      name: skippedProfile.name,
+      by: skipperPetName,
+      label: req.body.label || "",
+      reason: req.body.reason || "",
+    });
+  }
+  res.json({ success: true });
 });
 
 // GET /notifications/:username — 获取被 like 的通知
@@ -136,7 +200,7 @@ app.post("/impression", function (req, res) {
     console.log("filled cells:", filledCells.length);
   }
 
-  fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
+  fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
   res.json({ success: true });
 });
 
@@ -152,7 +216,7 @@ app.put("/profiles/:username", function (req, res) {
     if (!locked.includes(key)) profile[key] = updates[key];
   });
 
-  fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
+  fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
   res.json(profile);
 });
 
@@ -172,8 +236,28 @@ app.post("/interpretation", function (req, res) {
   }
   profile.interpretations[field].push({ text, addedBy });
 
-  fs.writeFileSync("profiles.json", JSON.stringify(profiles, null, 2));
+  fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
   res.json({ success: true });
+});
+
+// POST /interpretation/agree — 给某个解读点赞（每人最多2次）
+app.post("/interpretation/agree", function (req, res) {
+  const { profileUsername, field, interpIndex, agreeingUser } = req.body;
+  const profile = profiles.find((p) => p.username === profileUsername);
+  if (!profile) return res.status(404).json({ error: "Not found" });
+  const arr = profile.interpretations?.[field];
+  if (!Array.isArray(arr) || !arr[interpIndex]) return res.status(404).json({ error: "Not found" });
+
+  const interp = arr[interpIndex];
+  if (!interp.agreedBy) interp.agreedBy = {};
+  const myCount = interp.agreedBy[agreeingUser] || 0;
+  if (myCount >= 2) return res.json({ limited: true, agrees: interp.agrees || 0 });
+
+  interp.agreedBy[agreeingUser] = myCount + 1;
+  interp.agrees = (interp.agrees || 0) + 1;
+
+  fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
+  res.json({ success: true, agrees: interp.agrees });
 });
 
 // POST /messages — 发送消息
@@ -207,9 +291,7 @@ app.get("/messages/:username", function (req, res) {
 // GET /allMessages/:username — 获取某用户所有收发消息
 app.get("/allMessages/:username", function (req, res) {
   const username = req.params.username;
-  const all = messages.filter(
-    (m) => m.from === username || m.to === username
-  );
+  const all = messages.filter((m) => m.from === username || m.to === username);
   res.json(all);
 });
 
@@ -220,7 +302,7 @@ app.get("/conversation/:user1/:user2", function (req, res) {
     .filter(
       (m) =>
         (m.from === user1 && m.to === user2) ||
-        (m.from === user2 && m.to === user1)
+        (m.from === user2 && m.to === user1),
     )
     .sort((a, b) => new Date(a.date) - new Date(b.date));
   res.json(convo);

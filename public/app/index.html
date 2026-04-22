@@ -20,14 +20,15 @@
     <script src="../lib/p5.js"></script>
     <script src="../lib/p5.sound.js"></script>
     <script src="socket.io/socket.io.js"></script>
-    
   </head>
   <body>
     <!-- Launch Page -->
     <section id="launch" class="page active">
       <div class="phone">
         <h1 class="logo">PREDATE</h1>
-        <p class="subtitle">兽人世界的交友平台 / Furry dating in the anthro world</p>
+        <p class="subtitle">
+          兽人世界的交友平台 / Furry dating in the anthro world
+        </p>
         <button class="nes-btn" onclick="goTo('login')">开始 / START</button>
       </div>
     </section>
@@ -57,8 +58,9 @@
     </section>
 
     <!-- Profile - Name -->
-    <section id="profile-name" class="page">
-      <div class="phone">
+    <section id="profile-name" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('login')">◀</button>
+      <div class="phone setup-content">
         <div class="nes-field">
           <label for="name_field">你的名字 / Your Name</label>
           <input
@@ -68,50 +70,84 @@
             placeholder="你在兽人世界里叫什么？ / What's your anthro name?"
           />
         </div>
-
-        <button class="nes-btn" onclick="goTo('profile-breed')">
-          下一步 / Next
-        </button>
-        <button class="nes-btn" onclick="goTo('login')">
-          上一步 / Previous
-        </button>
       </div>
+      <button class="nes-btn setup-next-btn" onclick="goTo('profile-breed')">
+        ▶
+      </button>
     </section>
 
     <!-- Profile - Species -->
-    <section id="profile-breed" class="page">
-      <div class="phone">
+    <section id="profile-breed" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-name')">
+        ◀
+      </button>
+      <div class="phone setup-content">
         <label>种族大类 / Species Class</label>
         <div class="nes-select">
           <select id="petBreedClass" onchange="onBreedClassChange()">
-            <option value="" disabled selected hidden>选择大类 / Select class...</option>
+            <option value="" disabled selected hidden>
+              选择大类 / Select class...
+            </option>
             <option value="哺乳类 / Mammals">哺乳类 / Mammals</option>
             <option value="鸟类 / Birds">鸟类 / Birds</option>
             <option value="爬行类 / Reptiles">爬行类 / Reptiles</option>
             <option value="两栖类 / Amphibians">两栖类 / Amphibians</option>
             <option value="节肢动物 / Arthropods">节肢动物 / Arthropods</option>
+            <option value="鱼类 / Fish">鱼类 / Fish</option>
           </select>
+        </div>
+        <div id="breedSubgroupWrapper" class="hidden">
+          <label>细类 / Subgroup</label>
+          <div class="nes-select">
+            <select id="petBreedSubgroup" onchange="onBreedSubgroupChange()">
+              <option value="" disabled selected hidden>
+                选择细类 / Select subgroup...
+              </option>
+            </select>
+          </div>
+        </div>
+        <div id="breedSubSubgroupWrapper" class="hidden">
+          <label>子类 / Sub-group</label>
+          <div class="nes-select">
+            <select id="petBreedSubSubgroup" onchange="onBreedSubSubgroupChange()">
+              <option value="" disabled selected hidden>
+                选择子类 / Select sub-group...
+              </option>
+            </select>
+          </div>
         </div>
         <div id="breedSpecificWrapper" class="hidden">
           <label>物种 / Species</label>
           <div class="nes-select">
-            <select id="petBreed">
-              <option value="" disabled selected hidden>选择物种 / Select species...</option>
+            <select id="petBreed" onchange="updateHeightOptions()">
+              <option value="" disabled selected hidden>
+                选择物种 / Select species...
+              </option>
             </select>
           </div>
         </div>
-        <button class="nes-btn" onclick="goTo('profile-gender')">
-          下一步 / Next
-        </button>
-        <button class="nes-btn" onclick="goTo('profile-name')">
-          上一步 / Previous
-        </button>
+        <div id="heightWrapper" class="hidden">
+          <label>身高 / Height</label>
+          <div class="nes-select">
+            <select id="petHeight">
+              <option value="" disabled selected hidden>
+                选择身高 / Select height...
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
+      <button class="nes-btn setup-next-btn" onclick="goTo('profile-gender')">
+        ▶
+      </button>
     </section>
 
     <!-- Profile - Gender -->
-    <section id="profile-gender" class="page">
-      <div class="phone">
+    <section id="profile-gender" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-breed')">
+        ◀
+      </button>
+      <div class="phone setup-content">
         <label>性别 / GENDER</label>
         <div class="nes-select">
           <select id="petGender">
@@ -123,17 +159,18 @@
 
         <label>性取向 / Sexual Orientation</label>
         <div class="nes-select">
-          <select id="petOrientation">
+          <select id="petOrientation" onchange="onOrientationChange('petOrientation','orientation-custom')">
             <option value="" disabled selected hidden>选择 / Select...</option>
             <option value="异性恋/Straight">异性恋 / Straight</option>
             <option value="同性恋/Gay·Lesbian">同性恋 / Gay · Lesbian</option>
             <option value="双性恋/Bisexual">双性恋 / Bisexual</option>
             <option value="泛性恋/Pansexual">泛性恋 / Pansexual</option>
             <option value="无性恋/Asexual">无性恋 / Asexual</option>
-            <option value="其他/Other">其他 / Other</option>
             <option value="不透露/Prefer not to say">不透露 / Prefer not to say</option>
+            <option value="自定义/Custom">✏️ 自定义 / Custom</option>
           </select>
         </div>
+        <input id="orientation-custom" class="nes-input hidden" type="text" placeholder="自定义性取向... / Custom orientation..." />
 
         <div class="nes-field">
           <label>出生日期 / BIRTH DATE</label>
@@ -151,188 +188,364 @@
             <div class="wheel" id="monthWheel"></div>
             <div class="wheel" id="dayWheel"></div>
             <button class="nes-btn is-primary" onclick="confirmDate()">
-              确定
+              确定 / OK
             </button>
           </div>
 
-          <div class="nes-field">
-            <label for="name_field">领地 / Territory</label>
-            <input
-              id="petHukou"
-              class="nes-input"
-              type="text"
-              placeholder="你来自哪片领地？ / Which territory are you from?"
-            />
+        </div>
+      </div>
+      <button class="nes-btn setup-next-btn" onclick="goTo('profile-housing')">▶</button>
+    </section>
+
+    <!-- Profile - Housing -->
+    <section id="profile-housing" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-gender')">◀</button>
+      <div class="phone setup-content">
+        <label>城市 / City</label>
+        <div class="nes-select">
+          <select id="house-city-select" onchange="onCitySelectChange('house')">
+            <option value="" disabled selected hidden>选择城市 / Select City...</option>
+            <optgroup label="中国内地 / Mainland China">
+              <option value="上海">上海 / Shanghai</option>
+              <option value="北京">北京 / Beijing</option>
+              <option value="深圳">深圳 / Shenzhen</option>
+              <option value="广州">广州 / Guangzhou</option>
+              <option value="成都">成都 / Chengdu</option>
+              <option value="杭州">杭州 / Hangzhou</option>
+              <option value="南京">南京 / Nanjing</option>
+              <option value="武汉">武汉 / Wuhan</option>
+              <option value="重庆">重庆 / Chongqing</option>
+              <option value="西安">西安 / Xi'an</option>
+              <option value="苏州">苏州 / Suzhou</option>
+              <option value="天津">天津 / Tianjin</option>
+              <option value="长沙">长沙 / Changsha</option>
+              <option value="郑州">郑州 / Zhengzhou</option>
+              <option value="青岛">青岛 / Qingdao</option>
+              <option value="大连">大连 / Dalian</option>
+              <option value="厦门">厦门 / Xiamen</option>
+              <option value="福州">福州 / Fuzhou</option>
+              <option value="济南">济南 / Jinan</option>
+              <option value="昆明">昆明 / Kunming</option>
+              <option value="哈尔滨">哈尔滨 / Harbin</option>
+              <option value="沈阳">沈阳 / Shenyang</option>
+              <option value="合肥">合肥 / Hefei</option>
+              <option value="宁波">宁波 / Ningbo</option>
+              <option value="佛山">佛山 / Foshan</option>
+              <option value="东莞">东莞 / Dongguan</option>
+              <option value="无锡">无锡 / Wuxi</option>
+              <option value="珠海">珠海 / Zhuhai</option>
+              <option value="三亚">三亚 / Sanya</option>
+              <option value="乌鲁木齐">乌鲁木齐 / Ürümqi</option>
+            </optgroup>
+            <optgroup label="港澳台 / HK·Macau·Taiwan">
+              <option value="香港">香港 / Hong Kong</option>
+              <option value="澳门">澳门 / Macau</option>
+              <option value="台北">台北 / Taipei</option>
+              <option value="台中">台中 / Taichung</option>
+              <option value="高雄">高雄 / Kaohsiung</option>
+            </optgroup>
+            <optgroup label="日韩 / Japan·Korea">
+              <option value="东京">東京 / Tokyo</option>
+              <option value="大阪">大阪 / Osaka</option>
+              <option value="京都">京都 / Kyoto</option>
+              <option value="横滨">横浜 / Yokohama</option>
+              <option value="神户">神戸 / Kobe</option>
+              <option value="首尔">서울 / Seoul</option>
+              <option value="釜山">부산 / Busan</option>
+              <option value="济州">제주 / Jeju</option>
+            </optgroup>
+            <optgroup label="东南亚 / Southeast Asia">
+              <option value="新加坡">新加坡 / Singapore</option>
+              <option value="曼谷">กรุงเทพ / Bangkok</option>
+              <option value="吉隆坡">吉隆坡 / Kuala Lumpur</option>
+              <option value="雅加达">雅加达 / Jakarta</option>
+              <option value="马尼拉">马尼拉 / Manila</option>
+              <option value="河内">河内 / Hanoi</option>
+              <option value="胡志明市">胡志明市 / HCMC</option>
+              <option value="巴厘岛">巴厘岛 / Bali</option>
+            </optgroup>
+            <optgroup label="中东·南亚 / Middle East·South Asia">
+              <option value="迪拜">迪拜 / Dubai</option>
+              <option value="阿布扎比">阿布扎比 / Abu Dhabi</option>
+              <option value="孟买">孟买 / Mumbai</option>
+              <option value="德里">德里 / Delhi</option>
+              <option value="班加罗尔">班加罗尔 / Bangalore</option>
+            </optgroup>
+            <optgroup label="欧洲 / Europe">
+              <option value="伦敦">London</option>
+              <option value="巴黎">Paris</option>
+              <option value="柏林">Berlin</option>
+              <option value="马德里">Madrid</option>
+              <option value="罗马">Roma</option>
+              <option value="阿姆斯特丹">Amsterdam</option>
+              <option value="布鲁塞尔">Brussels</option>
+              <option value="维也纳">Wien / Vienna</option>
+              <option value="苏黎世">Zürich</option>
+              <option value="日内瓦">Genève / Geneva</option>
+              <option value="巴塞罗那">Barcelona</option>
+              <option value="慕尼黑">München / Munich</option>
+              <option value="法兰克福">Frankfurt</option>
+              <option value="米兰">Milano / Milan</option>
+              <option value="哥本哈根">København / Copenhagen</option>
+              <option value="斯德哥尔摩">Stockholm</option>
+              <option value="赫尔辛基">Helsinki</option>
+              <option value="奥斯陆">Oslo</option>
+              <option value="华沙">Warszawa / Warsaw</option>
+              <option value="布拉格">Praha / Prague</option>
+              <option value="布达佩斯">Budapest</option>
+              <option value="莫斯科">Москва / Moscow</option>
+              <option value="圣彼得堡">St. Petersburg</option>
+            </optgroup>
+            <optgroup label="北美 / North America">
+              <option value="纽约">New York</option>
+              <option value="洛杉矶">Los Angeles</option>
+              <option value="旧金山">San Francisco</option>
+              <option value="芝加哥">Chicago</option>
+              <option value="波士顿">Boston</option>
+              <option value="西雅图">Seattle</option>
+              <option value="迈阿密">Miami</option>
+              <option value="拉斯维加斯">Las Vegas</option>
+              <option value="华盛顿">Washington D.C.</option>
+              <option value="多伦多">Toronto</option>
+              <option value="温哥华">Vancouver</option>
+              <option value="蒙特利尔">Montréal</option>
+            </optgroup>
+            <optgroup label="中南美 / Latin America">
+              <option value="墨西哥城">Ciudad de México</option>
+              <option value="圣保罗">São Paulo</option>
+              <option value="里约热内卢">Rio de Janeiro</option>
+              <option value="布宜诺斯艾利斯">Buenos Aires</option>
+            </optgroup>
+            <optgroup label="大洋洲 / Oceania">
+              <option value="悉尼">Sydney</option>
+              <option value="墨尔本">Melbourne</option>
+              <option value="布里斯班">Brisbane</option>
+              <option value="珀斯">Perth</option>
+              <option value="奥克兰">Auckland</option>
+            </optgroup>
+            <optgroup label="非洲 / Africa">
+              <option value="开罗">القاهرة / Cairo</option>
+              <option value="约翰内斯堡">Johannesburg</option>
+              <option value="内罗毕">Nairobi</option>
+            </optgroup>
+            <option value="自定义">✏️ 自定义 / Custom</option>
+          </select>
+        </div>
+        <input id="house-city-custom" class="nes-input hidden" type="text" placeholder="输入城市名 / Enter city name" />
+
+        <label>区域 / District</label>
+        <div class="nes-select">
+          <select id="house-district-select" onchange="onDistrictSelectChange('house')">
+            <option value="" disabled selected hidden>选择区域 / Select District...</option>
+            <option value="市中心">市中心 / City Center</option>
+            <option value="CBD">CBD</option>
+            <option value="老城区">老城区 / Old Town</option>
+            <option value="新区">新区 / New District</option>
+            <option value="滨水区">滨水区 / Waterfront</option>
+            <option value="学区">学区 / School District</option>
+            <option value="科技园区">科技园区 / Tech Park</option>
+            <option value="豪华住宅区">豪华住宅区 / Luxury Residential</option>
+            <option value="郊区">郊区 / Suburbs</option>
+            <option value="自定义">✏️ 自定义 / Custom</option>
+          </select>
+        </div>
+        <input id="house-district-custom" class="nes-input hidden" type="text" placeholder="自定义区域... / Custom district..." />
+
+        <label>房屋类型 / Type</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="house-type-dice-btn" data-rolls="0"
+            onclick="rollHousingFieldDice('type','house')"></button>
+          <div id="house-type-display" class="dice-result-input">—</div>
+          <input id="house-type" type="hidden" value="" />
+        </div>
+
+        <div id="house-villa-wrapper" class="hidden">
+          <label>别墅共几层 / Villa Floors</label>
+          <div class="nes-select">
+            <select id="house-villa-floors">
+              <option value="1层独栋">1层独栋 / Single Story</option>
+              <option value="2层别墅">2层别墅 / 2-Floor Villa</option>
+              <option value="3层别墅">3层别墅 / 3-Floor Villa</option>
+              <option value="4层及以上">4层及以上 / 4+ Floors</option>
+            </select>
           </div>
         </div>
 
-        <button class="nes-btn" onclick="goTo('profile-sterilized')">
-          下一步 / Next
-        </button>
-        <button class="nes-btn" onclick="goTo('profile-breed')">
-          上一步 / Previous
-        </button>
+        <div id="house-garden-section" class="hidden">
+          <label>有院子吗 / Garden?</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="house-garden-dice-btn" data-rolls="0"
+              onclick="rollHousingFieldDice('garden','house')"></button>
+            <div id="house-garden-display" class="dice-result-input">—</div>
+            <input id="house-garden" type="hidden" value="" />
+          </div>
+        </div>
+
+        <label>面积 / Area</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="house-area-dice-btn" data-rolls="0"
+            onclick="rollHousingFieldDice('area','house')"></button>
+          <div id="house-area-display" class="dice-result-input">—</div>
+          <input id="house-area" type="hidden" value="" />
+        </div>
+
+        <div class="house-floor-row">
+          <div class="house-floor-cell">
+            <label>楼层 / Floor</label>
+            <input id="house-floor" class="nes-input" type="number" placeholder="第几层 / Floor #" />
+          </div>
+          <div class="house-floor-cell">
+            <label>共几层 / Total</label>
+            <input id="house-total-floors" class="nes-input" type="number" placeholder="共几层 / Total" />
+          </div>
+        </div>
+
+        <label>租还是买 / Rent or Buy?</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="house-tenure-dice-btn" data-rolls="0"
+            onclick="rollHousingFieldDice('tenure','house')"></button>
+          <div id="house-tenure-display" class="dice-result-input">—</div>
+          <input id="house-tenure" type="hidden" value="" />
+        </div>
+
+        <div id="house-ownership-section" class="hidden">
+          <label>产权归属 / Ownership</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="house-ownership-dice-btn" data-rolls="0"
+              onclick="rollHousingFieldDice('ownership','house')"></button>
+            <div id="house-ownership-display" class="dice-result-input">—</div>
+            <input id="house-ownership" type="hidden" value="" />
+          </div>
+        </div>
+
+        <div id="house-mortgage-wrapper" class="hidden">
+          <label>有房贷吗 / Mortgage?</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="house-mortgage-dice-btn" data-rolls="0"
+              onclick="rollHousingFieldDice('mortgage','house')"></button>
+            <div id="house-mortgage-display" class="dice-result-input">—</div>
+            <input id="house-mortgage" type="hidden" value="" />
+          </div>
+        </div>
+
+        <label>房价 / Price</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="house-price-dice-btn" data-rolls="0"
+            onclick="rollHousingFieldDice('price','house')"></button>
+          <div id="house-price-display" class="dice-result-input">—</div>
+          <input id="house-price" type="hidden" value="" />
+        </div>
       </div>
+      <button class="nes-btn setup-next-btn" onclick="goTo('profile-sterilized')">▶</button>
     </section>
 
     <!-- Profile - Sterilized -->
-    <section id="profile-sterilized" class="page">
-      <div class="phone">
+    <section id="profile-sterilized" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-housing')">◀</button>
+      <div class="phone setup-content">
         <label>婚育状况 / Mating Status</label>
-        <div class="nes-select">
-          <select id="petSterilized">
-            <option value="单身/Single">单身 / Single</option>
-            <option value="已配对/Mated">已配对 / Mated</option>
-            <option value="开放关系/Open">开放关系 / Open</option>
-          </select>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="petSterilized-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('petSterilized-dice-btn','petSterilized-display','petSterilized',HOUSING_TIERS.marriage)"></button>
+          <div id="petSterilized-display" class="dice-result-input">—</div>
+          <input id="petSterilized" type="hidden" value="" />
         </div>
-
-        <button class="nes-btn" onclick="goTo('profile-mbti')">
-          下一步 / Next
-        </button>
-        <button class="nes-btn" onclick="goTo('profile-gender')">
-          上一步 / Previous
-        </button>
       </div>
+      <button class="nes-btn setup-next-btn" onclick="goTo('profile-mbti')">▶</button>
     </section>
 
     <!-- Profile - MBTI -->
-    <section id="profile-mbti" class="page">
-      <div class="phone">
-        <label for="petMbti">MBTI类型 / MBTI Type</label>
+    <section id="profile-mbti" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-sterilized')">◀</button>
+      <div class="phone setup-content">
+        <label>MBTI类型 / MBTI Type</label>
 
-        <div class="nes-select">
-          <select id="petMbti1">
-            <option value="" disabled selected hidden>E/I</option>
-            <option value="E">E</option>
-            <option value="I">I</option>
-          </select>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="petMbti1-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('petMbti1-dice-btn','petMbti1-display','petMbti1',HOUSING_TIERS.mbtiEI)"></button>
+          <div id="petMbti1-display" class="dice-result-input">—</div>
+          <input id="petMbti1" type="hidden" value="" />
         </div>
-        <p>E (外向Extraversion) / I (内向Introversion)</p>
+        <p>E (外向) / I (内向)</p>
 
-        <div class="nes-select">
-          <select id="petMbti2">
-            <option value="" disabled selected hidden>S/N</option>
-            <option value="S">S</option>
-            <option value="N">N</option>
-          </select>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="petMbti2-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('petMbti2-dice-btn','petMbti2-display','petMbti2',HOUSING_TIERS.mbtiSN)"></button>
+          <div id="petMbti2-display" class="dice-result-input">—</div>
+          <input id="petMbti2" type="hidden" value="" />
         </div>
-        <p>S (感觉Sensing) / N (直觉Intuition)</p>
+        <p>S (感觉) / N (直觉)</p>
 
-        <div class="nes-select">
-          <select id="petMbti3">
-            <option value="" disabled selected hidden>T/F</option>
-            <option value="T">T</option>
-            <option value="F">F</option>
-          </select>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="petMbti3-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('petMbti3-dice-btn','petMbti3-display','petMbti3',HOUSING_TIERS.mbtiTF)"></button>
+          <div id="petMbti3-display" class="dice-result-input">—</div>
+          <input id="petMbti3" type="hidden" value="" />
         </div>
-        <p>T (思考Thinking) / F (情感Feeling)</p>
+        <p>T (思考) / F (情感)</p>
 
-        <div class="nes-select">
-          <select id="petMbti4">
-            <option value="" disabled selected hidden>J/P</option>
-            <option value="J">J</option>
-            <option value="P">P</option>
-          </select>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="petMbti4-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('petMbti4-dice-btn','petMbti4-display','petMbti4',HOUSING_TIERS.mbtiJP)"></button>
+          <div id="petMbti4-display" class="dice-result-input">—</div>
+          <input id="petMbti4" type="hidden" value="" />
         </div>
-        <p>J (判断Judging) / P (知觉Perceiving)</p>
-
-        <button class="nes-btn" onclick="goTo('profile-daily-life')">
-          下一步 / Next
-        </button>
-        <button class="nes-btn" onclick="goTo('profile-sterilized')">
-          上一步 / Previous
-        </button>
+        <p>J (判断) / P (知觉)</p>
       </div>
-    </section>
-
-    <!-- Profile - Daily Life -->
-    <section id="profile-daily-life" class="page">
-      <div class="phone">
-        <label for="dailylife">日常生活 / Daily Life</label>
-        <textarea
-          id="dailylife"
-          class="nes-textarea"
-          placeholder="你一天怎么过？ / What does your day look like?"
-        ></textarea>
-
-        <button class="nes-btn" onclick="goTo('profile-hobbies')">
-          下一步 / Next
-        </button>
-        <button class="nes-btn" onclick="goTo('profile-mbti')">
-          上一步 / Previous
-        </button>
-      </div>
+      <button class="nes-btn setup-next-btn" onclick="goTo('profile-hobbies')">▶</button>
     </section>
 
     <!-- Profile - Hobbies -->
-    <section id="profile-hobbies" class="page">
-      <div class="phone">
-        <label for="hobby">兴趣爱好 / Hobbies</label>
-        <textarea
-          id="hobby"
-          class="nes-textarea"
-          placeholder="狩猎 / 筑巢 / 群居 / 独行 / Hunting / Nesting / Pack life / Solo"
-        ></textarea>
-        <button class="nes-btn" onclick="goTo('profile-edu')">
-          下一步 / Next
-        </button>
-        <button class="nes-btn" onclick="goTo('profile-daily-life')">
-          上一步 / Previous
-        </button>
+    <section id="profile-hobbies" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-mbti')">◀</button>
+      <div class="phone setup-content">
+        <label>兴趣爱好 / Hobbies</label>
+        <p class="hobby-hint">可多选 / Pick any that fit</p>
+        <div class="hobby-tags-wrap" id="hobby-tags"></div>
+        <div class="hobby-custom-row">
+          <input id="hobby-custom-input" class="nes-input" type="text" placeholder="自定义爱好 / Custom..."
+            onkeydown="if(event.key==='Enter')addCustomHobbyTag('hobby-tags','hobby-custom-input')" />
+          <button class="nes-btn" onclick="addCustomHobbyTag('hobby-tags','hobby-custom-input')">+</button>
+        </div>
       </div>
+      <button class="nes-btn setup-next-btn" onclick="goTo('profile-edu')">▶</button>
     </section>
 
     <!-- Profile - Education & Occupation -->
-    <section id="profile-edu" class="page">
-      <div class="phone">
+    <section id="profile-edu" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-hobbies')">◀</button>
+      <div class="phone setup-content">
         <label>学历 / Education</label>
-        <div class="nes-select">
-          <select id="petEdu">
-            <option value="" disabled selected hidden>选择学历 / Select...</option>
-            <option value="小学/Primary">小学 / Primary</option>
-            <option value="初中/Middle School">初中 / Middle School</option>
-            <option value="高中/High School">高中 / High School</option>
-            <option value="大专/Associate">大专 / Associate</option>
-            <option value="本科/Bachelor">本科 / Bachelor</option>
-            <option value="硕士/Master">硕士 / Master</option>
-            <option value="博士/PhD">博士 / PhD</option>
-            <option value="其他/Other">其他 / Other</option>
-          </select>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="petEdu-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('petEdu-dice-btn','petEdu-display','petEdu',HOUSING_TIERS.education)"></button>
+          <div id="petEdu-display" class="dice-result-input">—</div>
+          <input id="petEdu" type="hidden" value="" />
         </div>
-        <div class="nes-field">
-          <label for="petOccupation">职业 / Occupation</label>
-          <input
-            id="petOccupation"
-            class="nes-input"
-            type="text"
-            placeholder="你的工作是什么？ / What do you do?"
-          />
+        <label>职业 / Occupation</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="petOccupation-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('petOccupation-dice-btn','petOccupation-display','petOccupation',HOUSING_TIERS.occupation)"></button>
+          <div id="petOccupation-display" class="dice-result-input">—</div>
+          <input id="petOccupation" type="hidden" value="" />
         </div>
         <label>月收入 / Monthly Income</label>
-        <div class="nes-select">
-          <select id="petIncome">
-            <option value="" disabled selected hidden>选择范围 / Select range...</option>
-            <option value="<3k">3k 以下</option>
-            <option value="3k–8k">3k – 8k</option>
-            <option value="8k–15k">8k – 15k</option>
-            <option value="15k–30k">15k – 30k</option>
-            <option value="30k+">30k 以上</option>
-            <option value="不透露/Prefer not to say">不透露 / Prefer not to say</option>
-          </select>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="petIncome-dice-btn" data-rolls="0"
+            onclick="rollIncomeTierDice()"></button>
+          <div id="petIncome-display" class="dice-result-input">—</div>
+          <input id="petIncome" type="hidden" value="" />
         </div>
-        <button class="nes-btn" onclick="goTo('profile-photo')">
-          下一步 / Next
-        </button>
-        <button class="nes-btn" onclick="goTo('profile-hobbies')">
-          上一步 / Previous
-        </button>
       </div>
+      <button class="nes-btn setup-next-btn" onclick="goTo('profile-photo')">▶</button>
     </section>
 
     <!-- Profile - Fursona -->
-    <section id="profile-photo" class="page">
-      <div class="phone">
+    <section id="profile-photo" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-edu')">
+        ◀
+      </button>
+      <div class="phone setup-content">
         <h1>创造你的兽人形象 / Create Your Fursona</h1>
         <div class="main-wrapper">
           <!-- the following div will contain the p5 canvas. -->
@@ -358,20 +571,14 @@
                   type="text"
                   placeholder="输入文字 / Enter text"
                 />
-                <button class="nes-btn" onclick="drawText()">
-                  绘制文字 / Draw Text
-                </button>
               </div>
             </div>
           </section>
         </div>
-        <button class="nes-btn" onclick="createCard()">
-          生成档案卡 / Generate Profile
-        </button>
-        <button class="nes-btn" onclick="goTo('profile-hobbies')">
-          上一步 / Previous
-        </button>
       </div>
+      <button class="nes-btn setup-next-btn" onclick="createCard()">
+        生成档案卡 / Create Card ▶
+      </button>
     </section>
 
     <!-- Profile Card -->
@@ -384,11 +591,37 @@
       </div>
     </section>
 
+    <!-- Swipe Tutorial Page -->
+    <section id="swipe-tutorial" class="page tutorial-page">
+      <div class="tut-flash-overlay" id="tut-flash"></div>
+      <div class="tut-scanlines"></div>
+      <div class="tutorial-inner">
+        <div class="tutorial-text">
+          <p class="tut-line" id="tut-line-1">所有文字都可以<span class="tut-word" id="tut-word-long">长按</span>或者<span class="tut-word tut-short-wrap" id="tut-word-short">短按<span class="tut-float-text tut-hidden" id="tut-float-text"></span></span>看看</p>
+          <p class="tut-line-en">Try <span class="tut-word-en">holding</span> or <span class="tut-word-en">tapping</span> any text</p>
+          <p class="tut-line">有<span class="tut-word" id="tut-word-agree">赞同</span>的文字也按按看吧</p>
+          <p class="tut-line-en">Press text you <span class="tut-word-en">agree</span> with too</p>
+        </div>
+        <div id="tut-enter-wrap" class="tut-enter-wrap tut-hidden" onclick="enterSwipePage()">
+          <span class="tut-enter-word">will be helpful</span><span class="tut-ellipsis">...</span>
+        </div>
+      </div>
+      <div id="tut-popup" class="tut-popup tut-hidden">
+        <div class="tut-popup-inner">
+          <p class="tut-popup-label">输入任何东西 / type anything</p>
+          <input id="tut-popup-input" class="nes-input tut-popup-input" type="text" placeholder="..." />
+          <button class="nes-btn tut-popup-btn" onclick="submitTutLongPress()">确定 / OK</button>
+        </div>
+      </div>
+    </section>
+
     <!-- Swipe Page -->
     <section id="swipe-page" class="page">
       <div class="phone">
         <div id="swipe-topbar">
-          <button class="nes-btn" onclick="goToMyProfile()">我的档案 / Me</button>
+          <button class="nes-btn" onclick="goToMyProfile()">
+            我的档案 / Me
+          </button>
           <button class="nes-btn" id="msg-notif-btn" onclick="openMessages()">
             💬 <span id="msg-notif-count" class="notif-badge hidden">0</span>
           </button>
@@ -400,18 +633,10 @@
 
       <div class="swipebutton">
         <button class="nes-btn" onclick="like()">💗</button>
-        <div id="text-tools">
-          <input
-            id="impression"
-            class="nes-input"
-            type="text"
-            placeholder="你的印象 / Your Impression"
-          />
-          <button class="nes-btn" id="impression-btn" onclick="impression()">
-            评论 / Comment
-          </button>
-          <button class="nes-btn is-primary" onclick="openSendMessage()">✉️ 发消息</button>
-        </div>
+        <button class="nes-btn" onclick="openImpressionPopup()">💭</button>
+        <button class="nes-btn is-primary" onclick="openSendMsgPopup()">
+          ✉️
+        </button>
         <button class="nes-btn" onclick="skip()">❌</button>
       </div>
     </section>
@@ -420,29 +645,73 @@
     <div id="profile-edit" class="hidden">
       <div class="edit-overlay-inner">
         <h2>编辑档案 / Edit Profile</h2>
-        <div class="scroll">
 
+        <!-- Stats banner: avatar + like/dislike counts -->
+        <div id="my-self-stats">
+          <div id="my-self-avatar-wrap">
+            <div id="my-self-stamp"></div>
+            <div id="my-self-avatar"></div>
+          </div>
+          <div id="my-self-stats-right">
+            <div id="my-self-likes" class="pixel-hearts-box stats-side"></div>
+            <div id="my-self-dislikes" class="pixel-hearts-box stats-side"></div>
+          </div>
+        </div>
+
+        <div class="scroll">
           <div class="nes-field">
             <label>名字 / Name</label>
             <input id="edit-name" class="nes-input" type="text" />
           </div>
 
+          <div class="nes-field">
+            <label>年龄 / Age</label>
+            <input id="edit-age" class="nes-input" type="text" placeholder="e.g. 3岁" />
+          </div>
+
           <label>种族大类 / Species Class</label>
           <div class="nes-select">
             <select id="edit-breedClass" onchange="onEditBreedClassChange()">
-              <option value="" disabled selected hidden>选择大类 / Select class...</option>
+              <option value="" disabled selected hidden>
+                选择大类 / Select class...
+              </option>
               <option value="哺乳类 / Mammals">哺乳类 / Mammals</option>
               <option value="鸟类 / Birds">鸟类 / Birds</option>
               <option value="爬行类 / Reptiles">爬行类 / Reptiles</option>
               <option value="两栖类 / Amphibians">两栖类 / Amphibians</option>
-              <option value="节肢动物 / Arthropods">节肢动物 / Arthropods</option>
+              <option value="节肢动物 / Arthropods">
+                节肢动物 / Arthropods
+              </option>
+              <option value="鱼类 / Fish">鱼类 / Fish</option>
             </select>
+          </div>
+          <div id="edit-breedSubgroupWrapper" class="hidden">
+            <label>细类 / Subgroup</label>
+            <div class="nes-select">
+              <select id="edit-breedSubgroup" onchange="onEditBreedSubgroupChange()">
+                <option value="" disabled selected hidden>
+                  选择细类 / Select subgroup...
+                </option>
+              </select>
+            </div>
+          </div>
+          <div id="edit-breedSubSubgroupWrapper" class="hidden">
+            <label>子类 / Sub-group</label>
+            <div class="nes-select">
+              <select id="edit-breedSubSubgroup" onchange="onEditBreedSubSubgroupChange()">
+                <option value="" disabled selected hidden>
+                  选择子类 / Select sub-group...
+                </option>
+              </select>
+            </div>
           </div>
           <div id="edit-breedSpecificWrapper" class="hidden">
             <label>物种 / Species</label>
             <div class="nes-select">
               <select id="edit-breed">
-                <option value="" disabled selected hidden>选择物种 / Select species...</option>
+                <option value="" disabled selected hidden>
+                  选择物种 / Select species...
+                </option>
               </select>
             </div>
           </div>
@@ -458,20 +727,252 @@
 
           <label>性取向 / Sexual Orientation</label>
           <div class="nes-select">
-            <select id="edit-orientation">
+            <select id="edit-orientation" onchange="onOrientationChange('edit-orientation','edit-orientation-custom')">
               <option value="异性恋/Straight">异性恋 / Straight</option>
               <option value="同性恋/Gay·Lesbian">同性恋 / Gay · Lesbian</option>
               <option value="双性恋/Bisexual">双性恋 / Bisexual</option>
               <option value="泛性恋/Pansexual">泛性恋 / Pansexual</option>
               <option value="无性恋/Asexual">无性恋 / Asexual</option>
-              <option value="其他/Other">其他 / Other</option>
               <option value="不透露/Prefer not to say">不透露 / Prefer not to say</option>
+              <option value="自定义/Custom">✏️ 自定义 / Custom</option>
+            </select>
+          </div>
+          <input id="edit-orientation-custom" class="nes-input hidden" type="text" placeholder="自定义性取向... / Custom orientation..." />
+
+          <!-- Housing fields -->
+          <label class="section-header-label">领地 / Territory</label>
+
+          <label>城市 / City</label>
+          <div class="nes-select">
+            <select id="edit-house-city-select" onchange="onCitySelectChange('edit-house')">
+              <option value="" disabled selected hidden>选择城市 / Select City...</option>
+              <optgroup label="中国内地 / Mainland China">
+                <option value="上海">上海 / Shanghai</option>
+                <option value="北京">北京 / Beijing</option>
+                <option value="深圳">深圳 / Shenzhen</option>
+                <option value="广州">广州 / Guangzhou</option>
+                <option value="成都">成都 / Chengdu</option>
+                <option value="杭州">杭州 / Hangzhou</option>
+                <option value="南京">南京 / Nanjing</option>
+                <option value="武汉">武汉 / Wuhan</option>
+                <option value="重庆">重庆 / Chongqing</option>
+                <option value="西安">西安 / Xi'an</option>
+                <option value="苏州">苏州 / Suzhou</option>
+                <option value="天津">天津 / Tianjin</option>
+                <option value="长沙">长沙 / Changsha</option>
+                <option value="郑州">郑州 / Zhengzhou</option>
+                <option value="青岛">青岛 / Qingdao</option>
+                <option value="大连">大连 / Dalian</option>
+                <option value="厦门">厦门 / Xiamen</option>
+                <option value="福州">福州 / Fuzhou</option>
+                <option value="济南">济南 / Jinan</option>
+                <option value="昆明">昆明 / Kunming</option>
+                <option value="哈尔滨">哈尔滨 / Harbin</option>
+                <option value="沈阳">沈阳 / Shenyang</option>
+                <option value="合肥">合肥 / Hefei</option>
+                <option value="宁波">宁波 / Ningbo</option>
+                <option value="佛山">佛山 / Foshan</option>
+                <option value="东莞">东莞 / Dongguan</option>
+                <option value="无锡">无锡 / Wuxi</option>
+                <option value="珠海">珠海 / Zhuhai</option>
+                <option value="三亚">三亚 / Sanya</option>
+                <option value="乌鲁木齐">乌鲁木齐 / Ürümqi</option>
+              </optgroup>
+              <optgroup label="港澳台 / HK·Macau·Taiwan">
+                <option value="香港">香港 / Hong Kong</option>
+                <option value="澳门">澳门 / Macau</option>
+                <option value="台北">台北 / Taipei</option>
+                <option value="台中">台中 / Taichung</option>
+                <option value="高雄">高雄 / Kaohsiung</option>
+              </optgroup>
+              <optgroup label="日韩 / Japan·Korea">
+                <option value="东京">東京 / Tokyo</option>
+                <option value="大阪">大阪 / Osaka</option>
+                <option value="京都">京都 / Kyoto</option>
+                <option value="横滨">横浜 / Yokohama</option>
+                <option value="神户">神戸 / Kobe</option>
+                <option value="首尔">서울 / Seoul</option>
+                <option value="釜山">부산 / Busan</option>
+                <option value="济州">제주 / Jeju</option>
+              </optgroup>
+              <optgroup label="东南亚 / Southeast Asia">
+                <option value="新加坡">新加坡 / Singapore</option>
+                <option value="曼谷">กรุงเทพ / Bangkok</option>
+                <option value="吉隆坡">吉隆坡 / Kuala Lumpur</option>
+                <option value="雅加达">雅加达 / Jakarta</option>
+                <option value="马尼拉">马尼拉 / Manila</option>
+                <option value="河内">河内 / Hanoi</option>
+                <option value="胡志明市">胡志明市 / HCMC</option>
+                <option value="巴厘岛">巴厘岛 / Bali</option>
+              </optgroup>
+              <optgroup label="中东·南亚 / Middle East·South Asia">
+                <option value="迪拜">迪拜 / Dubai</option>
+                <option value="阿布扎比">阿布扎比 / Abu Dhabi</option>
+                <option value="孟买">孟买 / Mumbai</option>
+                <option value="德里">德里 / Delhi</option>
+                <option value="班加罗尔">班加罗尔 / Bangalore</option>
+              </optgroup>
+              <optgroup label="欧洲 / Europe">
+                <option value="伦敦">London</option>
+                <option value="巴黎">Paris</option>
+                <option value="柏林">Berlin</option>
+                <option value="马德里">Madrid</option>
+                <option value="罗马">Roma</option>
+                <option value="阿姆斯特丹">Amsterdam</option>
+                <option value="布鲁塞尔">Brussels</option>
+                <option value="维也纳">Wien / Vienna</option>
+                <option value="苏黎世">Zürich</option>
+                <option value="日内瓦">Genève / Geneva</option>
+                <option value="巴塞罗那">Barcelona</option>
+                <option value="慕尼黑">München / Munich</option>
+                <option value="法兰克福">Frankfurt</option>
+                <option value="米兰">Milano / Milan</option>
+                <option value="哥本哈根">København / Copenhagen</option>
+                <option value="斯德哥尔摩">Stockholm</option>
+                <option value="赫尔辛基">Helsinki</option>
+                <option value="奥斯陆">Oslo</option>
+                <option value="华沙">Warszawa / Warsaw</option>
+                <option value="布拉格">Praha / Prague</option>
+                <option value="布达佩斯">Budapest</option>
+                <option value="莫斯科">Москва / Moscow</option>
+                <option value="圣彼得堡">St. Petersburg</option>
+              </optgroup>
+              <optgroup label="北美 / North America">
+                <option value="纽约">New York</option>
+                <option value="洛杉矶">Los Angeles</option>
+                <option value="旧金山">San Francisco</option>
+                <option value="芝加哥">Chicago</option>
+                <option value="波士顿">Boston</option>
+                <option value="西雅图">Seattle</option>
+                <option value="迈阿密">Miami</option>
+                <option value="拉斯维加斯">Las Vegas</option>
+                <option value="华盛顿">Washington D.C.</option>
+                <option value="多伦多">Toronto</option>
+                <option value="温哥华">Vancouver</option>
+                <option value="蒙特利尔">Montréal</option>
+              </optgroup>
+              <optgroup label="中南美 / Latin America">
+                <option value="墨西哥城">Ciudad de México</option>
+                <option value="圣保罗">São Paulo</option>
+                <option value="里约热内卢">Rio de Janeiro</option>
+                <option value="布宜诺斯艾利斯">Buenos Aires</option>
+              </optgroup>
+              <optgroup label="大洋洲 / Oceania">
+                <option value="悉尼">Sydney</option>
+                <option value="墨尔本">Melbourne</option>
+                <option value="布里斯班">Brisbane</option>
+                <option value="珀斯">Perth</option>
+                <option value="奥克兰">Auckland</option>
+              </optgroup>
+              <optgroup label="非洲 / Africa">
+                <option value="开罗">القاهرة / Cairo</option>
+                <option value="约翰内斯堡">Johannesburg</option>
+                <option value="内罗毕">Nairobi</option>
+              </optgroup>
+              <option value="自定义">✏️ 自定义 / Custom</option>
+            </select>
+          </div>
+          <input id="edit-house-city-custom" class="nes-input hidden" type="text" placeholder="输入城市名 / Enter city name" />
+
+          <label>区域 / District</label>
+          <div class="nes-select">
+            <select id="edit-house-district-select" onchange="onDistrictSelectChange('edit-house')">
+              <option value="" disabled selected hidden>选择区域 / Select District...</option>
+              <option value="市中心">市中心 / City Center</option>
+              <option value="CBD">CBD</option>
+              <option value="老城区">老城区 / Old Town</option>
+              <option value="新区">新区 / New District</option>
+              <option value="滨水区">滨水区 / Waterfront</option>
+              <option value="学区">学区 / School District</option>
+              <option value="科技园区">科技园区 / Tech Park</option>
+              <option value="豪华住宅区">豪华住宅区 / Luxury Residential</option>
+              <option value="郊区">郊区 / Suburbs</option>
+              <option value="自定义">✏️ 自定义 / Custom</option>
+            </select>
+          </div>
+          <input id="edit-house-district-custom" class="nes-input hidden" type="text" placeholder="自定义区域... / Custom district..." />
+
+          <label>房屋类型 / Type</label>
+          <div class="nes-select">
+            <select id="edit-house-type" onchange="onEditHouseTypeChange()">
+              <option value="" disabled selected hidden>选择 / Select...</option>
+              <option value="普通住宅">普通住宅 / Regular</option>
+              <option value="公寓">公寓 / Apartment</option>
+              <option value="大平层">大平层 / Open Plan ✨</option>
+              <option value="别墅">别墅 / Villa ✨</option>
+              <option value="地下室">地下室 / Basement</option>
+              <option value="阁楼">阁楼 / Attic Loft</option>
+              <option value="树屋">树屋 / Treehouse</option>
+              <option value="临海">临海 / Oceanfront</option>
+              <option value="湖边">湖边 / Lakeside</option>
+              <option value="下水管道">下水管道 / Pipe Shack</option>
+              <option value="自定义">✏️ 自定义 / Custom</option>
+            </select>
+          </div>
+          <input id="edit-house-type-custom" class="nes-input hidden" type="text" placeholder="自定义房屋类型... / Custom type..." />
+
+          <div id="edit-house-villa-wrapper" class="hidden">
+            <label>别墅共几层 / Villa Floors</label>
+            <div class="nes-select">
+              <select id="edit-house-villa-floors">
+                <option value="1层独栋">1层独栋 / Single Story</option>
+                <option value="2层别墅">2层别墅 / 2-Floor Villa</option>
+                <option value="3层别墅">3层别墅 / 3-Floor Villa</option>
+                <option value="4层及以上">4层及以上 / 4+ Floors</option>
+              </select>
+            </div>
+          </div>
+
+          <label>有院子吗 / Garden?</label>
+          <div class="nes-select">
+            <select id="edit-house-garden">
+              <option value="无院子">无院子 / No Garden</option>
+              <option value="有院子">有院子 / Has Garden ✨</option>
             </select>
           </div>
 
           <div class="nes-field">
-            <label>领地 / Territory</label>
-            <input id="edit-hukou" class="nes-input" type="text" />
+            <label>面积 / Area (㎡)</label>
+            <input id="edit-house-area" class="nes-input" type="number" placeholder="例如 120" />
+          </div>
+
+          <div class="house-floor-row">
+            <div class="house-floor-cell">
+              <label>楼层 / Floor</label>
+              <input id="edit-house-floor" class="nes-input" type="number" placeholder="第几层 / Floor #" />
+            </div>
+            <div class="house-floor-cell">
+              <label>共几层 / Total</label>
+              <input id="edit-house-total-floors" class="nes-input" type="number" placeholder="共几层 / Total" />
+            </div>
+          </div>
+
+          <label>房价 / Price</label>
+          <input id="edit-house-price" class="nes-input" type="text" placeholder="例如 500万 / 月租5000" />
+          <div class="dice-row">
+            <button class="nes-btn dice-btn" id="editPriceDiceBtn"
+              onclick="rollHousingDice('price','edit-house','editPriceDiceBtn','editPriceDiceDisplay')">🎲</button>
+            <span id="editPriceDiceDisplay" class="dice-display"></span>
+            <span class="dice-hint">摇到6解锁千万豪宅 / Roll 6 for a mega mansion</span>
+          </div>
+
+          <label>产权归属 / Ownership</label>
+          <div class="nes-select">
+            <select id="edit-house-ownership" onchange="onEditHouseOwnershipChange()">
+              <option value="自己名下">自己名下 / Self ✨</option>
+              <option value="父母名下">父母名下 / Parents</option>
+              <option value="租住中">租住中 / Renting</option>
+            </select>
+          </div>
+
+          <div id="edit-house-mortgage-wrapper">
+            <label>有房贷吗 / Mortgage?</label>
+            <div class="nes-select">
+              <select id="edit-house-mortgage">
+                <option value="无房贷">无房贷 / No Mortgage ✨</option>
+                <option value="有房贷">有房贷 / Has Mortgage</option>
+              </select>
+            </div>
           </div>
 
           <label>婚育状况 / Mating Status</label>
@@ -484,14 +985,34 @@
           </div>
 
           <label>MBTI</label>
-          <div class="nes-select"><select id="edit-mbti1"><option value="E">E</option><option value="I">I</option></select></div>
-          <div class="nes-select"><select id="edit-mbti2"><option value="S">S</option><option value="N">N</option></select></div>
-          <div class="nes-select"><select id="edit-mbti3"><option value="T">T</option><option value="F">F</option></select></div>
-          <div class="nes-select"><select id="edit-mbti4"><option value="J">J</option><option value="P">P</option></select></div>
+          <div class="nes-select">
+            <select id="edit-mbti1">
+              <option value="E">E</option>
+              <option value="I">I</option>
+            </select>
+          </div>
+          <div class="nes-select">
+            <select id="edit-mbti2">
+              <option value="S">S</option>
+              <option value="N">N</option>
+            </select>
+          </div>
+          <div class="nes-select">
+            <select id="edit-mbti3">
+              <option value="T">T</option>
+              <option value="F">F</option>
+            </select>
+          </div>
+          <div class="nes-select">
+            <select id="edit-mbti4">
+              <option value="J">J</option>
+              <option value="P">P</option>
+            </select>
+          </div>
 
           <label>学历 / Education</label>
           <div class="nes-select">
-            <select id="edit-edu">
+            <select id="edit-edu" onchange="onOrientationChange('edit-edu','edit-edu-custom')">
               <option value="小学/Primary">小学 / Primary</option>
               <option value="初中/Middle School">初中 / Middle School</option>
               <option value="高中/High School">高中 / High School</option>
@@ -499,9 +1020,10 @@
               <option value="本科/Bachelor">本科 / Bachelor</option>
               <option value="硕士/Master">硕士 / Master</option>
               <option value="博士/PhD">博士 / PhD</option>
-              <option value="其他/Other">其他 / Other</option>
+              <option value="自定义/Custom">✏️ 自定义 / Custom</option>
             </select>
           </div>
+          <input id="edit-edu-custom" class="nes-input hidden" type="text" placeholder="自定义学历... / Custom education..." />
 
           <div class="nes-field">
             <label>职业 / Occupation</label>
@@ -511,39 +1033,64 @@
           <label>月收入 / Monthly Income</label>
           <div class="nes-select">
             <select id="edit-income">
-              <option value="<3k">3k 以下</option>
+              <option value="<3k">3k 以下 / Below 3k</option>
               <option value="3k–8k">3k – 8k</option>
               <option value="8k–15k">8k – 15k</option>
               <option value="15k–30k">15k – 30k</option>
-              <option value="30k+">30k 以上</option>
-              <option value="不透露/Prefer not to say">不透露 / Prefer not to say</option>
+              <option value="不透露/Prefer not to say">
+                不透露 / Prefer not to say
+              </option>
             </select>
           </div>
-
-          <label>日常生活 / Daily Life</label>
-          <textarea id="edit-dailylife" class="nes-textarea"></textarea>
-
           <label>兴趣爱好 / Hobbies</label>
-          <textarea id="edit-hobby" class="nes-textarea"></textarea>
-
+          <div class="edit-hobby-collapsed" id="edit-hobby-collapsed" onclick="expandEditHobby()">
+            <span id="edit-hobby-summary" class="edit-hobby-summary-text">— 点击修改 / Click to edit —</span>
+            <span class="edit-hobby-edit-btn">修改 ▾</span>
+          </div>
+          <div class="hidden" id="edit-hobby-expanded">
+            <div class="hobby-tags-wrap" id="edit-hobby-tags"></div>
+            <div class="hobby-custom-row">
+              <input id="edit-hobby-custom-input" class="nes-input" type="text" placeholder="自定义爱好 / Custom..."
+                onkeydown="if(event.key==='Enter')addCustomHobbyTag('edit-hobby-tags','edit-hobby-custom-input')" />
+              <button class="nes-btn" onclick="addCustomHobbyTag('edit-hobby-tags','edit-hobby-custom-input')">+</button>
+            </div>
+            <button class="nes-btn" style="margin-top:8px;font-size:12px" onclick="collapseEditHobby()">收起 / Collapse ▴</button>
+          </div>
         </div>
 
-        <button class="nes-btn is-success" onclick="saveMyProfile()">保存 / Save</button>
+        <button class="nes-btn is-success" onclick="saveMyProfile()">
+          保存 / Save
+        </button>
         <button class="nes-btn" onclick="closeMyProfile()">返回 / Back</button>
+      </div>
+    </div>
+
+    <!-- Risk Warning Overlay -->
+    <div id="warning-overlay" class="hidden">
+      <div class="warning-box">
+        <div id="warning-icon" class="warning-icon">⚠️</div>
+        <div id="warning-messages-list"></div>
+        <div class="warning-btn-row">
+          <button class="nes-btn is-error" onclick="proceedDespiteWarning()">
+            继续 / Proceed
+          </button>
+          <button class="nes-btn" onclick="closeWarning()">
+            算了 / Never Mind
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Incoming Message Popup -->
     <div id="msg-popup" class="hidden">
-      <div class="msg-popup-box">
+      <div class="msg-popup-box" onclick="handlePopupClick()">
         <div class="msg-popup-header">
           <span id="msg-popup-from"></span>
-          <button class="msg-popup-close" onclick="closeMessagePopup()">✕</button>
+          <button class="msg-popup-close" onclick="event.stopPropagation(); closeMessagePopup();">
+            ✕
+          </button>
         </div>
         <div id="msg-popup-content" class="msg-popup-content"></div>
-        <button class="nes-btn is-primary msg-popup-open-btn" onclick="closeMessagePopup(); openMessages();">
-          查看消息 / Open Inbox
-        </button>
       </div>
     </div>
 
@@ -560,16 +1107,115 @@
         <!-- Conversation thread view -->
         <div id="convo-view" class="hidden">
           <div class="convo-header">
-            <button class="msg-reply-btn" onclick="closeConvoView()">← 返回</button>
-            <span id="convo-with-name"></span>
+            <button class="msg-reply-btn" onclick="closeConvoView()">
+              ← 返回 / Back
+            </button>
+            <span id="convo-with-name" class="convo-name-link" onclick="viewConvoProfile()"></span>
           </div>
           <div id="convo-bubbles" class="convo-bubbles scroll"></div>
           <div class="convo-input-row">
-            <input id="convo-input" class="nes-input" type="text" placeholder="回复... / Reply..." />
-            <button class="nes-btn is-primary" onclick="sendConvoMessage()">发送</button>
+            <input
+              id="convo-input"
+              class="nes-input"
+              type="text"
+              placeholder="回复... / Reply..."
+            />
+            <button class="nes-btn is-primary" onclick="sendConvoMessage()">
+              发送 / Send
+            </button>
           </div>
         </div>
+      </div>
+    </div>
 
+    <!-- Like Opener Belt Modal -->
+    <div id="like-opener-popup" class="hidden">
+      <div class="opener-modal">
+        <p class="opener-modal-title">💬 选一句开场白 / Pick an opener</p>
+        <div class="opener-belt-outer" id="opener-belt-outer"></div>
+        <div class="opener-selected-display" id="opener-selected-display">
+          <span id="opener-selected-text">— 点击上方选择 / Click to select —</span>
+        </div>
+        <div class="opener-modal-btn-row">
+          <button class="nes-btn is-primary" onclick="submitLikeOpener()">发送 ✉️</button>
+          <button class="nes-btn" onclick="closeLikeOpenerPopup()">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Hobby Category Picker -->
+    <div id="hobby-cat-picker" class="hidden">
+      <div class="hobby-cat-picker-box">
+        <p class="hobby-cat-picker-title">选择分类 / Choose Category</p>
+        <div id="hobby-cat-picker-list" class="hobby-cat-picker-list"></div>
+        <button class="nes-btn" onclick="closeHobbyCatPicker()" style="margin-top:6px">取消 / Cancel</button>
+      </div>
+    </div>
+
+    <!-- Like / Skip Reason Popup -->
+    <div id="reason-popup" class="hidden">
+      <div class="reason-box">
+        <p id="reason-popup-title">选择原因 / Select Reason</p>
+        <p class="reason-hint">选一个标签作为理由 / Pick a label</p>
+        <div id="reason-labels" class="reason-labels"></div>
+        <input
+          id="reason-input"
+          class="nes-input"
+          type="text"
+          placeholder="说说为什么... / Explain why..."
+        />
+        <div class="interpret-btn-row">
+          <button class="nes-btn is-success" onclick="submitReason()">
+            确定 / OK
+          </button>
+          <button class="nes-btn" onclick="closeReasonPopup()">取消 / Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impression Popup (Swipe) -->
+    <div id="swipe-impression-popup" class="hidden">
+      <div class="interpret-box">
+        <p>留下你的印象 / Your Impression</p>
+        <input
+          id="swipe-impression-input"
+          class="nes-input"
+          type="text"
+          placeholder="输入印象... / Enter impression..."
+        />
+        <div class="interpret-btn-row">
+          <button class="nes-btn is-success" onclick="submitSwipeImpression()">
+            确定 / OK
+          </button>
+          <button class="nes-btn" onclick="closeImpressionPopup()">取消 / Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Send Message Popup (Swipe) -->
+    <div id="swipe-sendmsg-popup" class="hidden">
+      <div class="interpret-box">
+        <p>发送消息 / Send Message</p>
+        <input
+          id="swipe-sendmsg-input"
+          class="nes-input"
+          type="text"
+          placeholder="输入消息... / Type message..."
+        />
+        <div class="interpret-btn-row">
+          <button class="nes-btn is-primary" onclick="submitSwipeSendMsg()">
+            发送 ✉️
+          </button>
+          <button class="nes-btn" onclick="closeSendMsgPopup()">取消 / Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile View Overlay -->
+    <div id="profile-view-overlay" class="hidden">
+      <div class="profile-view-box">
+        <button class="profile-view-close" onclick="closeProfileView()">✕</button>
+        <div id="profile-view-content" class="profile-view-content scroll"></div>
       </div>
     </div>
 
@@ -592,6 +1238,16 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- Running score badge -->
+    <div id="score-running-badge">SCORE: 100</div>
+
+    <!-- Settlement overlay -->
+    <div id="score-settlement">
+      <div class="settle-label">档案评分 / Profile Score</div>
+      <div class="settle-number">100</div>
+      <div class="settle-suffix">分 / pts</div>
     </div>
 
     <script src="sketch.js"></script>

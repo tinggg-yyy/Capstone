@@ -19,7 +19,7 @@ function setup() {
   for (let y = 0; y < 32; y++) {
     grid[y] = [];
     for (let x = 0; x < 32; x++) {
-      grid[y][x] = null;
+      grid[y][x] = "/";
     }
   }
 
@@ -29,37 +29,53 @@ function setup() {
 }
 
 function draw() {
-  //  background(176, 206, 173);
   background(0);
-  // fill(0);
-  // image(petCanvas, 0, 0, width, height);
 
   let cellSize = width / 32;
+  const pixelAlpha = { 1: 65, 2: 125, 3: 190, 4: 255 };
+  const textAlpha  = { "#1": 65, "#2": 125, "#3": 190, "#4": 255 };
+
+  // Pre-number text cells in row-major order for multi-char distribution
+  const textCellIdx = {};
+  if (currentText.length > 1) {
+    let idx = 0;
+    for (let y = 0; y < 32; y++) {
+      for (let x = 0; x < 32; x++) {
+        const c = grid[y][x];
+        if (c === "text" || c === "#" || textAlpha[c] !== undefined) {
+          textCellIdx[`${x},${y}`] = idx++;
+        }
+      }
+    }
+  }
 
   for (let y = 0; y < 32; y++) {
     for (let x = 0; x < 32; x++) {
       let cell = grid[y][x];
 
-      if (cell === "pixel") {
-        // fill(0);
-        fill(57, 255, 20);
-        noStroke();
+      if (cell === "pixel" || cell === 4) {
+        fill(57, 255, 20, 255); noStroke();
         rect(x * cellSize, y * cellSize, cellSize, cellSize);
-      } else if (cell === "text") {
-        // fill(0);
-        fill(57, 255, 20);
-        textAlign(CENTER, CENTER);
-        textSize(cellSize);
-        text(
-          currentText,
-          x * cellSize + cellSize / 2,
-          y * cellSize + cellSize / 2,
-        );
-      } else if (cell !== null) {
-        // fill(0);
-        fill(57, 255, 20);
-        textAlign(CENTER, CENTER);
-        textSize(cellSize);
+      } else if (pixelAlpha[cell] !== undefined) {
+        fill(57, 255, 20, pixelAlpha[cell]); noStroke();
+        rect(x * cellSize, y * cellSize, cellSize, cellSize);
+      } else if (cell === "text" || cell === "#" || cell === "#4") {
+        const ch = currentText.length > 1
+          ? currentText[(textCellIdx[`${x},${y}`] ?? 0) % currentText.length]
+          : currentText;
+        fill(57, 255, 20, 255);
+        textAlign(CENTER, CENTER); textSize(cellSize);
+        text(ch, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+      } else if (textAlpha[cell] !== undefined) {
+        const ch = currentText.length > 1
+          ? currentText[(textCellIdx[`${x},${y}`] ?? 0) % currentText.length]
+          : currentText;
+        fill(57, 255, 20, textAlpha[cell]);
+        textAlign(CENTER, CENTER); textSize(cellSize);
+        text(ch, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+      } else if (cell !== null && cell !== "/") {
+        fill(57, 255, 20, 255);
+        textAlign(CENTER, CENTER); textSize(cellSize);
         text(cell, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
       }
     }
@@ -87,7 +103,7 @@ function setEraser() {
 function setClear() {
   for (let y = 0; y < 32; y++) {
     for (let x = 0; x < 32; x++) {
-      grid[y][x] = null;
+      grid[y][x] = "/";
     }
   }
   petCanvas.clear();
@@ -127,32 +143,50 @@ function touchMoved() {
   let petX = floor((x / width) * 32);
   let petY = floor((y / height) * 32);
   if (petX >= 0 && petX < 32 && petY >= 0 && petY < 32) {
-    petCanvas.loadPixels();
+    const cur = grid[petY][petX];
+    let newVal = cur;
 
-    // Undo Function: 记录被修改的格子和它们的旧值
-    const key = `${petX},${petY}`;
-    if (!strokeCells.has(key)) {
-      strokeCells.add(key);
-      currentStroke.push({ x: petX, y: petY, oldVal: grid[petY][petX] });
-    }
-
-    // Brush
     if (tool === "brush") {
-      // console.log("Using brush tool");
-      // petCanvas.set(petX, petY, color(0));
       if (currentText !== "") {
-        grid[petY][petX] = "text";
+        // 文字模式：逐级加深
+        if (cur === "/" || cur === null) {
+          newVal = "#1";
+        } else if (cur === "#1") {
+          newVal = "#2";
+        } else if (cur === "#2") {
+          newVal = "#3";
+        } else if (cur === "#3") {
+          newVal = "#4";
+        } else if (typeof cur === "number") {
+          newVal = `#${cur}`; // 已有像素格 → 同级文字格
+        }
+        // "#4", "#", "text" stays
       } else {
-        grid[petY][petX] = "pixel";
+        // 像素模式：逐级加深
+        if (cur === "/" || cur === null) {
+          newVal = 1;
+        } else if (cur === 1) {
+          newVal = 2;
+        } else if (cur === 2) {
+          newVal = 3;
+        } else if (cur === 3) {
+          newVal = 4;
+        }
+        // cur === 4 or "pixel" stays at max
       }
+    } else if (tool === "eraser") {
+      newVal = "/";
     }
-    // Eraser
-    else if (tool === "eraser") {
-      // console.log("Using erasor tool");
-      // petCanvas.set(petX, petY, color(0, 0, 0, 0));
-      grid[petY][petX] = null;
+
+    if (newVal !== cur) {
+      // 只在首次修改时记录旧值，供撤销使用
+      const key = `${petX},${petY}`;
+      if (!strokeCells.has(key)) {
+        strokeCells.add(key);
+        currentStroke.push({ x: petX, y: petY, oldVal: cur });
+      }
+      grid[petY][petX] = newVal;
     }
-    petCanvas.updatePixels();
   }
 
   return false;
@@ -221,10 +255,18 @@ function drawText() {
     currentText = input;
   }
 
+  // 把已有的像素格子转成同级别的文字格子
   for (let y = 0; y < 32; y++) {
     for (let x = 0; x < 32; x++) {
-      if (grid[y][x] === "pixel") {
-        grid[y][x] = "text";
+      const cell = grid[y][x];
+      if (cell === "pixel" || cell === 4) {
+        grid[y][x] = "#4";
+      } else if (cell === 3) {
+        grid[y][x] = "#3";
+      } else if (cell === 2) {
+        grid[y][x] = "#2";
+      } else if (cell === 1) {
+        grid[y][x] = "#1";
       }
     }
   }
