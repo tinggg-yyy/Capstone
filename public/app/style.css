@@ -146,7 +146,18 @@ canvas {
 }
 
 .tut-word-en {
+  display: inline-block;
+  color: #00ff41;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
   border-bottom: 1px dashed rgba(0, 255, 65, 0.5);
+  position: relative;
+}
+
+.tut-word-en.tut-glitching {
+  animation: wordGlitch 0.45s ease-out forwards;
 }
 
 /* Interactive keyword spans */
@@ -2278,4 +2289,9 @@ textarea::placeholder {
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 4px;
+}
+
+/* Green mixed-breed checkbox */
+#isMixed:checked + span::before {
+  color: #00ff41 !important;
 }

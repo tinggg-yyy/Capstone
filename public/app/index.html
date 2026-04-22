@@ -126,6 +126,50 @@
             </select>
           </div>
         </div>
+        <div style="margin-top:14px;">
+          <label>
+            <input class="nes-checkbox" type="checkbox" id="isMixed" onchange="onMixedBreedChange()" />
+            <span>混血种族 / Mixed Heritage</span>
+          </label>
+        </div>
+        <div id="mixedBreedExtra" class="hidden" style="margin-top:8px;">
+          <label>第二族裔大类 / 2nd Heritage Class</label>
+          <div class="nes-select">
+            <select id="petBreedClass2" onchange="onBreedClass2Change()">
+              <option value="" disabled selected hidden>选择大类 / Select class...</option>
+              <option value="哺乳类 / Mammals">哺乳类 / Mammals</option>
+              <option value="鸟类 / Birds">鸟类 / Birds</option>
+              <option value="爬行类 / Reptiles">爬行类 / Reptiles</option>
+              <option value="两栖类 / Amphibians">两栖类 / Amphibians</option>
+              <option value="节肢动物 / Arthropods">节肢动物 / Arthropods</option>
+              <option value="鱼类 / Fish">鱼类 / Fish</option>
+            </select>
+          </div>
+          <div id="breedSubgroupWrapper2" class="hidden">
+            <label>细类 / Subgroup</label>
+            <div class="nes-select">
+              <select id="petBreedSubgroup2" onchange="onBreedSubgroup2Change()">
+                <option value="" disabled selected hidden>选择细类 / Select subgroup...</option>
+              </select>
+            </div>
+          </div>
+          <div id="breedSubSubgroupWrapper2" class="hidden">
+            <label>子类 / Sub-group</label>
+            <div class="nes-select">
+              <select id="petBreedSubSubgroup2" onchange="onBreedSubSubgroup2Change()">
+                <option value="" disabled selected hidden>选择子类 / Select sub-group...</option>
+              </select>
+            </div>
+          </div>
+          <div id="breedSpecificWrapper2" class="hidden">
+            <label>物种 / Species</label>
+            <div class="nes-select">
+              <select id="petBreed2" onchange="updateHeightOptions2()">
+                <option value="" disabled selected hidden>选择物种 / Select species...</option>
+              </select>
+            </div>
+          </div>
+        </div>
         <div id="heightWrapper" class="hidden">
           <label>身高 / Height</label>
           <div class="nes-select">
@@ -598,9 +642,9 @@
       <div class="tutorial-inner">
         <div class="tutorial-text">
           <p class="tut-line" id="tut-line-1">所有文字都可以<span class="tut-word" id="tut-word-long">长按</span>或者<span class="tut-word tut-short-wrap" id="tut-word-short">短按<span class="tut-float-text tut-hidden" id="tut-float-text"></span></span>看看</p>
-          <p class="tut-line-en">Try <span class="tut-word-en">holding</span> or <span class="tut-word-en">tapping</span> any text</p>
+          <p class="tut-line-en">Try <span class="tut-word-en" id="tut-word-en-long">holding</span> or <span class="tut-word-en tut-short-wrap" id="tut-word-en-short">tapping<span class="tut-float-text tut-hidden" id="tut-float-text-en"></span></span> any text</p>
           <p class="tut-line">有<span class="tut-word" id="tut-word-agree">赞同</span>的文字也按按看吧</p>
-          <p class="tut-line-en">Press text you <span class="tut-word-en">agree</span> with too</p>
+          <p class="tut-line-en">Press text you <span class="tut-word-en" id="tut-word-en-agree">agree</span> with too</p>
         </div>
         <div id="tut-enter-wrap" class="tut-enter-wrap tut-hidden" onclick="enterSwipePage()">
           <span class="tut-enter-word">will be helpful</span><span class="tut-ellipsis">...</span>
