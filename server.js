@@ -179,25 +179,49 @@ app.post("/impression", function (req, res) {
   });
 
   if (profile.grid && impression) {
-    // 收集所有非null的格子
+    // 只收集视觉上有内容的格子（排除 null 和橡皮擦标记 "/"）
     let filledCells = [];
     for (let y = 0; y < 32; y++) {
       for (let x = 0; x < 32; x++) {
-        if (profile.grid[y][x] !== null) {
+        const cell = profile.grid[y][x];
+        if (cell !== null && cell !== "/") {
           filledCells.push({ x, y });
         }
       }
     }
 
-    // 随机选5个替换
-    for (let i = 0; i < 5; i++) {
-      if (filledCells.length === 0) break;
-      const idx = Math.floor(Math.random() * filledCells.length);
-      const { x, y } = filledCells[idx];
-      profile.grid[y][x] = impression[0];
-      filledCells.splice(idx, 1);
+    if (filledCells.length >= impression.length) {
+      const CELL_ALPHA = { 1: 0.25, 2: 0.49, 3: 0.75, 4: 1, "pixel": 1, "text": 1, "#": 1,
+        "#1": 0.25, "#2": 0.49, "#3": 0.75, "#4": 1 };
+      const cellAlpha = (cell) => {
+        if (Array.isArray(cell)) return cell[1];
+        return CELL_ALPHA[cell] ?? 1;
+      };
+      filledCells.sort((a, b) => a.y !== b.y ? a.y - b.y : a.x - b.x);
+      const reps = Math.min(Math.floor(20 / impression.length) || 1, Math.floor(filledCells.length / impression.length));
+      const used = new Set();
+      for (let r = 0; r < reps; r++) {
+        let placed = false;
+        for (let attempt = 0; attempt < 60; attempt++) {
+          const start = Math.floor(Math.random() * (filledCells.length - impression.length + 1));
+          let ok = true;
+          for (let c = 0; c < impression.length; c++) {
+            if (used.has(start + c)) { ok = false; break; }
+          }
+          if (ok) {
+            for (let c = 0; c < impression.length; c++) {
+              const { x, y } = filledCells[start + c];
+              const alpha = cellAlpha(profile.grid[y][x]);
+              profile.grid[y][x] = alpha === 1 ? impression[c] : [impression[c], alpha];
+              used.add(start + c);
+            }
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) break;
+      }
     }
-    console.log("filled cells:", filledCells.length);
   }
 
   fs.writeFileSync("profiles.json", stringifyProfiles(profiles));

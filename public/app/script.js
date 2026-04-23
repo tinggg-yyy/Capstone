@@ -1831,65 +1831,86 @@ function _tutCheck() {
 function initTutorial() {
   _tutDone = { short: false, long: false, longText: "", agree: 0 };
 
-  const wordLong  = document.getElementById("tut-word-long");
-  const wordShort = document.getElementById("tut-word-short");
-  const wordAgree = document.getElementById("tut-word-agree");
-  const enterBtn  = document.getElementById("tut-enter-wrap");
+  const wordLong    = document.getElementById("tut-word-long");
+  const wordShort   = document.getElementById("tut-word-short");
+  const wordAgree   = document.getElementById("tut-word-agree");
+  const wordEnLong  = document.getElementById("tut-word-en-long");
+  const wordEnShort = document.getElementById("tut-word-en-short");
+  const wordEnAgree = document.getElementById("tut-word-en-agree");
+  const enterBtn    = document.getElementById("tut-enter-wrap");
   if (enterBtn) enterBtn.classList.add("tut-hidden");
 
   // Reset agree font-size
-  if (wordAgree) wordAgree.style.fontSize = "";
+  if (wordAgree)   wordAgree.style.fontSize = "";
+  if (wordEnAgree) wordEnAgree.style.fontSize = "";
 
-  // ── 长按: long-press (500ms) opens popup; short tap just glitches
-  function onLongStart(e) {
-    e.preventDefault();
-    _tutLongTimer = setTimeout(() => {
-      _tutLongTimer = null;
-      _tutGlitch(wordLong);
-      const popup = document.getElementById("tut-popup");
-      const input = document.getElementById("tut-popup-input");
-      if (popup) popup.classList.remove("tut-hidden");
-      if (input) { input.value = ""; input.focus(); }
-    }, 500);
+  // ── 长按 / holding: long-press (500ms) opens popup; short tap just glitches
+  function onLongStart(el) {
+    return (e) => {
+      e.preventDefault();
+      _tutLongTimer = setTimeout(() => {
+        _tutLongTimer = null;
+        _tutGlitch(el);
+        const popup = document.getElementById("tut-popup");
+        const input = document.getElementById("tut-popup-input");
+        if (popup) popup.classList.remove("tut-hidden");
+        if (input) { input.value = ""; input.focus(); }
+      }, 500);
+    };
   }
-  function onLongEnd() {
-    if (_tutLongTimer) {
-      clearTimeout(_tutLongTimer);
-      _tutLongTimer = null;
-      _tutGlitch(wordLong);
-    }
-  }
-  wordLong.addEventListener("touchstart", onLongStart, { passive: false });
-  wordLong.addEventListener("touchend",   onLongEnd);
-  wordLong.addEventListener("touchcancel", onLongEnd);
-  wordLong.addEventListener("mousedown",  onLongStart);
-  wordLong.addEventListener("mouseup",    onLongEnd);
-
-  // ── 短按: tap glitches; if long-press text stored, float it near 短按
-  wordShort.addEventListener("click", () => {
-    _tutGlitch(wordShort);
-    if (_tutDone.longText) {
-      const ft = document.getElementById("tut-float-text");
-      if (ft) {
-        ft.textContent = _tutDone.longText;
-        ft.classList.remove("tut-hidden");
-        // re-trigger float animation each tap
-        ft.style.animation = "none";
-        void ft.offsetWidth;
-        ft.style.animation = "";
+  function onLongEnd(el) {
+    return () => {
+      if (_tutLongTimer) {
+        clearTimeout(_tutLongTimer);
+        _tutLongTimer = null;
+        _tutGlitch(el);
       }
-      if (!_tutDone.short) { _tutDone.short = true; _tutCheck(); }
-    }
+    };
+  }
+
+  [wordLong, wordEnLong].forEach((el) => {
+    if (!el) return;
+    el.addEventListener("touchstart",  onLongStart(el), { passive: false });
+    el.addEventListener("touchend",    onLongEnd(el));
+    el.addEventListener("touchcancel", onLongEnd(el));
+    el.addEventListener("mousedown",   onLongStart(el));
+    el.addEventListener("mouseup",     onLongEnd(el));
   });
 
-  // ── 赞同: each tap grows the text; done after _TUT_AGREE_MIN taps
-  wordAgree.addEventListener("click", () => {
-    _tutGlitch(wordAgree);
-    _tutDone.agree++;
-    const size = 18 + _tutDone.agree * 5;
-    wordAgree.style.fontSize = size + "px";
-    if (_tutDone.agree >= _TUT_AGREE_MIN) _tutCheck();
-  });
+  // ── 短按 / tapping: tap glitches; if long-press text stored, float it
+  function makeShortHandler(el, floatId) {
+    return () => {
+      _tutGlitch(el);
+      if (_tutDone.longText) {
+        const ft = document.getElementById(floatId);
+        if (ft) {
+          ft.textContent = _tutDone.longText;
+          ft.classList.remove("tut-hidden");
+          ft.style.animation = "none";
+          void ft.offsetWidth;
+          ft.style.animation = "";
+        }
+        if (!_tutDone.short) { _tutDone.short = true; _tutCheck(); }
+      }
+    };
+  }
+  if (wordShort)   wordShort.addEventListener("click",   makeShortHandler(wordShort,   "tut-float-text"));
+  if (wordEnShort) wordEnShort.addEventListener("click",  makeShortHandler(wordEnShort, "tut-float-text-en"));
+
+  // ── 赞同 / agree: each tap grows the text; done after _TUT_AGREE_MIN taps
+  function makeAgreeHandler(el, enEl) {
+    return () => {
+      _tutGlitch(el);
+      if (enEl) _tutGlitch(enEl);
+      _tutDone.agree++;
+      const size = 18 + _tutDone.agree * 5;
+      el.style.fontSize   = size + "px";
+      if (enEl) enEl.style.fontSize = size + "px";
+      if (_tutDone.agree >= _TUT_AGREE_MIN) _tutCheck();
+    };
+  }
+  if (wordAgree)   wordAgree.addEventListener("click",   makeAgreeHandler(wordAgree, wordEnAgree));
+  if (wordEnAgree) wordEnAgree.addEventListener("click",  makeAgreeHandler(wordEnAgree, wordAgree));
 }
 
 function submitTutLongPress() {
@@ -4556,7 +4577,7 @@ function _sendRealFakeMsg(sender, content, alertStyle) {
 }
 
 function _startFloodMessages() {
-  const burstDelays = [1200, 3000, 5500, 8500, 12000, 16000, 21000, 27000];
+  const burstDelays = [4000, 9000, 16000, 24000, 33000, 43000, 54000, 66000];
   burstDelays.forEach((delay, i) => {
     const t = setTimeout(() => {
       if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
@@ -4593,7 +4614,7 @@ function _startFloodMessages() {
 // ── Male: flood of skip notifications ─────────────────────────
 
 function _startFloodSkips() {
-  const burstDelays = [900, 2200, 3800, 5600, 7800, 10500, 13500, 17000, 21000];
+  const burstDelays = [3000, 7000, 12000, 18000, 25000, 33000, 42000, 52000, 63000];
   burstDelays.forEach((delay) => {
     const t = setTimeout(() => {
       if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
@@ -5125,38 +5146,78 @@ function saveMyProfile() {
 }
 
 // Impression Function
+const _CELL_ALPHA = { 1: 0.25, 2: 0.49, 3: 0.75, 4: 1, "pixel": 1, "text": 1, "#": 1,
+  "#1": 0.25, "#2": 0.49, "#3": 0.75, "#4": 1 };
+function _cellAlpha(cell) {
+  if (Array.isArray(cell)) return cell[1];
+  return _CELL_ALPHA[cell] ?? 1;
+}
+
+function _applyImpressionToGrid(grid, text) {
+  if (!grid || !text) return;
+  const filled = [];
+  for (let y = 0; y < 32; y++) {
+    for (let x = 0; x < 32; x++) {
+      const cell = grid[y][x];
+      if (cell !== null && cell !== "/") filled.push({ x, y });
+    }
+  }
+  if (filled.length < text.length) return;
+
+  filled.sort((a, b) => a.y !== b.y ? a.y - b.y : a.x - b.x);
+
+  const reps = Math.min(Math.floor(20 / text.length) || 1, Math.floor(filled.length / text.length));
+  const used = new Set();
+
+  for (let r = 0; r < reps; r++) {
+    let placed = false;
+    for (let attempt = 0; attempt < 60; attempt++) {
+      const start = Math.floor(Math.random() * (filled.length - text.length + 1));
+      let ok = true;
+      for (let c = 0; c < text.length; c++) {
+        if (used.has(start + c)) { ok = false; break; }
+      }
+      if (ok) {
+        for (let c = 0; c < text.length; c++) {
+          const { x, y } = filled[start + c];
+          const alpha = _cellAlpha(grid[y][x]);
+          grid[y][x] = alpha === 1 ? text[c] : [text[c], alpha];
+          used.add(start + c);
+        }
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) break;
+  }
+}
+
 function impression(text) {
   if (!text) return;
 
-  // No more pets
   if (currentIndex >= profiles.length) {
     alert("没有更多兽人可以评论了 / No more anthros to comment on");
     return;
   }
 
-  const currentUsername = profiles[currentIndex].username;
+  const profile = profiles[currentIndex];
 
+  // Apply locally and re-render avatar immediately
+  if (profile.grid) {
+    _applyImpressionToGrid(profile.grid, text);
+    showProfile();
+  }
+
+  // Persist to server in the background
   fetch("/impression", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      likedUsername: currentUsername,
+      likedUsername: profile.username,
       commenterName: currentUser.name,
       impression: text,
     }),
-  })
-    .then((res) => res.json())
-    .then(() => {
-      fetch("/profiles")
-        .then((res) => res.json())
-        .then((data) => {
-          profiles = data.filter((p) => p.username !== currentUser.username);
-          currentIndex = profiles.findIndex(
-            (p) => p.username === currentUsername,
-          );
-          showProfile();
-        });
-    });
+  });
 }
 
 function openImpressionPopup() {
@@ -5211,9 +5272,6 @@ function renderGridAsAvatar(grid, gridText) {
   const ctx = canvas.getContext("2d");
 
   const cellSize = size / 32;
-  ctx.fillStyle = "#000000";
-  ctx.fillRect(0, 0, size, size);
-
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = `${cellSize}px monospace`;
@@ -5241,6 +5299,13 @@ function renderGridAsAvatar(grid, gridText) {
         ctx.fillStyle = `rgba(57, 255, 20, ${textAlpha[cell]})`;
         ctx.fillText(
           gridText,
+          x * cellSize + cellSize / 2,
+          y * cellSize + cellSize / 2,
+        );
+      } else if (Array.isArray(cell)) {
+        ctx.fillStyle = `rgba(57, 255, 20, ${cell[1]})`;
+        ctx.fillText(
+          cell[0],
           x * cellSize + cellSize / 2,
           y * cellSize + cellSize / 2,
         );
