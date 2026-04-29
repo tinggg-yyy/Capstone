@@ -36,9 +36,15 @@ function handleLogin() {
 
 // Page Navigation Function
 const _setupPageOrder = [
-  "profile-name","profile-breed","profile-gender","profile-housing",
-  "profile-sterilized","profile-mbti",
-  "profile-hobbies","profile-edu","profile-photo"
+  "profile-name",
+  "profile-breed",
+  "profile-gender",
+  "profile-housing",
+  "profile-sterilized",
+  "profile-mbti",
+  "profile-hobbies",
+  "profile-edu",
+  "profile-photo",
 ];
 let _currentScore = 100;
 
@@ -53,10 +59,15 @@ function goTo(id) {
     _currentScore = newTotal;
     if (delta !== 0) showScoreDelta(delta);
     const badge = document.getElementById("score-running-badge");
-    if (badge) { badge.style.display = "block"; badge.textContent = `SCORE: ${_currentScore}`; }
+    if (badge) {
+      badge.style.display = "block";
+      badge.textContent = `SCORE: ${_currentScore}`;
+    }
   }
 
-  document.querySelectorAll(".page").forEach((p) => { p.classList.remove("active"); });
+  document.querySelectorAll(".page").forEach((p) => {
+    p.classList.remove("active");
+  });
   const target = document.getElementById(id);
   if (target) {
     target.classList.add("active");
@@ -71,20 +82,30 @@ function goTo(id) {
 function getTotalProfileScore() {
   let score = 100;
   const ids = [
-    "house-type","house-garden","house-area","house-tenure",
-    "house-ownership","house-mortgage","house-price",
-    "petIncome","petEdu","petOccupation","petSterilized",
-    "petBreedClass","petOrientation",
+    "house-type",
+    "house-garden",
+    "house-area",
+    "house-tenure",
+    "house-ownership",
+    "house-mortgage",
+    "house-price",
+    "petIncome",
+    "petEdu",
+    "petOccupation",
+    "petSterilized",
+    "petBreedClass",
+    "petOrientation",
   ];
   ids.forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     const val = el.value.trim();
-    if (val && SCORE_DEDUCTIONS[val] !== undefined) score += SCORE_DEDUCTIONS[val];
+    if (val && SCORE_DEDUCTIONS[val] !== undefined)
+      score += SCORE_DEDUCTIONS[val];
   });
   score += getHobbyScore();
-  if (document.getElementById("isMixed")?.checked) score -= 20;
-  return Math.max(0, Math.min(100, score));
+  if (document.getElementById("isMixed")?.checked) score -= 10;
+  return Math.max(0, score);
 }
 
 function showScoreDelta(delta) {
@@ -100,7 +121,7 @@ function animateSettlement(finalScore) {
   if (!overlay) return;
   const numEl = overlay.querySelector(".settle-number");
   overlay.classList.add("active");
-  let current = 100;
+  let current = finalScore + 30;
   const iv = setInterval(() => {
     current = Math.max(finalScore, current - 1);
     numEl.textContent = current;
@@ -110,6 +131,56 @@ function animateSettlement(finalScore) {
     }
   }, 28);
 }
+
+// ── MBTI Custom Picker ──────────────────────────────────────────────────────
+const MBTI_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ?!*~@&+−=^%$#/|.,()[]{}";
+
+function toggleMbtiPicker(id) {
+  // close all other open pickers first
+  document.querySelectorAll(".mbti-char-picker:not(.hidden)").forEach((el) => {
+    if (el.id !== id + "-picker") el.classList.add("hidden");
+  });
+
+  const picker = document.getElementById(id + "-picker");
+  if (!picker) return;
+
+  if (picker.classList.contains("hidden")) {
+    if (!picker.children.length) {
+      const current = document.getElementById(id)?.value;
+      MBTI_CHARS.split("").forEach((ch) => {
+        const btn = document.createElement("button");
+        btn.className = "mbti-char-btn" + (ch === current ? " active" : "");
+        btn.textContent = ch;
+        btn.onclick = (e) => { e.stopPropagation(); selectMbtiChar(id, ch); };
+        picker.appendChild(btn);
+      });
+    } else {
+      // update active state
+      const current = document.getElementById(id)?.value;
+      picker.querySelectorAll(".mbti-char-btn").forEach((b) => {
+        b.classList.toggle("active", b.textContent === current);
+      });
+    }
+    picker.classList.remove("hidden");
+  } else {
+    picker.classList.add("hidden");
+  }
+}
+
+function selectMbtiChar(id, ch) {
+  const input = document.getElementById(id);
+  const display = document.getElementById(id + "-display");
+  if (input) input.value = ch;
+  if (display) display.textContent = ch;
+  document.getElementById(id + "-picker")?.classList.add("hidden");
+}
+
+// close pickers when clicking outside
+document.addEventListener("click", () => {
+  document.querySelectorAll(".mbti-char-picker:not(.hidden)").forEach((el) => {
+    el.classList.add("hidden");
+  });
+});
 
 function rollGenericTierDice(btnId, displayId, inputId, tierMap) {
   const btn = document.getElementById(btnId);
@@ -130,10 +201,10 @@ function rollGenericTierDice(btnId, displayId, inputId, tierMap) {
       const remaining = MAX_HOUSING_ROLLS - parseInt(btn.dataset.rolls, 10);
       btn.disabled = remaining <= 0;
       if (remaining <= 0) btn.classList.add("dice-exhausted");
-      else btn.title = `还可摇 ${remaining} 次`;
+      else btn.title = `还可摇 ${remaining} 次 / ${remaining} rolls left`;
       const value = tierMap[roll];
       if (inputId) document.getElementById(inputId).value = value;
-      display.textContent = value;
+      display.textContent = disp(value);
     }
   }, 70);
 }
@@ -228,7 +299,7 @@ function confirmDate() {
 //Age Calculation
 function getPetAge() {
   const value = document.getElementById("birthDisplay").value;
-  if (!value) return "未知";
+  if (!value) return "未知 / Unknown";
 
   const birth = new Date(value);
   const today = new Date();
@@ -241,11 +312,11 @@ function getPetAge() {
   const months = Math.abs(totalMonths % 12);
 
   if (years === 0) {
-    return `${months}个月`;
+    return `${months}个月 / ${months}mo`;
   } else if (months === 0) {
-    return `${years}岁`;
+    return `${years}岁 / ${years}yo`;
   } else {
-    return `${years}.${months}岁`;
+    return `${years}.${months}岁 / ${years}.${months}yo`;
   }
 }
 
@@ -255,106 +326,195 @@ const breedSubgroups = {
   "哺乳类 / Mammals": {
     "猫科 / Felines": {
       "家猫 / Domestic Cats": [
-        "猫 / Cat", "野猫 / Wild Cat",
-        "橘猫 / Orange Tabby", "三花猫 / Calico", "狸花猫 / Chinese Tabby",
-        "布偶猫 / Ragdoll", "拿破仑猫 / Napoleon Cat",
-        "英国短毛猫 / British Shorthair", "英短金渐层 / British Shorthair (Golden)",
-        "苏格兰折耳猫 / Scottish Fold", "美国短毛猫 / American Shorthair",
-        "波斯猫 / Persian", "异国短毛猫 / Exotic Shorthair",
-        "暹罗猫 / Siamese", "缅因猫 / Maine Coon",
-        "孟加拉猫 / Bengal Cat", "俄罗斯蓝猫 / Russian Blue",
-        "挪威森林猫 / Norwegian Forest Cat", "斯芬克斯猫 / Sphynx",
+        "猫 / Cat",
+        "野猫 / Wild Cat",
+        "橘猫 / Orange Tabby",
+        "三花猫 / Calico",
+        "狸花猫 / Chinese Tabby",
+        "布偶猫 / Ragdoll",
+        "拿破仑猫 / Napoleon Cat",
+        "英国短毛猫 / British Shorthair",
+        "英短金渐层 / British Shorthair (Golden)",
+        "苏格兰折耳猫 / Scottish Fold",
+        "美国短毛猫 / American Shorthair",
+        "波斯猫 / Persian",
+        "异国短毛猫 / Exotic Shorthair",
+        "暹罗猫 / Siamese",
+        "缅因猫 / Maine Coon",
+        "孟加拉猫 / Bengal Cat",
+        "俄罗斯蓝猫 / Russian Blue",
+        "挪威森林猫 / Norwegian Forest Cat",
+        "斯芬克斯猫 / Sphynx",
       ],
       "大型猫科 / Big Cats": [
         "猎豹 / Cheetah",
-        "豹 / Leopard", "雪豹 / Leopard (Snow)", "黑豹 / Black Panther",
-        "狮子 / Lion", "非洲狮 / Lion (African)", "亚洲狮 / Lion (Asiatic)", "刚果狮 / Lion (Congo)", "马赛狮 / Lion (Maasai)",
+        "豹 / Leopard",
+        "雪豹 / Leopard (Snow)",
+        "黑豹 / Black Panther",
+        "狮子 / Lion",
+        "非洲狮 / Lion (African)",
+        "亚洲狮 / Lion (Asiatic)",
+        "刚果狮 / Lion (Congo)",
+        "马赛狮 / Lion (Maasai)",
         "美洲豹 / Jaguar",
-        "老虎 / Tiger", "孟加拉虎 / Tiger (Bengal)", "西伯利亚虎 / Tiger (Siberian)", "白虎 / Tiger (White)",
+        "老虎 / Tiger",
+        "孟加拉虎 / Tiger (Bengal)",
+        "西伯利亚虎 / Tiger (Siberian)",
+        "白虎 / Tiger (White)",
         "加拿大猞猁 / Canada Lynx",
       ],
     },
     "犬科 / Canines": {
       "家犬 / Domestic Dogs": [
         "狗 / Dog",
-        "哈士奇 / Husky", "阿拉斯加雪橇犬 / Alaskan Malamute", "萨摩耶 / Samoyed",
-        "金毛寻回犬 / Golden Retriever", "拉布拉多寻回犬 / Dog (Labrador Retriever)",
-        "德国牧羊犬 / German Shepherd", "边境牧羊犬 / Dog (Border Collie)",
-        "古英格兰牧羊犬 / Dog (Old English Sheepdog)", "柯基 / Corgi",
-        "贵宾犬 / Poodle", "比熊犬 / Bichon Frise",
-        "腊肠犬 / Dachshund", "比格犬 / Beagle",
-        "法国斗牛犬 / French Bulldog", "英国斗牛犬 / English Bulldog",
-        "松狮犬 / Chow Chow", "秋田犬 / Akita", "柴犬 / Dog (Shiba Inu)",
-        "西施犬 / Shih Tzu", "约克夏梗 / Yorkshire Terrier", "迷你雪纳瑞 / Miniature Schnauzer",
-        "杜宾犬 / Doberman", "罗威纳犬 / Rottweiler", "拳师犬 / Boxer",
-        "大丹犬 / Dog (Great Dane)", "圣伯纳犬 / Dog (Saint Bernard)",
-        "蝴蝶犬 / Dog (Papillon)", "博美犬 / Dog (Pomeranian)", "巴哥犬 / Dog (Pug)",
+        "哈士奇 / Husky",
+        "阿拉斯加雪橇犬 / Alaskan Malamute",
+        "萨摩耶 / Samoyed",
+        "金毛寻回犬 / Golden Retriever",
+        "拉布拉多寻回犬 / Dog (Labrador Retriever)",
+        "德国牧羊犬 / German Shepherd",
+        "边境牧羊犬 / Dog (Border Collie)",
+        "古英格兰牧羊犬 / Dog (Old English Sheepdog)",
+        "柯基 / Corgi",
+        "贵宾犬 / Poodle",
+        "比熊犬 / Bichon Frise",
+        "腊肠犬 / Dachshund",
+        "比格犬 / Beagle",
+        "法国斗牛犬 / French Bulldog",
+        "英国斗牛犬 / English Bulldog",
+        "松狮犬 / Chow Chow",
+        "秋田犬 / Akita",
+        "柴犬 / Dog (Shiba Inu)",
+        "西施犬 / Shih Tzu",
+        "约克夏梗 / Yorkshire Terrier",
+        "迷你雪纳瑞 / Miniature Schnauzer",
+        "杜宾犬 / Doberman",
+        "罗威纳犬 / Rottweiler",
+        "拳师犬 / Boxer",
+        "大丹犬 / Dog (Great Dane)",
+        "圣伯纳犬 / Dog (Saint Bernard)",
+        "蝴蝶犬 / Dog (Papillon)",
+        "博美犬 / Dog (Pomeranian)",
+        "巴哥犬 / Dog (Pug)",
         "罗素梗 / Dog (Russell Terrier)",
       ],
       "狼属 / Wolves": [
-        "狼 / Wolf", "灰狼 / Wolf (Gray)", "白狼 / Wolf (White)",
+        "狼 / Wolf",
+        "灰狼 / Wolf (Gray)",
+        "白狼 / Wolf (White)",
       ],
       "狐属 / Foxes": [
-        "狐狸 / Fox", "赤狐 / Fox (Red)", "藏狐 / Fox (Tibetan)", "耳廓狐 / Fennec Fox",
+        "狐狸 / Fox",
+        "赤狐 / Fox (Red)",
+        "藏狐 / Fox (Tibetan)",
+        "耳廓狐 / Fennec Fox",
       ],
       "野生犬科 / Wild Canines": [
-        "郊狼 / Coyote", "豺 / Jackal", "澳洲野犬 / Dingo", "非洲野犬 / African Wild Dog",
+        "郊狼 / Coyote",
+        "豺 / Jackal",
+        "澳洲野犬 / Dingo",
+        "非洲野犬 / African Wild Dog",
       ],
     },
     "熊科 / Bears": [
-      "熊 / Bear", "亚洲黑熊 / Bear (Asian Black)", "棕熊 / Bear (Brown)", "北极熊 / Bear (Polar)",
+      "熊 / Bear",
+      "亚洲黑熊 / Bear (Asian Black)",
+      "棕熊 / Bear (Brown)",
+      "北极熊 / Bear (Polar)",
       "大熊猫 / Giant Panda",
     ],
     "灵长类 / Primates": [
-      "猴 / Monkey", "狒狒 / Baboon", "山魈 / Mandrill",
-      "猩猩 / Orangutan", "山地大猩猩 / Mountain Gorilla", "狐猴 / Lemur",
+      "猴 / Monkey",
+      "狒狒 / Baboon",
+      "山魈 / Mandrill",
+      "猩猩 / Orangutan",
+      "山地大猩猩 / Mountain Gorilla",
+      "狐猴 / Lemur",
     ],
     "啮齿类 / Rodents": [
-      "鼠 / Mouse", "大鼠 / Rat", "仓鼠 / Hamster", "豚鼠 / Guinea Pig",
-      "龙猫 / Chinchilla", "松鼠 / Squirrel", "花栗鼠 / Chipmunk",
-      "鼯鼠 / Flying Squirrel", "蒙古沙鼠 / Mongolian Gerbil", "河狸 / Beaver",
+      "鼠 / Mouse",
+      "大鼠 / Rat",
+      "仓鼠 / Hamster",
+      "豚鼠 / Guinea Pig",
+      "龙猫 / Chinchilla",
+      "松鼠 / Squirrel",
+      "花栗鼠 / Chipmunk",
+      "鼯鼠 / Flying Squirrel",
+      "蒙古沙鼠 / Mongolian Gerbil",
+      "河狸 / Beaver",
       "山绒鼠 / Viscacha",
     ],
     "兔形目 / Lagomorphs": [
-      "兔子 / Rabbit", "花斑兔 / Rabbit (Harlequin)", "垂耳兔 / Rabbit (Lop-eared)",
-      "迷你雷克斯兔 / Rabbit (Mini Rex)", "荷兰侏儒兔 / Rabbit (Netherland Dwarf)",
+      "兔子 / Rabbit",
+      "花斑兔 / Rabbit (Harlequin)",
+      "垂耳兔 / Rabbit (Lop-eared)",
+      "迷你雷克斯兔 / Rabbit (Mini Rex)",
+      "荷兰侏儒兔 / Rabbit (Netherland Dwarf)",
     ],
     "有蹄类 / Ungulates": [
-      "马 / Horse", "斑马 / Zebra", "驴 / Donkey",
-      "牛 / Cow", "水牛 / Buffalo", "骆驼 / Camel",
-      "犀牛 / Rhinoceros", "河马 / Hippopotamus", "大象 / Elephant",
-      "疣猪 / Warthog", "约克夏猪 / Yorkshire Pig", "貘 / Tapir",
+      "马 / Horse",
+      "斑马 / Zebra",
+      "驴 / Donkey",
+      "牛 / Cow",
+      "水牛 / Buffalo",
+      "骆驼 / Camel",
+      "犀牛 / Rhinoceros",
+      "河马 / Hippopotamus",
+      "大象 / Elephant",
+      "疣猪 / Warthog",
+      "约克夏猪 / Yorkshire Pig",
+      "貘 / Tapir",
     ],
     "鹿 & 长颈鹿科 / Deer & Giraffids": [
-      "马鹿 / Red Deer", "梅花鹿 / Spotted Deer", "驼鹿 / Moose",
-      "霍加皮 / Okapi", "长颈鹿 / Giraffe",
+      "马鹿 / Red Deer",
+      "梅花鹿 / Spotted Deer",
+      "驼鹿 / Moose",
+      "霍加皮 / Okapi",
+      "长颈鹿 / Giraffe",
     ],
     "羊羚类 / Bovids": [
-      "绵羊 / Sheep", "达尔绵羊 / Sheep (Dall)", "美利奴绵羊 / Sheep (Merino)",
-      "山羊 / Goat", "安哥拉山羊 / Angora Goat", "羊驼 / Alpaca",
-      "瞪羚 / Gazelle", "汤氏瞪羚 / Thomson's Gazelle", "黑斑羚 / Impala",
-      "高鼻羚羊 / Saiga Antelope", "大角羚 / Oryx",
+      "绵羊 / Sheep",
+      "达尔绵羊 / Sheep (Dall)",
+      "美利奴绵羊 / Sheep (Merino)",
+      "山羊 / Goat",
+      "安哥拉山羊 / Angora Goat",
+      "羊驼 / Alpaca",
+      "瞪羚 / Gazelle",
+      "汤氏瞪羚 / Thomson's Gazelle",
+      "黑斑羚 / Impala",
+      "高鼻羚羊 / Saiga Antelope",
+      "大角羚 / Oryx",
     ],
     "鼬科 / Mustelids": [
-      "雪貂 / Ferret", "水獭 / Otter", "海獭 / Sea Otter",
-      "白鼬 / Stoat", "蜜獾 / Honey Badger", "日本獾 / Japanese Badger",
+      "雪貂 / Ferret",
+      "水獭 / Otter",
+      "海獭 / Sea Otter",
+      "白鼬 / Stoat",
+      "蜜獾 / Honey Badger",
+      "日本獾 / Japanese Badger",
     ],
     "鬣狗科 / Hyenas": [
-      "斑点鬣狗 / Hyena (Spotted)", "条纹鬣狗 / Hyena (Striped)",
+      "斑点鬣狗 / Hyena (Spotted)",
+      "条纹鬣狗 / Hyena (Striped)",
     ],
     "海洋哺乳类 / Marine Mammals": [
-      "海豚 / Dolphin", "鲸 / Whale", "斑海豹 / Spotted Seal",
+      "海豚 / Dolphin",
+      "鲸 / Whale",
+      "斑海豹 / Spotted Seal",
     ],
-    "有袋类 / Marsupials": [
-      "袋鼠 / Kangaroo", "考拉 / Koala",
-    ],
-    "翼手目 / Chiroptera": [
-      "蝙蝠 / Bat", "果蝠 / Fruit Bat",
-    ],
+    "有袋类 / Marsupials": ["袋鼠 / Kangaroo", "考拉 / Koala"],
+    "翼手目 / Chiroptera": ["蝙蝠 / Bat", "果蝠 / Fruit Bat"],
     "其他哺乳类 / Other Mammals": [
-      "刺猬 / Hedgehog", "浣熊 / Raccoon", "狸 / Tanuki", "麝香猫 / Civet",
-      "猫鼬 / Mongoose", "臭鼬 / Skunk", "鼹鼠 / Mole",
-      "小熊猫 / Red Panda", "树懒 / Sloth", "小食蚁兽 / Anteater (Tamandua)",
+      "刺猬 / Hedgehog",
+      "浣熊 / Raccoon",
+      "狸 / Tanuki",
+      "麝香猫 / Civet",
+      "猫鼬 / Mongoose",
+      "臭鼬 / Skunk",
+      "鼹鼠 / Mole",
+      "小熊猫 / Red Panda",
+      "树懒 / Sloth",
+      "小食蚁兽 / Anteater (Tamandua)",
     ],
   },
 };
@@ -443,242 +603,244 @@ const breedData = {
 // ── Height ranges per breed [min, max] in cm, step 5 ─────────
 const breedHeight = {
   // ── Tiny (20–70) ──
-  "蜘蛛 / Spider":               [20, 65],
-  "蚱蜢 / Grasshopper":          [20, 60],
-  "螃蟹 / Crab":                 [25, 65],
-  "蜈蚣 / Centipede":            [25, 65],
-  "蝎子 / Scorpion":             [25, 70],
-  "独角仙 / Rhinoceros Beetle":  [25, 65],
-  "鼠 / Mouse":                  [30, 70],
+  "蜘蛛 / Spider": [20, 65],
+  "蚱蜢 / Grasshopper": [20, 60],
+  "螃蟹 / Crab": [25, 65],
+  "蜈蚣 / Centipede": [25, 65],
+  "蝎子 / Scorpion": [25, 70],
+  "独角仙 / Rhinoceros Beetle": [25, 65],
+  "鼠 / Mouse": [30, 70],
   "蒙古沙鼠 / Mongolian Gerbil": [30, 70],
-  "花栗鼠 / Chipmunk":           [35, 75],
-  "仓鼠 / Hamster":              [30, 70],
-  "鼯鼠 / Flying Squirrel":      [35, 75],
-  "山绒鼠 / Viscacha":           [40, 80],
-  "大鼠 / Rat":                  [40, 85],
+  "花栗鼠 / Chipmunk": [35, 75],
+  "仓鼠 / Hamster": [30, 70],
+  "鼯鼠 / Flying Squirrel": [35, 75],
+  "山绒鼠 / Viscacha": [40, 80],
+  "大鼠 / Rat": [40, 85],
   // ── Very small (55–115) ──
-  "青蛙 / Frog":                 [50, 95],
-  "蟾蜍 / Toad":                 [50, 95],
-  "蝾螈 / Salamander":           [55, 100],
-  "钝口螈 / Axolotl":            [55, 100],
-  "鼹鼠 / Mole":                 [55, 95],
-  "刺猬 / Hedgehog":             [60, 100],
-  "白鼬 / Stoat":                [60, 100],
-  "壁虎 / Gecko":                [60, 105],
-  "鱼 / Fish":                   [50, 110],
-  "豚鼠 / Guinea Pig":           [65, 110],
-  "龙猫 / Chinchilla":           [70, 115],
-  "蝙蝠 / Bat":                  [65, 110],
-  "果蝠 / Fruit Bat":            [70, 115],
-  "松鼠 / Squirrel":             [45, 90],
+  "青蛙 / Frog": [50, 95],
+  "蟾蜍 / Toad": [50, 95],
+  "蝾螈 / Salamander": [55, 100],
+  "钝口螈 / Axolotl": [55, 100],
+  "鼹鼠 / Mole": [55, 95],
+  "刺猬 / Hedgehog": [60, 100],
+  "白鼬 / Stoat": [60, 100],
+  "壁虎 / Gecko": [60, 105],
+  "鱼 / Fish": [50, 110],
+  "豚鼠 / Guinea Pig": [65, 110],
+  "龙猫 / Chinchilla": [70, 115],
+  "蝙蝠 / Bat": [65, 110],
+  "果蝠 / Fruit Bat": [70, 115],
+  "松鼠 / Squirrel": [45, 90],
   // ── Small (80–145) ──
-  "兔子 / Rabbit":               [80, 140],
+  "兔子 / Rabbit": [80, 140],
   "花斑兔 / Rabbit (Harlequin)": [80, 140],
   "垂耳兔 / Rabbit (Lop-eared)": [80, 140],
-  "迷你雷克斯兔 / Rabbit (Mini Rex)":       [75, 130],
+  "迷你雷克斯兔 / Rabbit (Mini Rex)": [75, 130],
   "荷兰侏儒兔 / Rabbit (Netherland Dwarf)": [65, 120],
-  "雪貂 / Ferret":               [75, 120],
-  "变色龙 / Chameleon":          [70, 115],
-  "蜥蜴 / Lizard":               [70, 120],
-  "石龙子 / Skink":              [70, 120],
-  "鳄蜥 / Crocodile Skink":      [70, 120],
-  "蛇 / Snake":                  [100, 165],
-  "响尾蛇 / Rattlesnake":        [100, 160],
-  "陆龟 / Tortoise":             [90, 145],
-  "龟 / Turtle":                 [85, 140],
-  "鳄龟 / Snapping Turtle":      [90, 150],
-  "金丝雀 / Canary":             [80, 125],
-  "文鸟 / Finch":                [80, 120],
-  "八哥 / Myna":                 [90, 140],
-  "鸽子 / Pigeon":               [90, 140],
-  "鸡 / Chicken":                [95, 150],
-  "鸭 / Duck":                   [90, 145],
+  "雪貂 / Ferret": [75, 120],
+  "变色龙 / Chameleon": [70, 115],
+  "蜥蜴 / Lizard": [70, 120],
+  "石龙子 / Skink": [70, 120],
+  "鳄蜥 / Crocodile Skink": [70, 120],
+  "蛇 / Snake": [100, 165],
+  "响尾蛇 / Rattlesnake": [100, 160],
+  "陆龟 / Tortoise": [90, 145],
+  "龟 / Turtle": [85, 140],
+  "鳄龟 / Snapping Turtle": [90, 150],
+  "金丝雀 / Canary": [80, 125],
+  "文鸟 / Finch": [80, 120],
+  "八哥 / Myna": [90, 140],
+  "鸽子 / Pigeon": [90, 140],
+  "鸡 / Chicken": [95, 150],
+  "鸭 / Duck": [90, 145],
   // ── Medium-small (110–165) ──
-  "猫 / Cat":                    [105, 158],
-  "野猫 / Wild Cat":             [105, 158],
-  "橘猫 / Orange Tabby":        [105, 158],
-  "三花猫 / Calico":             [105, 158],
-  "狸花猫 / Chinese Tabby":     [105, 158],
-  "布偶猫 / Ragdoll":            [115, 165],
-  "拿破仑猫 / Napoleon Cat":    [90, 140],
-  "英国短毛猫 / British Shorthair":        [110, 160],
+  "猫 / Cat": [105, 158],
+  "野猫 / Wild Cat": [105, 158],
+  "橘猫 / Orange Tabby": [105, 158],
+  "三花猫 / Calico": [105, 158],
+  "狸花猫 / Chinese Tabby": [105, 158],
+  "布偶猫 / Ragdoll": [115, 165],
+  "拿破仑猫 / Napoleon Cat": [90, 140],
+  "英国短毛猫 / British Shorthair": [110, 160],
   "英短金渐层 / British Shorthair (Golden)": [110, 160],
-  "苏格兰折耳猫 / Scottish Fold":          [105, 158],
-  "美国短毛猫 / American Shorthair":       [110, 160],
-  "波斯猫 / Persian":            [110, 158],
+  "苏格兰折耳猫 / Scottish Fold": [105, 158],
+  "美国短毛猫 / American Shorthair": [110, 160],
+  "波斯猫 / Persian": [110, 158],
   "异国短毛猫 / Exotic Shorthair": [108, 158],
-  "暹罗猫 / Siamese":            [110, 163],
-  "缅因猫 / Maine Coon":         [120, 170],
-  "孟加拉猫 / Bengal Cat":       [115, 165],
-  "俄罗斯蓝猫 / Russian Blue":   [110, 160],
+  "暹罗猫 / Siamese": [110, 163],
+  "缅因猫 / Maine Coon": [120, 170],
+  "孟加拉猫 / Bengal Cat": [115, 165],
+  "俄罗斯蓝猫 / Russian Blue": [110, 160],
   "挪威森林猫 / Norwegian Forest Cat": [118, 168],
-  "斯芬克斯猫 / Sphynx":         [105, 155],
-  "麝香猫 / Civet":              [100, 155],
-  "狸 / Tanuki":                 [105, 158],
-  "浣熊 / Raccoon":              [105, 158],
-  "猫鼬 / Mongoose":             [85, 138],
-  "小熊猫 / Red Panda":          [95, 148],
-  "狐猴 / Lemur":                [90, 148],
-  "树懒 / Sloth":                [90, 148],
-  "考拉 / Koala":                [115, 165],
-  "巴哥犬 / Dog (Pug)":          [120, 163],
-  "蝴蝶犬 / Dog (Papillon)":     [110, 158],
-  "博美犬 / Dog (Pomeranian)":   [110, 155],
+  "斯芬克斯猫 / Sphynx": [105, 155],
+  "麝香猫 / Civet": [100, 155],
+  "狸 / Tanuki": [105, 158],
+  "浣熊 / Raccoon": [105, 158],
+  "猫鼬 / Mongoose": [85, 138],
+  "小熊猫 / Red Panda": [95, 148],
+  "狐猴 / Lemur": [90, 148],
+  "树懒 / Sloth": [90, 148],
+  "考拉 / Koala": [115, 165],
+  "巴哥犬 / Dog (Pug)": [120, 163],
+  "蝴蝶犬 / Dog (Papillon)": [110, 158],
+  "博美犬 / Dog (Pomeranian)": [110, 155],
   "罗素梗 / Dog (Russell Terrier)": [120, 163],
-  "腊肠犬 / Dachshund":          [110, 155],
-  "比格犬 / Beagle":             [125, 165],
-  "西施犬 / Shih Tzu":           [110, 155],
+  "腊肠犬 / Dachshund": [110, 155],
+  "比格犬 / Beagle": [125, 165],
+  "西施犬 / Shih Tzu": [110, 155],
   "约克夏梗 / Yorkshire Terrier": [110, 153],
   "迷你雪纳瑞 / Miniature Schnauzer": [120, 163],
-  "贵宾犬 / Poodle":             [130, 173],
-  "比熊犬 / Bichon Frise":       [120, 160],
+  "贵宾犬 / Poodle": [130, 173],
+  "比熊犬 / Bichon Frise": [120, 160],
   "法国斗牛犬 / French Bulldog": [125, 163],
-  "耳廓狐 / Fennec Fox":         [90, 143],
-  "猴 / Monkey":                 [110, 165],
-  "日本獾 / Japanese Badger":    [110, 158],
-  "蜜獾 / Honey Badger":         [115, 163],
+  "耳廓狐 / Fennec Fox": [90, 143],
+  "猴 / Monkey": [110, 165],
+  "日本獾 / Japanese Badger": [110, 158],
+  "蜜獾 / Honey Badger": [115, 163],
   "小食蚁兽 / Anteater (Tamandua)": [115, 163],
-  "水獭 / Otter":                [120, 165],
-  "海獭 / Sea Otter":            [130, 173],
-  "臭鼬 / Skunk":                [90, 143],
-  "猫头鹰 / Owl":                [100, 153],
-  "仓鸮 / Owl (Barn)":           [100, 153],
-  "乌鸦 / Crow":                 [100, 153],
-  "鹦鹉 / Parrot":               [100, 155],
-  "火鸡 / Turkey":               [120, 168],
-  "大熊猫 / Giant Panda":        [150, 200],
-  "鬣蜥 / Iguana":               [115, 163],
-  "科莫多巨蜥 / Komodo Dragon":  [140, 190],
-  "短吻鳄 / Alligator":          [148, 198],
-  "凯门鳄 / Caiman":             [145, 193],
+  "水獭 / Otter": [120, 165],
+  "海獭 / Sea Otter": [130, 173],
+  "臭鼬 / Skunk": [90, 143],
+  "猫头鹰 / Owl": [100, 153],
+  "仓鸮 / Owl (Barn)": [100, 153],
+  "乌鸦 / Crow": [100, 153],
+  "鹦鹉 / Parrot": [100, 155],
+  "火鸡 / Turkey": [120, 168],
+  "大熊猫 / Giant Panda": [150, 200],
+  "鬣蜥 / Iguana": [115, 163],
+  "科莫多巨蜥 / Komodo Dragon": [140, 190],
+  "短吻鳄 / Alligator": [148, 198],
+  "凯门鳄 / Caiman": [145, 193],
   "暹罗鳄 / Crocodile (Siamese)": [148, 198],
   // ── Medium (145–190) ──
-  "狗 / Dog":                    [125, 188],
-  "柴犬 / Dog (Shiba Inu)":      [138, 178],
-  "柯基 / Corgi":                [130, 168],
+  "狗 / Dog": [125, 188],
+  "柴犬 / Dog (Shiba Inu)": [138, 178],
+  "柯基 / Corgi": [130, 168],
   "英国斗牛犬 / English Bulldog": [138, 175],
-  "松狮犬 / Chow Chow":          [143, 183],
-  "秋田犬 / Akita":              [153, 193],
-  "哈士奇 / Husky":              [158, 198],
-  "萨摩耶 / Samoyed":            [158, 198],
+  "松狮犬 / Chow Chow": [143, 183],
+  "秋田犬 / Akita": [153, 193],
+  "哈士奇 / Husky": [158, 198],
+  "萨摩耶 / Samoyed": [158, 198],
   "金毛寻回犬 / Golden Retriever": [160, 200],
   "德国牧羊犬 / German Shepherd": [163, 205],
-  "杜宾犬 / Doberman":           [168, 210],
-  "拳师犬 / Boxer":              [163, 205],
-  "罗威纳犬 / Rottweiler":       [165, 210],
+  "杜宾犬 / Doberman": [168, 210],
+  "拳师犬 / Boxer": [163, 205],
+  "罗威纳犬 / Rottweiler": [165, 210],
   "阿拉斯加雪橇犬 / Alaskan Malamute": [168, 213],
   "边境牧羊犬 / Dog (Border Collie)": [148, 185],
-  "狒狒 / Baboon":               [148, 193],
-  "山魈 / Mandrill":             [153, 200],
-  "猩猩 / Orangutan":            [155, 200],
-  "袋鼠 / Kangaroo":             [160, 215],
-  "驴 / Donkey":                 [153, 198],
-  "约克夏猪 / Yorkshire Pig":    [143, 188],
-  "疣猪 / Warthog":              [143, 188],
-  "牛 / Cow":                    [163, 213],
-  "瞪羚 / Gazelle":              [153, 198],
+  "狒狒 / Baboon": [148, 193],
+  "山魈 / Mandrill": [153, 200],
+  "猩猩 / Orangutan": [155, 200],
+  "袋鼠 / Kangaroo": [160, 215],
+  "驴 / Donkey": [153, 198],
+  "约克夏猪 / Yorkshire Pig": [143, 188],
+  "疣猪 / Warthog": [143, 188],
+  "牛 / Cow": [163, 213],
+  "瞪羚 / Gazelle": [153, 198],
   "汤氏瞪羚 / Thomson's Gazelle": [150, 195],
-  "高鼻羚羊 / Saiga Antelope":   [148, 193],
-  "黑斑羚 / Impala":             [153, 198],
-  "梅花鹿 / Spotted Deer":       [155, 200],
-  "貘 / Tapir":                  [158, 205],
-  "绵羊 / Sheep":                [138, 183],
-  "达尔绵羊 / Sheep (Dall)":     [140, 185],
+  "高鼻羚羊 / Saiga Antelope": [148, 193],
+  "黑斑羚 / Impala": [153, 198],
+  "梅花鹿 / Spotted Deer": [155, 200],
+  "貘 / Tapir": [158, 205],
+  "绵羊 / Sheep": [138, 183],
+  "达尔绵羊 / Sheep (Dall)": [140, 185],
   "美利奴绵羊 / Sheep (Merino)": [138, 183],
-  "山羊 / Goat":                 [130, 178],
-  "安哥拉山羊 / Angora Goat":    [130, 178],
-  "羊驼 / Alpaca":               [148, 193],
-  "天鹅 / Swan":                 [130, 175],
-  "火烈鸟 / Flamingo":           [143, 188],
-  "鹤 / Crane":                  [148, 193],
-  "苍鹭 / Heron":                [148, 193],
-  "孔雀 / Peafowl":              [143, 188],
-  "雄孔雀 / Peacock":            [143, 188],
-  "鹈鹕 / Pelican":              [143, 188],
-  "蛇鹫 / Secretarybird":        [148, 193],
-  "鸵鸟 / Ostrich":              [163, 210],
-  "狐狸 / Fox":                  [113, 163],
-  "赤狐 / Fox (Red)":            [113, 163],
-  "藏狐 / Fox (Tibetan)":        [110, 160],
-  "斑海豹 / Spotted Seal":       [135, 180],
-  "海豚 / Dolphin":              [155, 205],
+  "山羊 / Goat": [130, 178],
+  "安哥拉山羊 / Angora Goat": [130, 178],
+  "羊驼 / Alpaca": [148, 193],
+  "天鹅 / Swan": [130, 175],
+  "火烈鸟 / Flamingo": [143, 188],
+  "鹤 / Crane": [148, 193],
+  "苍鹭 / Heron": [148, 193],
+  "孔雀 / Peafowl": [143, 188],
+  "雄孔雀 / Peacock": [143, 188],
+  "鹈鹕 / Pelican": [143, 188],
+  "蛇鹫 / Secretarybird": [148, 193],
+  "鸵鸟 / Ostrich": [163, 210],
+  "狐狸 / Fox": [113, 163],
+  "赤狐 / Fox (Red)": [113, 163],
+  "藏狐 / Fox (Tibetan)": [110, 160],
+  "斑海豹 / Spotted Seal": [135, 180],
+  "海豚 / Dolphin": [155, 205],
   // ── Medium-large (163–215) ──
-  "拉布拉多寻回犬 / Dog (Labrador Retriever)":   [158, 198],
+  "拉布拉多寻回犬 / Dog (Labrador Retriever)": [158, 198],
   "古英格兰牧羊犬 / Dog (Old English Sheepdog)": [158, 200],
-  "澳洲野犬 / Dingo":            [150, 195],
+  "澳洲野犬 / Dingo": [150, 195],
   "非洲野犬 / African Wild Dog": [155, 200],
-  "郊狼 / Coyote":               [148, 193],
-  "豺 / Jackal":                 [148, 193],
-  "加拿大猞猁 / Canada Lynx":    [148, 193],
-  "豹 / Leopard":                [158, 203],
-  "雪豹 / Leopard (Snow)":       [158, 203],
-  "猎豹 / Cheetah":              [163, 208],
-  "美洲豹 / Jaguar":             [163, 208],
-  "黑豹 / Black Panther":        [163, 208],
-  "白头海雕 / Bald Eagle":       [153, 198],
-  "金雕 / Golden Eagle":         [153, 198],
+  "郊狼 / Coyote": [148, 193],
+  "豺 / Jackal": [148, 193],
+  "加拿大猞猁 / Canada Lynx": [148, 193],
+  "豹 / Leopard": [158, 203],
+  "雪豹 / Leopard (Snow)": [158, 203],
+  "猎豹 / Cheetah": [163, 208],
+  "美洲豹 / Jaguar": [163, 208],
+  "黑豹 / Black Panther": [163, 208],
+  "白头海雕 / Bald Eagle": [153, 198],
+  "金雕 / Golden Eagle": [153, 198],
   "虎头海雕 / Stellar's Sea Eagle": [158, 203],
-  "大角羚 / Oryx":               [168, 218],
-  "霍加皮 / Okapi":              [173, 223],
-  "马鹿 / Red Deer":             [173, 223],
+  "大角羚 / Oryx": [168, 218],
+  "霍加皮 / Okapi": [173, 223],
+  "马鹿 / Red Deer": [173, 223],
   "山地大猩猩 / Mountain Gorilla": [165, 213],
-  "鲨鱼 / Shark":                [168, 240],
+  "鲨鱼 / Shark": [168, 240],
   "湾鳄 / Crocodile (Saltwater)": [170, 228],
   // ── Large (183–240) ──
   "圣伯纳犬 / Dog (Saint Bernard)": [173, 218],
-  "大丹犬 / Dog (Great Dane)":   [178, 225],
-  "狼 / Wolf":                   [173, 218],
-  "灰狼 / Wolf (Gray)":          [173, 218],
-  "白狼 / Wolf (White)":         [173, 218],
-  "狮子 / Lion":                 [178, 225],
-  "非洲狮 / Lion (African)":     [178, 225],
-  "亚洲狮 / Lion (Asiatic)":     [175, 220],
-  "刚果狮 / Lion (Congo)":       [178, 225],
-  "马赛狮 / Lion (Maasai)":      [178, 225],
-  "老虎 / Tiger":                [183, 228],
-  "孟加拉虎 / Tiger (Bengal)":   [183, 228],
+  "大丹犬 / Dog (Great Dane)": [178, 225],
+  "狼 / Wolf": [173, 218],
+  "灰狼 / Wolf (Gray)": [173, 218],
+  "白狼 / Wolf (White)": [173, 218],
+  "狮子 / Lion": [178, 225],
+  "非洲狮 / Lion (African)": [178, 225],
+  "亚洲狮 / Lion (Asiatic)": [175, 220],
+  "刚果狮 / Lion (Congo)": [178, 225],
+  "马赛狮 / Lion (Maasai)": [178, 225],
+  "老虎 / Tiger": [183, 228],
+  "孟加拉虎 / Tiger (Bengal)": [183, 228],
   "西伯利亚虎 / Tiger (Siberian)": [188, 235],
-  "白虎 / Tiger (White)":        [183, 228],
-  "熊 / Bear":                   [178, 230],
+  "白虎 / Tiger (White)": [183, 228],
+  "熊 / Bear": [178, 230],
   "亚洲黑熊 / Bear (Asian Black)": [170, 218],
-  "棕熊 / Bear (Brown)":         [183, 233],
-  "北极熊 / Bear (Polar)":       [193, 248],
-  "马 / Horse":                  [178, 233],
-  "水牛 / Buffalo":              [178, 230],
-  "斑马 / Zebra":                [173, 225],
-  "驼鹿 / Moose":               [198, 265],
-  "河狸 / Beaver":               [113, 158],
-  "鲸 / Whale":                  [183, 265],
+  "棕熊 / Bear (Brown)": [183, 233],
+  "北极熊 / Bear (Polar)": [193, 248],
+  "马 / Horse": [178, 233],
+  "水牛 / Buffalo": [178, 230],
+  "斑马 / Zebra": [173, 225],
+  "驼鹿 / Moose": [198, 265],
+  "河狸 / Beaver": [113, 158],
+  "鲸 / Whale": [183, 265],
   // ── Very large (215–350) ──
-  "大象 / Elephant":             [233, 325],
-  "河马 / Hippopotamus":         [213, 283],
-  "犀牛 / Rhinoceros":           [203, 275],
-  "骆驼 / Camel":                [203, 275],
-  "长颈鹿 / Giraffe":            [283, 400],
+  "大象 / Elephant": [233, 325],
+  "河马 / Hippopotamus": [213, 283],
+  "犀牛 / Rhinoceros": [203, 275],
+  "骆驼 / Camel": [203, 275],
+  "长颈鹿 / Giraffe": [283, 400],
 };
 
 const breedHeightDefaults = {
-  "哺乳类 / Mammals":      [120, 190],
-  "鸟类 / Birds":           [110, 175],
-  "爬行类 / Reptiles":      [90, 165],
-  "两栖类 / Amphibians":    [55, 120],
-  "节肢动物 / Arthropods":  [20, 80],
-  "鱼类 / Fish":             [50, 130],
+  "哺乳类 / Mammals": [120, 190],
+  "鸟类 / Birds": [110, 175],
+  "爬行类 / Reptiles": [90, 165],
+  "两栖类 / Amphibians": [55, 120],
+  "节肢动物 / Arthropods": [20, 80],
+  "鱼类 / Fish": [50, 130],
 };
 
 function getHeightRange(breedSpecific, breedClass) {
-  if (breedSpecific && breedHeight[breedSpecific]) return breedHeight[breedSpecific];
+  if (breedSpecific && breedHeight[breedSpecific])
+    return breedHeight[breedSpecific];
   return breedHeightDefaults[breedClass] || [100, 200];
 }
 
 function updateHeightOptions() {
   const breedSpecific = document.getElementById("petBreed").value;
-  const breedClass    = document.getElementById("petBreedClass").value;
-  const [min, max]    = getHeightRange(breedSpecific, breedClass);
-  const select        = document.getElementById("petHeight");
-  const wrapper       = document.getElementById("heightWrapper");
+  const breedClass = document.getElementById("petBreedClass").value;
+  const [min, max] = getHeightRange(breedSpecific, breedClass);
+  const select = document.getElementById("petHeight");
+  const wrapper = document.getElementById("heightWrapper");
 
-  select.innerHTML = '<option value="" disabled selected hidden>选择身高 / Select height...</option>';
+  select.innerHTML =
+    '<option value="" disabled selected hidden>选择身高 / Select height...</option>';
   for (let h = min; h <= max; h += 5) {
     const opt = document.createElement("option");
     opt.value = `${h}cm`;
@@ -722,7 +884,10 @@ function getHousingDistrictValue(prefix) {
 function loadDistrictIntoSelect(prefix, savedDistrict) {
   const sel = document.getElementById(`${prefix}-district-select`);
   const customInput = document.getElementById(`${prefix}-district-custom`);
-  if (!sel || !savedDistrict) { if (customInput) customInput.classList.add("hidden"); return; }
+  if (!sel || !savedDistrict) {
+    if (customInput) customInput.classList.add("hidden");
+    return;
+  }
   sel.value = savedDistrict;
   if (sel.value === savedDistrict) {
     customInput.classList.add("hidden");
@@ -736,7 +901,10 @@ function loadDistrictIntoSelect(prefix, savedDistrict) {
 function loadCityIntoSelect(prefix, savedCity) {
   const sel = document.getElementById(`${prefix}-city-select`);
   const customInput = document.getElementById(`${prefix}-city-custom`);
-  if (!savedCity) { customInput.classList.add("hidden"); return; }
+  if (!savedCity) {
+    customInput.classList.add("hidden");
+    return;
+  }
   sel.value = savedCity;
   if (sel.value === savedCity) {
     customInput.classList.add("hidden");
@@ -748,7 +916,18 @@ function loadCityIntoSelect(prefix, savedCity) {
 }
 
 function loadHouseTypeIntoSelect(prefix, savedType) {
-  const knownTypes = ["普通住宅", "公寓", "大平层", "别墅", "地下室", "阁楼", "树屋", "临海", "湖边", "下水管道"];
+  const knownTypes = [
+    "普通住宅",
+    "公寓",
+    "大平层",
+    "别墅",
+    "地下室",
+    "阁楼",
+    "树屋",
+    "临海",
+    "湖边",
+    "下水管道",
+  ];
   const sel = document.getElementById(`${prefix}-type`);
   const customInput = document.getElementById(`${prefix}-type-custom`);
   if (knownTypes.includes(savedType)) {
@@ -793,47 +972,239 @@ function addOptionIfMissing(sel, value, text) {
 
 // ── Housing & income tier data ─────────────────────────────────
 const HOUSING_TIERS = {
-  type:      { 1:"下水管道", 2:"地下室", 3:"普通住宅", 4:"公寓", 5:"大平层", 6:"别墅" },
-  garden:    { 1:"无院子", 2:"无院子", 3:"无院子", 4:"有院子", 5:"有院子", 6:"有院子" },
-  area:      { 1:"20-40", 2:"50-80", 3:"80-120", 4:"120-200", 5:"200-400", 6:"500+" },
-  tenure:    { 1:"租住中", 2:"租住中", 3:"购买", 4:"购买", 5:"购买", 6:"购买" },
-  ownership: { 1:"父母名下", 2:"父母名下", 3:"父母名下", 4:"父母名下", 5:"父母名下", 6:"自己名下" },
-  mortgage:  { 1:"有房贷", 2:"有房贷", 3:"有房贷", 4:"有房贷", 5:"无房贷", 6:"无房贷" },
-  priceRent: { 1:"月租500元", 2:"月租1000元", 3:"月租3000元", 4:"月租5000元", 5:"月租1万元", 6:"月租3万+" },
-  priceBuy:  { 1:"50万", 2:"100万", 3:"300万", 4:"500万", 5:"1000万", 6:"3000万+" },
-  income:    { 1:"3k以下", 2:"3k-8k", 3:"8k-15k", 4:"15k-30k", 5:"3w-10w/月", 6:"10w+/月" },
-  marriage:  { 1:"单身/Single", 2:"单身/Single", 3:"单身/Single", 4:"已配对/Mated", 5:"已配对/Mated", 6:"开放关系/Open" },
-  education: { 1:"小学", 2:"初中", 3:"高中", 4:"大专", 5:"本科", 6:"硕士+" },
-  occupation:{ 1:"无业", 2:"体力劳动", 3:"服务业", 4:"办公室职员", 5:"专业人士", 6:"企业高管" },
-  mbtiEI:    { 1:"I", 2:"I", 3:"I", 4:"E", 5:"E", 6:"E" },
-  mbtiSN:    { 1:"N", 2:"N", 3:"N", 4:"S", 5:"S", 6:"S" },
-  mbtiTF:    { 1:"F", 2:"F", 3:"F", 4:"T", 5:"T", 6:"T" },
-  mbtiJP:    { 1:"P", 2:"P", 3:"P", 4:"J", 5:"J", 6:"J" },
+  type: {
+    1: "下水管道",
+    2: "地下室",
+    3: "普通住宅",
+    4: "公寓",
+    5: "大平层",
+    6: "别墅",
+  },
+  garden: {
+    1: "无院子",
+    2: "无院子",
+    3: "无院子",
+    4: "有院子",
+    5: "有院子",
+    6: "有院子",
+  },
+  area: {
+    1: "20-40",
+    2: "50-80",
+    3: "80-120",
+    4: "120-200",
+    5: "200-400",
+    6: "500+",
+  },
+  tenure: {
+    1: "租住中",
+    2: "租住中",
+    3: "购买",
+    4: "购买",
+    5: "购买",
+    6: "购买",
+  },
+  ownership: {
+    1: "父母名下",
+    2: "父母名下",
+    3: "父母名下",
+    4: "父母名下",
+    5: "父母名下",
+    6: "自己名下",
+  },
+  mortgage: {
+    1: "有房贷",
+    2: "有房贷",
+    3: "有房贷",
+    4: "有房贷",
+    5: "无房贷",
+    6: "无房贷",
+  },
+  priceRent: {
+    1: "月租500元",
+    2: "月租1000元",
+    3: "月租3000元",
+    4: "月租5000元",
+    5: "月租1w元",
+    6: "月租3w+",
+  },
+  priceBuy: {
+    1: "50w",
+    2: "100w",
+    3: "300w",
+    4: "500w",
+    5: "1000w",
+    6: "3000w+",
+  },
+  income: {
+    1: "3k以下",
+    2: "3k-8k",
+    3: "8k-15k",
+    4: "15k-30k",
+    5: "3w-10w/月",
+    6: "10w+/月",
+  },
+  marriage: {
+    1: "单身/Single",
+    2: "单身/Single",
+    3: "单身/Single",
+    4: "已配对/Mated",
+    5: "已配对/Mated",
+    6: "开放关系/Open",
+  },
+  education: {
+    1: "小学",
+    2: "初中",
+    3: "高中",
+    4: "大专",
+    5: "本科",
+    6: "硕士+",
+  },
+  occupation: {
+    1: "无业",
+    2: "体力劳动",
+    3: "服务业",
+    4: "办公室职员",
+    5: "专业人士",
+    6: "企业高管",
+  },
+  mbtiEI: { 1: "I", 2: "I", 3: "I", 4: "E", 5: "E", 6: "E" },
+  mbtiSN: { 1: "N", 2: "N", 3: "N", 4: "S", 5: "S", 6: "S" },
+  mbtiTF: { 1: "F", 2: "F", 3: "F", 4: "T", 5: "T", 6: "T" },
+  mbtiJP: { 1: "P", 2: "P", 3: "P", 4: "J", 5: "J", 6: "J" },
 };
 
 const SCORE_DEDUCTIONS = {
-  "下水管道": -20, "地下室": -15, "普通住宅": -10, "公寓": -5, "大平层": -2, "别墅": 0,
-  "无院子": -2, "有院子": 0,
-  "20-40": -8, "50-80": -6, "80-120": -4, "120-200": -2, "200-400": -1, "500+": 0,
-  "租住中": -5, "购买": 0,
-  "父母名下": -3, "自己名下": 0,
-  "有房贷": -4, "无房贷": 0,
-  "月租500元": -10, "月租1000元": -8, "月租3000元": -6, "月租5000元": -3, "月租1万元": -1, "月租3万+": 0,
-  "50万": -10, "100万": -8, "300万": -6, "500万": -4, "1000万": -2, "3000万+": 0,
-  "3k以下": -10, "3k-8k": -7, "8k-15k": -4, "15k-30k": -2, "3w-10w/月": -1, "10w+/月": 0,
-  "小学": -8, "初中": -6, "高中": -4, "大专": -2, "本科": -1, "硕士+": 0,
-  "无业": -8, "体力劳动": -5, "服务业": -3, "办公室职员": -1, "专业人士": 0, "企业高管": 0,
-  "单身/Single": 0, "已配对/Mated": -5, "开放关系/Open": -10,
-  // 种族大类歧视链
-  "哺乳类 / Mammals": 0, "鸟类 / Birds": -3, "爬行类 / Reptiles": -6,
-  "两栖类 / Amphibians": -10, "节肢动物 / Arthropods": -15, "鱼类 / Fish": -8,
-  // 性取向歧视链
-  "异性恋/Straight": 0, "同性恋/Gay·Lesbian": -5,
-  "双性恋/Bisexual": -5, "泛性恋/Pansexual": -7,
-  "无性恋/Asexual": -8, "不透露/Prefer not to say": -10, "自定义/Custom": -5,
+  // 房屋类型 / House type
+  下水管道: -18,
+  地下室: -12,
+  普通住宅: -4,
+  公寓: +2,
+  大平层: +6,
+  别墅: +12,
+  // 院子 / Garden
+  无院子: 0,
+  有院子: +4,
+  // 面积 / Area
+  "20-40": -6,
+  "50-80": -3,
+  "80-120": 0,
+  "120-200": +3,
+  "200-400": +5,
+  "500+": +8,
+  // 租/买 / Tenure
+  租住中: -4,
+  购买: +4,
+  // 产权 / Ownership
+  父母名下: -3,
+  自己名下: +6,
+  // 房贷 / Mortgage
+  有房贷: -3,
+  无房贷: +4,
+  // 月租价格 / Rent price
+  月租500元: -8,
+  月租1000元: -5,
+  月租3000元: -2,
+  月租5000元: +1,
+  月租1w元: +3,
+  "月租3w+": +6,
+  // 买房价格 / Buy price
+  "50w": -8,
+  "100w": -4,
+  "300w": -1,
+  "500w": +2,
+  "1000w": +5,
+  "3000w+": +10,
+  // 月收入 / Income
+  "3k以下": -8,
+  "3k-8k": -4,
+  "8k-15k": 0,
+  "15k-30k": +4,
+  "3w-10w/月": +8,
+  "10w+/月": +12,
+  // 学历 / Education
+  小学: -7,
+  初中: -4,
+  高中: -1,
+  大专: +1,
+  本科: +3,
+  "硕士+": +6,
+  // 职业 / Occupation
+  无业: -7,
+  体力劳动: -3,
+  服务业: -1,
+  办公室职员: +1,
+  专业人士: +4,
+  企业高管: +8,
+  // 婚育状况 / Mating status
+  "单身/Single": +2,
+  "已配对/Mated": -3,
+  "开放关系/Open": -6,
+  // 种族大类歧视链 / Species hierarchy
+  "哺乳类 / Mammals": +5,
+  "鸟类 / Birds": 0,
+  "爬行类 / Reptiles": -3,
+  "两栖类 / Amphibians": -6,
+  "节肢动物 / Arthropods": -12,
+  "鱼类 / Fish": -5,
+  // 性取向歧视链 / Orientation hierarchy
+  "异性恋/Straight": +3,
+  "同性恋/Gay·Lesbian": -2,
+  "双性恋/Bisexual": -2,
+  "泛性恋/Pansexual": -4,
+  "无性恋/Asexual": -5,
+  "不透露/Prefer not to say": -5,
+  "自定义/Custom": -2,
 };
 
 const MAX_HOUSING_ROLLS = 3;
+
+// Bilingual display map for Chinese-only tier values
+const DISP = {
+  // house type
+  下水管道: "下水管道 / Pipe Shack",
+  地下室: "地下室 / Basement",
+  普通住宅: "普通住宅 / Regular",
+  公寓: "公寓 / Apt",
+  大平层: "大平层 / Open Plan",
+  别墅: "别墅 / Villa",
+  // garden
+  无院子: "无院子 / No Garden",
+  有院子: "有院子 / Garden ✨",
+  // tenure
+  租住中: "租住中 / Renting",
+  购买: "购买 / Owned",
+  // ownership
+  父母名下: "父母名下 / Parents",
+  自己名下: "自己名下 / Self ✨",
+  // mortgage
+  有房贷: "有房贷 / Mortgaged",
+  无房贷: "无房贷 / Paid Off ✨",
+  // education
+  小学: "小学 / Primary",
+  初中: "初中 / Middle",
+  高中: "高中 / High School",
+  大专: "大专 / Associate",
+  本科: "本科 / Bachelor",
+  "硕士+": "硕士+ / Master+",
+  // occupation
+  无业: "无业 / Unemployed",
+  体力劳动: "体力劳动 / Labor",
+  服务业: "服务业 / Service",
+  办公室职员: "办公室职员 / Office",
+  专业人士: "专业人士 / Professional",
+  企业高管: "企业高管 / Executive",
+  // income (dice)
+  "3k以下": "3k以下 / <¥3k",
+  "3k-8k": "3k-8k / ¥3k-8k",
+  "8k-15k": "8k-15k / ¥8k-15k",
+  "15k-30k": "15k-30k / ¥15k-30k",
+  "3w-10w/月": "3w-10w/月 / ¥30k-100k",
+  "10w+/月": "10w+/月 / ¥100k+",
+};
+function disp(v) {
+  return DISP[v] || v;
+}
 
 function rollHousingFieldDice(field, prefix) {
   const btn = document.getElementById(`${prefix}-${field}-dice-btn`);
@@ -858,9 +1229,9 @@ function rollHousingFieldDice(field, prefix) {
       const remaining = MAX_HOUSING_ROLLS - parseInt(btn.dataset.rolls, 10);
       btn.disabled = remaining <= 0;
       if (remaining > 0) {
-        btn.title = `还可摇 ${remaining} 次`;
+        btn.title = `还可摇 ${remaining} 次 / ${remaining} rolls left`;
       } else {
-        btn.title = "已用完摇骰机会";
+        btn.title = "已用完摇骰机会 / No rolls left";
         btn.classList.add("dice-exhausted");
       }
 
@@ -869,20 +1240,31 @@ function rollHousingFieldDice(field, prefix) {
 
       if (field === "type") {
         value = HOUSING_TIERS.type[roll];
-        text = value;
+        text = disp(value);
         document.getElementById(`${prefix}-type`).value = value;
         const isVilla = value === "别墅";
-        document.getElementById(`${prefix}-villa-wrapper`).classList.toggle("hidden", !isVilla);
-        document.getElementById(`${prefix}-garden-section`).classList.toggle("hidden", !isVilla);
+        document
+          .getElementById(`${prefix}-villa-wrapper`)
+          .classList.toggle("hidden", !isVilla);
+        document
+          .getElementById(`${prefix}-garden-section`)
+          .classList.toggle("hidden", !isVilla);
         if (!isVilla) {
           document.getElementById(`${prefix}-garden`).value = "";
           document.getElementById(`${prefix}-garden-display`).textContent = "—";
-          const gardenBtn = document.getElementById(`${prefix}-garden-dice-btn`);
-          if (gardenBtn) { gardenBtn.dataset.rolls = "0"; gardenBtn.disabled = false; gardenBtn.classList.remove("dice-exhausted"); gardenBtn.innerHTML = diceFaceImg(1, 4); }
+          const gardenBtn = document.getElementById(
+            `${prefix}-garden-dice-btn`,
+          );
+          if (gardenBtn) {
+            gardenBtn.dataset.rolls = "0";
+            gardenBtn.disabled = false;
+            gardenBtn.classList.remove("dice-exhausted");
+            gardenBtn.innerHTML = diceFaceImg(1, 4);
+          }
         }
       } else if (field === "garden") {
         value = HOUSING_TIERS.garden[roll];
-        text = value;
+        text = disp(value);
         document.getElementById(`${prefix}-garden`).value = value;
       } else if (field === "area") {
         value = HOUSING_TIERS.area[roll];
@@ -890,21 +1272,28 @@ function rollHousingFieldDice(field, prefix) {
         document.getElementById(`${prefix}-area`).value = value;
       } else if (field === "tenure") {
         value = HOUSING_TIERS.tenure[roll];
-        text = value;
+        text = disp(value);
         document.getElementById(`${prefix}-tenure`).value = value;
         const isBuying = value === "购买";
         const ownerSec = document.getElementById(`${prefix}-ownership-section`);
-        const mortgageWrap = document.getElementById(`${prefix}-mortgage-wrapper`);
+        const mortgageWrap = document.getElementById(
+          `${prefix}-mortgage-wrapper`,
+        );
         if (ownerSec) ownerSec.classList.toggle("hidden", !isBuying);
         if (mortgageWrap) mortgageWrap.classList.toggle("hidden", !isBuying);
         if (isBuying) {
-          ["ownership", "mortgage"].forEach(f => {
+          ["ownership", "mortgage"].forEach((f) => {
             const d = document.getElementById(`${prefix}-${f}-display`);
             if (d) d.textContent = "—";
             const inp = document.getElementById(`${prefix}-${f}`);
             if (inp) inp.value = "";
             const b = document.getElementById(`${prefix}-${f}-dice-btn`);
-            if (b) { b.dataset.rolls = "0"; b.disabled = false; b.classList.remove("dice-exhausted"); b.innerHTML = diceFaceImg(1, 4); }
+            if (b) {
+              b.dataset.rolls = "0";
+              b.disabled = false;
+              b.classList.remove("dice-exhausted");
+              b.innerHTML = diceFaceImg(1, 4);
+            }
           });
         } else {
           document.getElementById(`${prefix}-ownership`).value = "租住中";
@@ -912,17 +1301,19 @@ function rollHousingFieldDice(field, prefix) {
         }
       } else if (field === "ownership") {
         value = HOUSING_TIERS.ownership[roll];
-        text = value;
+        text = disp(value);
         document.getElementById(`${prefix}-ownership`).value = value;
       } else if (field === "mortgage") {
         value = HOUSING_TIERS.mortgage[roll];
-        text = value;
+        text = disp(value);
         document.getElementById(`${prefix}-mortgage`).value = value;
       } else if (field === "price") {
         const tenureEl = document.getElementById(`${prefix}-tenure`);
         const isRenting = !tenureEl || tenureEl.value !== "购买";
-        value = (isRenting ? HOUSING_TIERS.priceRent : HOUSING_TIERS.priceBuy)[roll];
-        text = value;
+        value = (isRenting ? HOUSING_TIERS.priceRent : HOUSING_TIERS.priceBuy)[
+          roll
+        ];
+        text = disp(value);
         document.getElementById(`${prefix}-price`).value = value;
       }
 
@@ -948,9 +1339,21 @@ function rollHousingDice(field, prefix, btnId, displayId) {
       if (result === 6) {
         const p = prefix === "house" ? "house" : "edit-house";
         if (field === "price") {
-          const prices = ["1000万", "1500万", "2000万", "3000万", "5000万", "8000万", "1亿", "3亿"];
-          document.getElementById(`${p}-price`).value = prices[Math.floor(Math.random() * prices.length)];
-          setTimeout(() => { display.innerHTML = diceFaceImg(6, 4) + " !!!"; }, 100);
+          const prices = [
+            "1000w",
+            "1500w",
+            "2000w",
+            "3000w",
+            "5000w",
+            "8000w",
+            "1亿",
+            "3亿",
+          ];
+          document.getElementById(`${p}-price`).value =
+            prices[Math.floor(Math.random() * prices.length)];
+          setTimeout(() => {
+            display.innerHTML = diceFaceImg(6, 4) + " !!!";
+          }, 100);
         }
       }
       btn.disabled = false;
@@ -988,7 +1391,8 @@ function onHouseOwnershipChange() {
   const ownership = document.getElementById("house-ownership");
   if (!ownership) return;
   const mortgageWrap = document.getElementById("house-mortgage-wrapper");
-  if (mortgageWrap) mortgageWrap.classList.toggle("hidden", ownership.value === "租住中");
+  if (mortgageWrap)
+    mortgageWrap.classList.toggle("hidden", ownership.value === "租住中");
 }
 
 function onEditHouseTypeChange() {
@@ -1019,21 +1423,26 @@ function getEditHousingDescription() {
   const total = document.getElementById("edit-house-total-floors").value.trim();
   const price = document.getElementById("edit-house-price").value.trim();
   const ownership = document.getElementById("edit-house-ownership").value;
-  const mortgageWrapper = document.getElementById("edit-house-mortgage-wrapper");
+  const mortgageWrapper = document.getElementById(
+    "edit-house-mortgage-wrapper",
+  );
   const mortgage = mortgageWrapper.classList.contains("hidden")
     ? ""
     : document.getElementById("edit-house-mortgage").value;
 
   const parts = [];
-  if (city || district) parts.push([city, district].filter(Boolean).join(" · "));
+  if (city || district)
+    parts.push([city, district].filter(Boolean).join(" · "));
   if (area) parts.push(`${area}㎡`);
-  if (type) parts.push(type === "别墅" ? `${type}(${villaFloors})` : type);
-  if (garden === "有院子") parts.push("有院子");
-  if (floor && total) parts.push(`${floor}层/共${total}层`);
-  else if (floor) parts.push(`${floor}层`);
-  if (price) parts.push(price);
-  if (ownership) parts.push(ownership);
-  if (mortgage) parts.push(mortgage);
+  if (type)
+    parts.push(type === "别墅" ? `${disp(type)}(${villaFloors})` : disp(type));
+  if (garden === "有院子") parts.push("有院子 / Garden ✨");
+  if (floor && total)
+    parts.push(`${floor}层/共${total}层 / fl.${floor}/${total}`);
+  else if (floor) parts.push(`${floor}层 / fl.${floor}`);
+  if (price) parts.push(disp(price));
+  if (ownership) parts.push(disp(ownership));
+  if (mortgage) parts.push(disp(mortgage));
   return parts.join(" · ");
 }
 
@@ -1054,15 +1463,18 @@ function getHousingDescription() {
     : document.getElementById("house-mortgage").value;
 
   const parts = [];
-  if (city || district) parts.push([city, district].filter(Boolean).join(" · "));
+  if (city || district)
+    parts.push([city, district].filter(Boolean).join(" · "));
   if (area) parts.push(`${area}㎡`);
-  if (type) parts.push(type === "别墅" ? `${type}(${villaFloors})` : type);
-  if (garden === "有院子") parts.push("有院子");
-  if (floor && total) parts.push(`${floor}层/共${total}层`);
-  else if (floor) parts.push(`${floor}层`);
-  if (price) parts.push(price);
-  if (ownership) parts.push(ownership);
-  if (mortgage) parts.push(mortgage);
+  if (type)
+    parts.push(type === "别墅" ? `${disp(type)}(${villaFloors})` : disp(type));
+  if (garden === "有院子") parts.push("有院子 / Garden ✨");
+  if (floor && total)
+    parts.push(`${floor}层/共${total}层 / fl.${floor}/${total}`);
+  else if (floor) parts.push(`${floor}层 / fl.${floor}`);
+  if (price) parts.push(disp(price));
+  if (ownership) parts.push(disp(ownership));
+  if (mortgage) parts.push(disp(mortgage));
   return parts.join(" · ");
 }
 
@@ -1084,7 +1496,8 @@ function onBreedClassChange() {
     const sgSelect = document.getElementById("petBreedSubgroup");
     Object.keys(breedSubgroups[cls]).forEach((sg) => {
       const opt = document.createElement("option");
-      opt.value = sg; opt.textContent = sg;
+      opt.value = sg;
+      opt.textContent = sg;
       sgSelect.appendChild(opt);
     });
     document.getElementById("breedSubgroupWrapper").classList.remove("hidden");
@@ -1094,7 +1507,8 @@ function onBreedClassChange() {
     const select = document.getElementById("petBreed");
     (breedData[cls] || []).forEach((b) => {
       const opt = document.createElement("option");
-      opt.value = b; opt.textContent = b;
+      opt.value = b;
+      opt.textContent = b;
       select.appendChild(opt);
     });
     document.getElementById("breedSpecificWrapper").classList.remove("hidden");
@@ -1104,7 +1518,7 @@ function onBreedClassChange() {
 
 function onBreedSubgroupChange() {
   const cls = document.getElementById("petBreedClass").value;
-  const sg  = document.getElementById("petBreedSubgroup").value;
+  const sg = document.getElementById("petBreedSubgroup").value;
   const val = (breedSubgroups[cls] || {})[sg];
 
   document.getElementById("petBreedSubSubgroup").innerHTML =
@@ -1118,10 +1532,13 @@ function onBreedSubgroupChange() {
     const ssgSelect = document.getElementById("petBreedSubSubgroup");
     Object.keys(val).forEach((ssg) => {
       const opt = document.createElement("option");
-      opt.value = ssg; opt.textContent = ssg;
+      opt.value = ssg;
+      opt.textContent = ssg;
       ssgSelect.appendChild(opt);
     });
-    document.getElementById("breedSubSubgroupWrapper").classList.remove("hidden");
+    document
+      .getElementById("breedSubSubgroupWrapper")
+      .classList.remove("hidden");
     document.getElementById("breedSpecificWrapper").classList.add("hidden");
   } else {
     // Flat: show species directly
@@ -1129,7 +1546,8 @@ function onBreedSubgroupChange() {
     const select = document.getElementById("petBreed");
     (val || []).forEach((b) => {
       const opt = document.createElement("option");
-      opt.value = b; opt.textContent = b;
+      opt.value = b;
+      opt.textContent = b;
       select.appendChild(opt);
     });
     document.getElementById("breedSpecificWrapper").classList.remove("hidden");
@@ -1139,14 +1557,15 @@ function onBreedSubgroupChange() {
 
 function onBreedSubSubgroupChange() {
   const cls = document.getElementById("petBreedClass").value;
-  const sg  = document.getElementById("petBreedSubgroup").value;
+  const sg = document.getElementById("petBreedSubgroup").value;
   const ssg = document.getElementById("petBreedSubSubgroup").value;
   const select = document.getElementById("petBreed");
   select.innerHTML =
     '<option value="" disabled selected hidden>选择物种 / Select species...</option>';
   (((breedSubgroups[cls] || {})[sg] || {})[ssg] || []).forEach((b) => {
     const opt = document.createElement("option");
-    opt.value = b; opt.textContent = b;
+    opt.value = b;
+    opt.textContent = b;
     select.appendChild(opt);
   });
   document.getElementById("breedSpecificWrapper").classList.remove("hidden");
@@ -1156,7 +1575,9 @@ function onBreedSubSubgroupChange() {
 
 function onMixedBreedChange() {
   const checked = document.getElementById("isMixed")?.checked;
-  document.getElementById("mixedBreedExtra")?.classList.toggle("hidden", !checked);
+  document
+    .getElementById("mixedBreedExtra")
+    ?.classList.toggle("hidden", !checked);
   if (checked) {
     document.getElementById("heightWrapper")?.classList.add("hidden");
   } else {
@@ -1169,7 +1590,8 @@ function _breed2AddOptions(select, list) {
   list.forEach((b) => {
     if (b === exclude) return;
     const opt = document.createElement("option");
-    opt.value = b; opt.textContent = b;
+    opt.value = b;
+    opt.textContent = b;
     select.appendChild(opt);
   });
 }
@@ -1187,21 +1609,25 @@ function onBreedClass2Change() {
     const sgSelect = document.getElementById("petBreedSubgroup2");
     Object.keys(breedSubgroups[cls]).forEach((sg) => {
       const opt = document.createElement("option");
-      opt.value = sg; opt.textContent = sg;
+      opt.value = sg;
+      opt.textContent = sg;
       sgSelect.appendChild(opt);
     });
     document.getElementById("breedSubgroupWrapper2").classList.remove("hidden");
     document.getElementById("breedSpecificWrapper2").classList.add("hidden");
   } else {
     document.getElementById("breedSubgroupWrapper2").classList.add("hidden");
-    _breed2AddOptions(document.getElementById("petBreed2"), breedData[cls] || []);
+    _breed2AddOptions(
+      document.getElementById("petBreed2"),
+      breedData[cls] || [],
+    );
     document.getElementById("breedSpecificWrapper2").classList.remove("hidden");
   }
 }
 
 function onBreedSubgroup2Change() {
   const cls = document.getElementById("petBreedClass2").value;
-  const sg  = document.getElementById("petBreedSubgroup2").value;
+  const sg = document.getElementById("petBreedSubgroup2").value;
   const val = (breedSubgroups[cls] || {})[sg];
 
   document.getElementById("petBreedSubSubgroup2").innerHTML =
@@ -1214,10 +1640,13 @@ function onBreedSubgroup2Change() {
     const ssgSelect = document.getElementById("petBreedSubSubgroup2");
     Object.keys(val).forEach((ssg) => {
       const opt = document.createElement("option");
-      opt.value = ssg; opt.textContent = ssg;
+      opt.value = ssg;
+      opt.textContent = ssg;
       ssgSelect.appendChild(opt);
     });
-    document.getElementById("breedSubSubgroupWrapper2").classList.remove("hidden");
+    document
+      .getElementById("breedSubSubgroupWrapper2")
+      .classList.remove("hidden");
     document.getElementById("breedSpecificWrapper2").classList.add("hidden");
   } else {
     document.getElementById("breedSubSubgroupWrapper2").classList.add("hidden");
@@ -1228,7 +1657,7 @@ function onBreedSubgroup2Change() {
 
 function onBreedSubSubgroup2Change() {
   const cls = document.getElementById("petBreedClass2").value;
-  const sg  = document.getElementById("petBreedSubgroup2").value;
+  const sg = document.getElementById("petBreedSubgroup2").value;
   const ssg = document.getElementById("petBreedSubSubgroup2").value;
   const select = document.getElementById("petBreed2");
   select.innerHTML =
@@ -1255,11 +1684,16 @@ function createCard() {
   const breedClass2 = document.getElementById("petBreedClass2")?.value || "";
   const breedSpecific2 = document.getElementById("petBreed2")?.value || "";
   const breed2 = isMixed
-    ? (breedClass2 && breedSpecific2 ? `${breedClass2} · ${breedSpecific2}` : breedSpecific2 || breedClass2)
+    ? breedClass2 && breedSpecific2
+      ? `${breedClass2} · ${breedSpecific2}`
+      : breedSpecific2 || breedClass2
     : "";
   const height = document.getElementById("petHeight").value;
   const gender = document.getElementById("petGender").value;
-  const orientation = getCustomFieldValue("petOrientation", "orientation-custom");
+  const orientation = getCustomFieldValue(
+    "petOrientation",
+    "orientation-custom",
+  );
   const age = getPetAge();
   const hukou = getHousingDescription();
   const sterilized = document.getElementById("petSterilized").value;
@@ -1334,11 +1768,11 @@ function createCard() {
   // create the card content
   const scoreBar = `<div style="display:inline-block;background:#212529;color:rgb(57,255,20);font-size:13px;padding:2px 8px;border:2px solid rgb(57,255,20);margin-top:6px;letter-spacing:1px;">💯 ${finalScore} / 100</div>`;
   const card = `
-  <img src="${renderGridAsAvatar(grid, currentText)}" alt="Fursona" style="width:100px; height:100px;" />
+  <img src="${renderGridAsAvatar(grid, currentText)}" alt="Fursona" style="width:150px; height:250px; border:none;" />
     <h3>${name || "无名兽人 / Unnamed Anthro"}</h3>
-    <p>物种 / Species: ${breed}${isMixed && breed2 ? ` <span style="color:#ff6b6b">× ${breed2}（混血）</span>` : ""}</p>
+    <p>物种 / Species: ${breed}${isMixed && breed2 ? ` <span style="color:#ff6b6b">× ${breed2}（混血/Mixed）</span>` : ""}</p>
     <p style="opacity:0.6; font-size:14px;">
-      ${gender} · ${age} · 领地 ${hukou} · ${sterilized} · MBTI: ${mbti} <br />
+      ${gender} · ${age} · 领地/Territory: ${hukou} · ${sterilized} · MBTI: ${mbti} <br />
       爱好 / Hobbies: ${hobby}
     </p>
     ${scoreBar}
@@ -1392,12 +1826,8 @@ function createSwipeCard() {
 
       currentIndex = 0;
       showProfile();
-      goTo("swipe-tutorial");
-      initTutorial();
-      setTimeout(() => {
-        const flash = document.getElementById("tut-flash");
-        if (flash) { flash.classList.add("active"); setTimeout(() => flash.classList.remove("active"), 600); }
-      }, 80);
+      goTo("swipe-page");
+      startOnboarding();
     });
 }
 
@@ -1406,218 +1836,554 @@ function createSwipeCard() {
 // badges are never shown to users — scoring is silent
 const HOBBY_CATEGORIES = [
   {
-    zh: "兽人特色", en: "Anthro Life", tier: 1,
+    zh: "兽人特色",
+    en: "Anthro Life",
+    tier: 1,
     tags: [
-      {zh:"狩猎",en:"Hunting"},{zh:"筑巢",en:"Nesting"},{zh:"觅食",en:"Foraging"},{zh:"飞翔",en:"Flying"},
-      {zh:"冬眠",en:"Hibernating"},{zh:"标记领地",en:"Territory Marking"},{zh:"奔跑",en:"Running"},
-      {zh:"攀爬",en:"Climbing"},{zh:"格斗",en:"Fighting"},{zh:"潜水",en:"Diving"},
-      {zh:"晒毛",en:"Sunbathing Fur"},{zh:"理毛",en:"Grooming"},{zh:"嗅探",en:"Sniffing"},{zh:"夜行",en:"Night Roaming"},
+      { zh: "狩猎", en: "Hunting" },
+      { zh: "筑巢", en: "Nesting" },
+      { zh: "觅食", en: "Foraging" },
+      { zh: "飞翔", en: "Flying" },
+      { zh: "冬眠", en: "Hibernating" },
+      { zh: "标记领地", en: "Territory Marking" },
+      { zh: "奔跑", en: "Running" },
+      { zh: "攀爬", en: "Climbing" },
+      { zh: "格斗", en: "Fighting" },
+      { zh: "潜水", en: "Diving" },
+      { zh: "晒毛", en: "Sunbathing Fur" },
+      { zh: "理毛", en: "Grooming" },
+      { zh: "嗅探", en: "Sniffing" },
+      { zh: "夜行", en: "Night Roaming" },
     ],
   },
   {
-    zh: "堕落放松", en: "Guilty Pleasures", tier: 0,
+    zh: "堕落放松",
+    en: "Guilty Pleasures",
+    tier: 0,
     tags: [
-      {zh:"刷短视频",en:"Short Videos"},{zh:"刷微博",en:"Weibo Scrolling"},{zh:"刷剧",en:"Binge Watching"},
-      {zh:"看综艺",en:"Variety Shows"},{zh:"躺着玩手机",en:"Phone in Bed"},{zh:"瘫在沙发吃零食",en:"Couch Snacking"},
-      {zh:"熬夜追小说",en:"Late Night Novels"},{zh:"看甜宠剧",en:"Romcoms"},{zh:"磕CP",en:"Shipping"},
-      {zh:"刷朋友圈",en:"Feed Scrolling"},{zh:"窥探前任动态",en:"Stalking Exes"},{zh:"漫无目的网购",en:"Mindless Shopping"},
-      {zh:"看土味视频",en:"Cringey Videos"},{zh:"玩消消乐",en:"Match-3 Games"},{zh:"吃垃圾食品",en:"Junk Food"},
-      {zh:"喝高糖饮料",en:"Sugary Drinks"},{zh:"赖床",en:"Staying in Bed"},{zh:"工作日请病假",en:"Faking Sick Days"},
-      {zh:"拖延事项",en:"Procrastinating"},{zh:"逃避社交",en:"Avoiding People"},{zh:"沉迷八卦",en:"Gossip"},
-      {zh:"看塌房新闻",en:"Drama News"},{zh:"给朋友发吐槽",en:"Venting"},{zh:"反复刷消息",en:"Refreshing Messages"},
-      {zh:"把脏衣服堆成山",en:"Laundry Mountain"},{zh:"点外卖",en:"Food Delivery"},{zh:"把房间弄乱不管",en:"Ignoring Mess"},
-      {zh:"看天气不出门",en:"Weather Excuses"},{zh:"研究如何更懒",en:"Optimizing Laziness"},{zh:"收藏躺平语录",en:"Slack Quotes"},
-      {zh:"摆烂",en:"Letting Go"},{zh:"看吃播",en:"Food Streams"},{zh:"听洗脑神曲循环",en:"Earworm Loops"},
-      {zh:"玩网页小游戏",en:"Browser Games"},{zh:"看老剧重温童年",en:"Childhood Shows"},{zh:"发呆看天花板",en:"Staring at Ceiling"},
-      {zh:"数羊睡不着",en:"Counting Sheep"},{zh:"泡脚看剧",en:"Foot Soak & TV"},{zh:"晒太阳放空",en:"Sunbathing"},
-      {zh:"逛超市试吃",en:"Supermarket Sampling"},{zh:"喂鸽子",en:"Feeding Pigeons"},{zh:"收集搞笑段子",en:"Meme Collecting"},
-      {zh:"整理手机越整越乱",en:"Disorganizing Phone"},
+      { zh: "刷短视频", en: "Short Videos" },
+      { zh: "刷微博", en: "Weibo Scrolling" },
+      { zh: "刷剧", en: "Binge Watching" },
+      { zh: "看综艺", en: "Variety Shows" },
+      { zh: "躺着玩手机", en: "Phone in Bed" },
+      { zh: "瘫在沙发吃零食", en: "Couch Snacking" },
+      { zh: "熬夜追小说", en: "Late Night Novels" },
+      { zh: "看甜宠剧", en: "Romcoms" },
+      { zh: "磕CP", en: "Shipping" },
+      { zh: "刷朋友圈", en: "Feed Scrolling" },
+      { zh: "窥探前任动态", en: "Stalking Exes" },
+      { zh: "漫无目的网购", en: "Mindless Shopping" },
+      { zh: "看土味视频", en: "Cringey Videos" },
+      { zh: "玩消消乐", en: "Match-3 Games" },
+      { zh: "吃垃圾食品", en: "Junk Food" },
+      { zh: "喝高糖饮料", en: "Sugary Drinks" },
+      { zh: "赖床", en: "Staying in Bed" },
+      { zh: "工作日请病假", en: "Faking Sick Days" },
+      { zh: "拖延事项", en: "Procrastinating" },
+      { zh: "逃避社交", en: "Avoiding People" },
+      { zh: "沉迷八卦", en: "Gossip" },
+      { zh: "看塌房新闻", en: "Drama News" },
+      { zh: "给朋友发吐槽", en: "Venting" },
+      { zh: "反复刷消息", en: "Refreshing Messages" },
+      { zh: "把脏衣服堆成山", en: "Laundry Mountain" },
+      { zh: "点外卖", en: "Food Delivery" },
+      { zh: "把房间弄乱不管", en: "Ignoring Mess" },
+      { zh: "看天气不出门", en: "Weather Excuses" },
+      { zh: "研究如何更懒", en: "Optimizing Laziness" },
+      { zh: "收藏躺平语录", en: "Slack Quotes" },
+      { zh: "摆烂", en: "Letting Go" },
+      { zh: "看吃播", en: "Food Streams" },
+      { zh: "听洗脑神曲循环", en: "Earworm Loops" },
+      { zh: "玩网页小游戏", en: "Browser Games" },
+      { zh: "看老剧重温童年", en: "Childhood Shows" },
+      { zh: "发呆看天花板", en: "Staring at Ceiling" },
+      { zh: "数羊睡不着", en: "Counting Sheep" },
+      { zh: "泡脚看剧", en: "Foot Soak & TV" },
+      { zh: "晒太阳放空", en: "Sunbathing" },
+      { zh: "逛超市试吃", en: "Supermarket Sampling" },
+      { zh: "喂鸽子", en: "Feeding Pigeons" },
+      { zh: "收集搞笑段子", en: "Meme Collecting" },
+      { zh: "整理手机越整越乱", en: "Disorganizing Phone" },
     ],
   },
   {
-    zh: "艺术与手工", en: "Arts & Crafts", tier: 2,
+    zh: "艺术与手工",
+    en: "Arts & Crafts",
+    tier: 2,
     tags: [
-      {zh:"素描",en:"Sketching"},{zh:"速写",en:"Gesture Drawing"},{zh:"水彩画",en:"Watercolor"},
-      {zh:"油画",en:"Oil Painting"},{zh:"丙烯画",en:"Acrylic Painting"},{zh:"版画",en:"Printmaking"},
-      {zh:"数字绘画",en:"Digital Art"},{zh:"插画",en:"Illustration"},{zh:"漫画",en:"Comics"},
-      {zh:"动画原画",en:"Animation"},{zh:"硬笔书法",en:"Pen Calligraphy"},{zh:"毛笔书法",en:"Brush Calligraphy"},
-      {zh:"篆刻",en:"Seal Carving"},{zh:"木雕",en:"Wood Carving"},{zh:"石雕",en:"Stone Carving"},
-      {zh:"玉雕",en:"Jade Carving"},{zh:"泥塑",en:"Clay Sculpting"},{zh:"陶艺",en:"Ceramics"},
-      {zh:"拉坯",en:"Pottery Wheel"},{zh:"陶瓷彩绘",en:"Ceramic Painting"},{zh:"琉璃制作",en:"Glass Art"},
-      {zh:"玻璃吹制",en:"Glass Blowing"},{zh:"马赛克镶嵌",en:"Mosaic"},{zh:"金工首饰",en:"Metalwork Jewelry"},
-      {zh:"银饰制作",en:"Silver Jewelry"},{zh:"棒针编织",en:"Knitting"},{zh:"钩针编织",en:"Crochet"},
-      {zh:"十字绣",en:"Cross Stitch"},{zh:"缝纫",en:"Sewing"},{zh:"拼布",en:"Quilting"},
-      {zh:"服装设计",en:"Fashion Design"},{zh:"首饰制作",en:"Jewelry Making"},{zh:"皮具制作",en:"Leatherwork"},
-      {zh:"木工",en:"Woodworking"},{zh:"家具制作",en:"Furniture Making"},{zh:"建筑模型",en:"Architecture Models"},
-      {zh:"剪纸",en:"Paper Cutting"},{zh:"折纸",en:"Origami"},{zh:"纸雕",en:"Paper Sculpting"},
-      {zh:"串珠",en:"Beading"},{zh:"蜡烛制作",en:"Candle Making"},{zh:"香薰制作",en:"Aromatherapy Crafts"},
-      {zh:"手工皂",en:"Soap Making"},{zh:"花艺",en:"Floral Art"},{zh:"插花",en:"Ikebana"},
-      {zh:"苔藓微景观",en:"Moss Terrariums"},{zh:"植物标本",en:"Plant Specimens"},{zh:"昆虫标本",en:"Insect Specimens"},
-      {zh:"布艺玩偶",en:"Fabric Dolls"},{zh:"旅行手账",en:"Travel Journals"},{zh:"印章雕刻",en:"Stamp Carving"},
-      {zh:"自然材料拼贴画",en:"Nature Collage"},{zh:"戏剧面具彩绘",en:"Mask Painting"},{zh:"复古首饰修复",en:"Vintage Jewelry Repair"},
+      { zh: "素描", en: "Sketching" },
+      { zh: "速写", en: "Gesture Drawing" },
+      { zh: "水彩画", en: "Watercolor" },
+      { zh: "油画", en: "Oil Painting" },
+      { zh: "丙烯画", en: "Acrylic Painting" },
+      { zh: "版画", en: "Printmaking" },
+      { zh: "数字绘画", en: "Digital Art" },
+      { zh: "插画", en: "Illustration" },
+      { zh: "漫画", en: "Comics" },
+      { zh: "动画原画", en: "Animation" },
+      { zh: "硬笔书法", en: "Pen Calligraphy" },
+      { zh: "毛笔书法", en: "Brush Calligraphy" },
+      { zh: "篆刻", en: "Seal Carving" },
+      { zh: "木雕", en: "Wood Carving" },
+      { zh: "石雕", en: "Stone Carving" },
+      { zh: "玉雕", en: "Jade Carving" },
+      { zh: "泥塑", en: "Clay Sculpting" },
+      { zh: "陶艺", en: "Ceramics" },
+      { zh: "拉坯", en: "Pottery Wheel" },
+      { zh: "陶瓷彩绘", en: "Ceramic Painting" },
+      { zh: "琉璃制作", en: "Glass Art" },
+      { zh: "玻璃吹制", en: "Glass Blowing" },
+      { zh: "马赛克镶嵌", en: "Mosaic" },
+      { zh: "金工首饰", en: "Metalwork Jewelry" },
+      { zh: "银饰制作", en: "Silver Jewelry" },
+      { zh: "棒针编织", en: "Knitting" },
+      { zh: "钩针编织", en: "Crochet" },
+      { zh: "十字绣", en: "Cross Stitch" },
+      { zh: "缝纫", en: "Sewing" },
+      { zh: "拼布", en: "Quilting" },
+      { zh: "服装设计", en: "Fashion Design" },
+      { zh: "首饰制作", en: "Jewelry Making" },
+      { zh: "皮具制作", en: "Leatherwork" },
+      { zh: "木工", en: "Woodworking" },
+      { zh: "家具制作", en: "Furniture Making" },
+      { zh: "建筑模型", en: "Architecture Models" },
+      { zh: "剪纸", en: "Paper Cutting" },
+      { zh: "折纸", en: "Origami" },
+      { zh: "纸雕", en: "Paper Sculpting" },
+      { zh: "串珠", en: "Beading" },
+      { zh: "蜡烛制作", en: "Candle Making" },
+      { zh: "香薰制作", en: "Aromatherapy Crafts" },
+      { zh: "手工皂", en: "Soap Making" },
+      { zh: "花艺", en: "Floral Art" },
+      { zh: "插花", en: "Ikebana" },
+      { zh: "苔藓微景观", en: "Moss Terrariums" },
+      { zh: "植物标本", en: "Plant Specimens" },
+      { zh: "昆虫标本", en: "Insect Specimens" },
+      { zh: "布艺玩偶", en: "Fabric Dolls" },
+      { zh: "旅行手账", en: "Travel Journals" },
+      { zh: "印章雕刻", en: "Stamp Carving" },
+      { zh: "自然材料拼贴画", en: "Nature Collage" },
+      { zh: "戏剧面具彩绘", en: "Mask Painting" },
+      { zh: "复古首饰修复", en: "Vintage Jewelry Repair" },
     ],
   },
   {
-    zh: "音乐与表演", en: "Music & Performance", tier: 2,
+    zh: "音乐与表演",
+    en: "Music & Performance",
+    tier: 2,
     tags: [
-      {zh:"声乐",en:"Singing"},{zh:"钢琴",en:"Piano"},{zh:"小提琴",en:"Violin"},{zh:"吉他",en:"Guitar"},
-      {zh:"古筝",en:"Guzheng"},{zh:"琵琶",en:"Pipa"},{zh:"架子鼓",en:"Drums"},{zh:"萨克斯",en:"Saxophone"},
-      {zh:"长笛",en:"Flute"},{zh:"作曲",en:"Composition"},{zh:"音乐制作",en:"Music Production"},{zh:"合唱",en:"Choir"},
-      {zh:"芭蕾",en:"Ballet"},{zh:"现代舞",en:"Contemporary Dance"},{zh:"民族舞",en:"Folk Dance"},
-      {zh:"爵士舞",en:"Jazz Dance"},{zh:"街舞",en:"Street Dance"},{zh:"拉丁舞",en:"Latin Dance"},
-      {zh:"戏剧表演",en:"Theater"},{zh:"京剧",en:"Peking Opera"},{zh:"歌剧",en:"Opera"},
-      {zh:"朗诵",en:"Recitation"},{zh:"主持",en:"Hosting"},{zh:"脱口秀",en:"Stand-Up Comedy"},
-      {zh:"魔术",en:"Magic"},{zh:"配音",en:"Voice Acting"},{zh:"影视表演",en:"Film Acting"},
-      {zh:"导演",en:"Directing"},{zh:"舞台设计",en:"Stage Design"},
+      { zh: "声乐", en: "Singing" },
+      { zh: "钢琴", en: "Piano" },
+      { zh: "小提琴", en: "Violin" },
+      { zh: "吉他", en: "Guitar" },
+      { zh: "古筝", en: "Guzheng" },
+      { zh: "琵琶", en: "Pipa" },
+      { zh: "架子鼓", en: "Drums" },
+      { zh: "萨克斯", en: "Saxophone" },
+      { zh: "长笛", en: "Flute" },
+      { zh: "作曲", en: "Composition" },
+      { zh: "音乐制作", en: "Music Production" },
+      { zh: "合唱", en: "Choir" },
+      { zh: "芭蕾", en: "Ballet" },
+      { zh: "现代舞", en: "Contemporary Dance" },
+      { zh: "民族舞", en: "Folk Dance" },
+      { zh: "爵士舞", en: "Jazz Dance" },
+      { zh: "街舞", en: "Street Dance" },
+      { zh: "拉丁舞", en: "Latin Dance" },
+      { zh: "戏剧表演", en: "Theater" },
+      { zh: "京剧", en: "Peking Opera" },
+      { zh: "歌剧", en: "Opera" },
+      { zh: "朗诵", en: "Recitation" },
+      { zh: "主持", en: "Hosting" },
+      { zh: "脱口秀", en: "Stand-Up Comedy" },
+      { zh: "魔术", en: "Magic" },
+      { zh: "配音", en: "Voice Acting" },
+      { zh: "影视表演", en: "Film Acting" },
+      { zh: "导演", en: "Directing" },
+      { zh: "舞台设计", en: "Stage Design" },
     ],
   },
   {
-    zh: "文学与创作", en: "Literature & Writing", tier: 3,
+    zh: "文学与创作",
+    en: "Literature & Writing",
+    tier: 3,
     tags: [
-      {zh:"阅读小说",en:"Reading Novels"},{zh:"文学创作",en:"Creative Writing"},{zh:"诗词创作",en:"Poetry"},
-      {zh:"外语学习",en:"Language Learning"},{zh:"演讲",en:"Public Speaking"},{zh:"辩论",en:"Debating"},
-      {zh:"手语",en:"Sign Language"},{zh:"写书评",en:"Book Reviews"},{zh:"写影评",en:"Film Reviews"},
-      {zh:"藏书",en:"Book Collecting"},{zh:"书信写作",en:"Letter Writing"},{zh:"日记写作",en:"Journaling"},
-      {zh:"自媒体写作",en:"Content Writing"},{zh:"同人小说创作",en:"Fan Fiction"},{zh:"科普写作",en:"Science Writing"},
-      {zh:"剧本创作",en:"Screenwriting"},
+      { zh: "阅读小说", en: "Reading Novels" },
+      { zh: "文学创作", en: "Creative Writing" },
+      { zh: "诗词创作", en: "Poetry" },
+      { zh: "外语学习", en: "Language Learning" },
+      { zh: "演讲", en: "Public Speaking" },
+      { zh: "辩论", en: "Debating" },
+      { zh: "手语", en: "Sign Language" },
+      { zh: "写书评", en: "Book Reviews" },
+      { zh: "写影评", en: "Film Reviews" },
+      { zh: "藏书", en: "Book Collecting" },
+      { zh: "书信写作", en: "Letter Writing" },
+      { zh: "日记写作", en: "Journaling" },
+      { zh: "自媒体写作", en: "Content Writing" },
+      { zh: "同人小说创作", en: "Fan Fiction" },
+      { zh: "科普写作", en: "Science Writing" },
+      { zh: "剧本创作", en: "Screenwriting" },
     ],
   },
   {
-    zh: "运动与竞技", en: "Sports & Athletics", tier: 2,
+    zh: "运动与竞技",
+    en: "Sports & Athletics",
+    tier: 2,
     tags: [
-      {zh:"跑步",en:"Running"},{zh:"健走",en:"Walking"},{zh:"徒步",en:"Hiking"},{zh:"登山",en:"Mountaineering"},
-      {zh:"攀岩",en:"Rock Climbing"},{zh:"攀冰",en:"Ice Climbing"},{zh:"滑雪",en:"Skiing"},{zh:"滑冰",en:"Ice Skating"},
-      {zh:"轮滑",en:"Roller Skating"},{zh:"滑板",en:"Skateboarding"},{zh:"冲浪",en:"Surfing"},{zh:"帆板",en:"Windsurfing"},
-      {zh:"帆船",en:"Sailing"},{zh:"赛艇",en:"Rowing"},{zh:"皮划艇",en:"Kayaking"},{zh:"独木舟",en:"Canoeing"},
-      {zh:"游泳",en:"Swimming"},{zh:"自由潜水",en:"Freediving"},{zh:"水肺潜水",en:"Scuba Diving"},{zh:"浮潜",en:"Snorkeling"},
-      {zh:"跳水",en:"Diving Boards"},{zh:"花样游泳",en:"Synchronized Swimming"},{zh:"钓鱼",en:"Fishing"},{zh:"飞盘",en:"Frisbee"},
-      {zh:"高尔夫",en:"Golf"},{zh:"网球",en:"Tennis"},{zh:"羽毛球",en:"Badminton"},{zh:"乒乓球",en:"Table Tennis"},
-      {zh:"壁球",en:"Squash"},{zh:"保龄球",en:"Bowling"},{zh:"台球",en:"Billiards"},{zh:"篮球",en:"Basketball"},
-      {zh:"足球",en:"Football"},{zh:"排球",en:"Volleyball"},{zh:"沙滩排球",en:"Beach Volleyball"},{zh:"橄榄球",en:"Rugby"},
-      {zh:"棒球",en:"Baseball"},{zh:"垒球",en:"Softball"},{zh:"曲棍球",en:"Field Hockey"},{zh:"冰球",en:"Ice Hockey"},
-      {zh:"马术",en:"Equestrian"},{zh:"击剑",en:"Fencing"},{zh:"射箭",en:"Archery"},{zh:"射击",en:"Shooting"},
-      {zh:"拳击",en:"Boxing"},{zh:"散打",en:"Sanda"},{zh:"跆拳道",en:"Taekwondo"},{zh:"空手道",en:"Karate"},
-      {zh:"柔道",en:"Judo"},{zh:"合气道",en:"Aikido"},{zh:"泰拳",en:"Muay Thai"},{zh:"巴西柔术",en:"BJJ"},
-      {zh:"摔跤",en:"Wrestling"},{zh:"太极拳",en:"Tai Chi"},{zh:"少林拳",en:"Shaolin"},{zh:"咏春拳",en:"Wing Chun"},
-      {zh:"气功",en:"Qigong"},{zh:"瑜伽",en:"Yoga"},{zh:"普拉提",en:"Pilates"},{zh:"健美操",en:"Aerobics"},
-      {zh:"广场舞",en:"Square Dance"},{zh:"尊巴",en:"Zumba"},{zh:"动感单车",en:"Spinning"},{zh:"力量训练",en:"Weight Training"},
-      {zh:"举重",en:"Weightlifting"},{zh:"CrossFit",en:"CrossFit"},{zh:"体操",en:"Gymnastics"},{zh:"艺术体操",en:"Rhythmic Gymnastics"},
-      {zh:"蹦床",en:"Trampoline"},{zh:"跑酷",en:"Parkour"},{zh:"自行车骑行",en:"Cycling"},{zh:"摩托车骑行",en:"Motorcycling"},
-      {zh:"卡丁车",en:"Go-Karting"},{zh:"跳伞",en:"Skydiving"},{zh:"滑翔伞",en:"Paragliding"},{zh:"热气球",en:"Hot Air Balloon"},
+      { zh: "跑步", en: "Running" },
+      { zh: "健走", en: "Walking" },
+      { zh: "徒步", en: "Hiking" },
+      { zh: "登山", en: "Mountaineering" },
+      { zh: "攀岩", en: "Rock Climbing" },
+      { zh: "攀冰", en: "Ice Climbing" },
+      { zh: "滑雪", en: "Skiing" },
+      { zh: "滑冰", en: "Ice Skating" },
+      { zh: "轮滑", en: "Roller Skating" },
+      { zh: "滑板", en: "Skateboarding" },
+      { zh: "冲浪", en: "Surfing" },
+      { zh: "帆板", en: "Windsurfing" },
+      { zh: "帆船", en: "Sailing" },
+      { zh: "赛艇", en: "Rowing" },
+      { zh: "皮划艇", en: "Kayaking" },
+      { zh: "独木舟", en: "Canoeing" },
+      { zh: "游泳", en: "Swimming" },
+      { zh: "自由潜水", en: "Freediving" },
+      { zh: "水肺潜水", en: "Scuba Diving" },
+      { zh: "浮潜", en: "Snorkeling" },
+      { zh: "跳水", en: "Diving Boards" },
+      { zh: "花样游泳", en: "Synchronized Swimming" },
+      { zh: "钓鱼", en: "Fishing" },
+      { zh: "飞盘", en: "Frisbee" },
+      { zh: "高尔夫", en: "Golf" },
+      { zh: "网球", en: "Tennis" },
+      { zh: "羽毛球", en: "Badminton" },
+      { zh: "乒乓球", en: "Table Tennis" },
+      { zh: "壁球", en: "Squash" },
+      { zh: "保龄球", en: "Bowling" },
+      { zh: "台球", en: "Billiards" },
+      { zh: "篮球", en: "Basketball" },
+      { zh: "足球", en: "Football" },
+      { zh: "排球", en: "Volleyball" },
+      { zh: "沙滩排球", en: "Beach Volleyball" },
+      { zh: "橄榄球", en: "Rugby" },
+      { zh: "棒球", en: "Baseball" },
+      { zh: "垒球", en: "Softball" },
+      { zh: "曲棍球", en: "Field Hockey" },
+      { zh: "冰球", en: "Ice Hockey" },
+      { zh: "马术", en: "Equestrian" },
+      { zh: "击剑", en: "Fencing" },
+      { zh: "射箭", en: "Archery" },
+      { zh: "射击", en: "Shooting" },
+      { zh: "拳击", en: "Boxing" },
+      { zh: "散打", en: "Sanda" },
+      { zh: "跆拳道", en: "Taekwondo" },
+      { zh: "空手道", en: "Karate" },
+      { zh: "柔道", en: "Judo" },
+      { zh: "合气道", en: "Aikido" },
+      { zh: "泰拳", en: "Muay Thai" },
+      { zh: "巴西柔术", en: "BJJ" },
+      { zh: "摔跤", en: "Wrestling" },
+      { zh: "太极拳", en: "Tai Chi" },
+      { zh: "少林拳", en: "Shaolin" },
+      { zh: "咏春拳", en: "Wing Chun" },
+      { zh: "气功", en: "Qigong" },
+      { zh: "瑜伽", en: "Yoga" },
+      { zh: "普拉提", en: "Pilates" },
+      { zh: "健美操", en: "Aerobics" },
+      { zh: "广场舞", en: "Square Dance" },
+      { zh: "尊巴", en: "Zumba" },
+      { zh: "动感单车", en: "Spinning" },
+      { zh: "力量训练", en: "Weight Training" },
+      { zh: "举重", en: "Weightlifting" },
+      { zh: "CrossFit", en: "CrossFit" },
+      { zh: "体操", en: "Gymnastics" },
+      { zh: "艺术体操", en: "Rhythmic Gymnastics" },
+      { zh: "蹦床", en: "Trampoline" },
+      { zh: "跑酷", en: "Parkour" },
+      { zh: "自行车骑行", en: "Cycling" },
+      { zh: "摩托车骑行", en: "Motorcycling" },
+      { zh: "卡丁车", en: "Go-Karting" },
+      { zh: "跳伞", en: "Skydiving" },
+      { zh: "滑翔伞", en: "Paragliding" },
+      { zh: "热气球", en: "Hot Air Balloon" },
     ],
   },
   {
-    zh: "健康与养生", en: "Health & Wellness", tier: 1,
+    zh: "健康与养生",
+    en: "Health & Wellness",
+    tier: 1,
     tags: [
-      {zh:"定向越野",en:"Orienteering"},{zh:"拓展训练",en:"Outdoor Training"},{zh:"军事训练体验",en:"Military Training"},
-      {zh:"八段锦",en:"Baduanjin"},{zh:"五禽戏",en:"Five Animals Qigong"},{zh:"健身气功",en:"Fitness Qigong"},
-      {zh:"按摩",en:"Massage"},{zh:"推拿",en:"Tuina"},{zh:"针灸",en:"Acupuncture"},{zh:"拔罐",en:"Cupping"},
-      {zh:"刮痧",en:"Gua Sha"},{zh:"芳香疗法",en:"Aromatherapy"},{zh:"冥想",en:"Meditation"},{zh:"正念练习",en:"Mindfulness"},
-      {zh:"森林浴",en:"Forest Bathing"},{zh:"园艺疗法",en:"Horticultural Therapy"},{zh:"经络拍打",en:"Meridian Tapping"},
-      {zh:"足底按摩",en:"Reflexology"},{zh:"呼吸训练",en:"Breathwork"},{zh:"体态矫正",en:"Posture Correction"},
-      {zh:"柔韧性训练",en:"Flexibility Training"},{zh:"平衡训练",en:"Balance Training"},{zh:"营养学研究",en:"Nutrition"},
-      {zh:"健康饮食实践",en:"Healthy Eating"},{zh:"养生功法",en:"Health Exercises"},{zh:"水中健身",en:"Aqua Fitness"},
-      {zh:"康复训练",en:"Rehab Training"},
+      { zh: "定向越野", en: "Orienteering" },
+      { zh: "拓展训练", en: "Outdoor Training" },
+      { zh: "军事训练体验", en: "Military Training" },
+      { zh: "八段锦", en: "Baduanjin" },
+      { zh: "五禽戏", en: "Five Animals Qigong" },
+      { zh: "健身气功", en: "Fitness Qigong" },
+      { zh: "按摩", en: "Massage" },
+      { zh: "推拿", en: "Tuina" },
+      { zh: "针灸", en: "Acupuncture" },
+      { zh: "拔罐", en: "Cupping" },
+      { zh: "刮痧", en: "Gua Sha" },
+      { zh: "芳香疗法", en: "Aromatherapy" },
+      { zh: "冥想", en: "Meditation" },
+      { zh: "正念练习", en: "Mindfulness" },
+      { zh: "森林浴", en: "Forest Bathing" },
+      { zh: "园艺疗法", en: "Horticultural Therapy" },
+      { zh: "经络拍打", en: "Meridian Tapping" },
+      { zh: "足底按摩", en: "Reflexology" },
+      { zh: "呼吸训练", en: "Breathwork" },
+      { zh: "体态矫正", en: "Posture Correction" },
+      { zh: "柔韧性训练", en: "Flexibility Training" },
+      { zh: "平衡训练", en: "Balance Training" },
+      { zh: "营养学研究", en: "Nutrition" },
+      { zh: "健康饮食实践", en: "Healthy Eating" },
+      { zh: "养生功法", en: "Health Exercises" },
+      { zh: "水中健身", en: "Aqua Fitness" },
+      { zh: "康复训练", en: "Rehab Training" },
     ],
   },
   {
-    zh: "知识与学习", en: "Knowledge & Learning", tier: 3,
+    zh: "知识与学习",
+    en: "Knowledge & Learning",
+    tier: 3,
     tags: [
-      {zh:"数学",en:"Mathematics"},{zh:"物理学",en:"Physics"},{zh:"化学实验",en:"Chemistry"},{zh:"生物学观察",en:"Biology"},
-      {zh:"地理学探索",en:"Geography"},{zh:"环境科学",en:"Environmental Science"},{zh:"心理学",en:"Psychology"},
-      {zh:"社会学",en:"Sociology"},{zh:"人类学",en:"Anthropology"},{zh:"历史学研读",en:"History"},{zh:"考古学",en:"Archaeology"},
-      {zh:"哲学思考",en:"Philosophy"},{zh:"逻辑学训练",en:"Logic"},{zh:"经济学",en:"Economics"},{zh:"金融学",en:"Finance"},
-      {zh:"管理学",en:"Management"},{zh:"法学",en:"Law"},{zh:"教育学",en:"Education"},{zh:"医学常识",en:"Medical Knowledge"},
-      {zh:"中医学",en:"TCM"},{zh:"语言学",en:"Linguistics"},{zh:"文学研究",en:"Literature Studies"},{zh:"艺术史",en:"Art History"},
-      {zh:"音乐史",en:"Music History"},{zh:"电影史",en:"Film History"},{zh:"科技史",en:"Tech History"},
-      {zh:"参加学术讲座",en:"Academic Lectures"},{zh:"加入读书会",en:"Book Clubs"},
+      { zh: "数学", en: "Mathematics" },
+      { zh: "物理学", en: "Physics" },
+      { zh: "化学实验", en: "Chemistry" },
+      { zh: "生物学观察", en: "Biology" },
+      { zh: "地理学探索", en: "Geography" },
+      { zh: "环境科学", en: "Environmental Science" },
+      { zh: "心理学", en: "Psychology" },
+      { zh: "社会学", en: "Sociology" },
+      { zh: "人类学", en: "Anthropology" },
+      { zh: "历史学研读", en: "History" },
+      { zh: "考古学", en: "Archaeology" },
+      { zh: "哲学思考", en: "Philosophy" },
+      { zh: "逻辑学训练", en: "Logic" },
+      { zh: "经济学", en: "Economics" },
+      { zh: "金融学", en: "Finance" },
+      { zh: "管理学", en: "Management" },
+      { zh: "法学", en: "Law" },
+      { zh: "教育学", en: "Education" },
+      { zh: "医学常识", en: "Medical Knowledge" },
+      { zh: "中医学", en: "TCM" },
+      { zh: "语言学", en: "Linguistics" },
+      { zh: "文学研究", en: "Literature Studies" },
+      { zh: "艺术史", en: "Art History" },
+      { zh: "音乐史", en: "Music History" },
+      { zh: "电影史", en: "Film History" },
+      { zh: "科技史", en: "Tech History" },
+      { zh: "参加学术讲座", en: "Academic Lectures" },
+      { zh: "加入读书会", en: "Book Clubs" },
     ],
   },
   {
-    zh: "科技与数字", en: "Tech & Digital", tier: 3,
+    zh: "科技与数字",
+    en: "Tech & Digital",
+    tier: 3,
     tags: [
-      {zh:"Python编程",en:"Python"},{zh:"算法研究",en:"Algorithms"},{zh:"数据结构",en:"Data Structures"},
-      {zh:"人工智能",en:"AI"},{zh:"机器学习",en:"Machine Learning"},{zh:"深度学习",en:"Deep Learning"},
-      {zh:"数据科学",en:"Data Science"},{zh:"大数据处理",en:"Big Data"},{zh:"网络安全",en:"Cybersecurity"},
-      {zh:"Web开发",en:"Web Dev"},{zh:"移动应用开发",en:"Mobile Dev"},{zh:"游戏开发",en:"Game Dev"},
-      {zh:"3D建模",en:"3D Modeling"},{zh:"无人机操作",en:"Drone Flying"},{zh:"无人机编程",en:"Drone Programming"},
-      {zh:"机器人技术",en:"Robotics"},{zh:"软件工程",en:"Software Engineering"},{zh:"数据库管理",en:"Database"},
-      {zh:"电子制作",en:"Electronics DIY"},
+      { zh: "Python编程", en: "Python" },
+      { zh: "算法研究", en: "Algorithms" },
+      { zh: "数据结构", en: "Data Structures" },
+      { zh: "人工智能", en: "AI" },
+      { zh: "机器学习", en: "Machine Learning" },
+      { zh: "深度学习", en: "Deep Learning" },
+      { zh: "数据科学", en: "Data Science" },
+      { zh: "大数据处理", en: "Big Data" },
+      { zh: "网络安全", en: "Cybersecurity" },
+      { zh: "Web开发", en: "Web Dev" },
+      { zh: "移动应用开发", en: "Mobile Dev" },
+      { zh: "游戏开发", en: "Game Dev" },
+      { zh: "3D建模", en: "3D Modeling" },
+      { zh: "无人机操作", en: "Drone Flying" },
+      { zh: "无人机编程", en: "Drone Programming" },
+      { zh: "机器人技术", en: "Robotics" },
+      { zh: "软件工程", en: "Software Engineering" },
+      { zh: "数据库管理", en: "Database" },
+      { zh: "电子制作", en: "Electronics DIY" },
     ],
   },
   {
-    zh: "科学与探索", en: "Science & Exploration", tier: 3,
+    zh: "科学与探索",
+    en: "Science & Exploration",
+    tier: 3,
     tags: [
-      {zh:"望远镜观测",en:"Telescope Gazing"},{zh:"气象观测",en:"Weather Watching"},{zh:"地质勘探",en:"Geology"},
-      {zh:"化石采集",en:"Fossil Collecting"},{zh:"矿物收集",en:"Mineral Collecting"},{zh:"植物分类学",en:"Plant Taxonomy"},
-      {zh:"鸟类观察",en:"Birdwatching"},{zh:"昆虫观察",en:"Insect Watching"},{zh:"动物行为观察",en:"Animal Behavior"},
-      {zh:"观星认星座",en:"Stargazing"},{zh:"天体摄影",en:"Astrophotography"},{zh:"家庭科学小实验",en:"Home Experiments"},
-      {zh:"科普阅读",en:"Science Reading"},{zh:"古建筑研究",en:"Historic Buildings"},{zh:"家谱研究",en:"Genealogy"},
-      {zh:"历史遗迹探访",en:"Historic Sites"},{zh:"地图收藏",en:"Map Collecting"},{zh:"邮票收藏",en:"Stamp Collecting"},
-      {zh:"模型收藏",en:"Model Collecting"},{zh:"档案馆查阅",en:"Archive Research"},
+      { zh: "望远镜观测", en: "Telescope Gazing" },
+      { zh: "气象观测", en: "Weather Watching" },
+      { zh: "地质勘探", en: "Geology" },
+      { zh: "化石采集", en: "Fossil Collecting" },
+      { zh: "矿物收集", en: "Mineral Collecting" },
+      { zh: "植物分类学", en: "Plant Taxonomy" },
+      { zh: "鸟类观察", en: "Birdwatching" },
+      { zh: "昆虫观察", en: "Insect Watching" },
+      { zh: "动物行为观察", en: "Animal Behavior" },
+      { zh: "观星认星座", en: "Stargazing" },
+      { zh: "天体摄影", en: "Astrophotography" },
+      { zh: "家庭科学小实验", en: "Home Experiments" },
+      { zh: "科普阅读", en: "Science Reading" },
+      { zh: "古建筑研究", en: "Historic Buildings" },
+      { zh: "家谱研究", en: "Genealogy" },
+      { zh: "历史遗迹探访", en: "Historic Sites" },
+      { zh: "地图收藏", en: "Map Collecting" },
+      { zh: "邮票收藏", en: "Stamp Collecting" },
+      { zh: "模型收藏", en: "Model Collecting" },
+      { zh: "档案馆查阅", en: "Archive Research" },
     ],
   },
   {
-    zh: "竞技与策略", en: "Games & Strategy", tier: 2,
+    zh: "竞技与策略",
+    en: "Games & Strategy",
+    tier: 2,
     tags: [
-      {zh:"围棋",en:"Go"},{zh:"象棋",en:"Chinese Chess"},{zh:"国际象棋",en:"Chess"},{zh:"将棋",en:"Shogi"},
-      {zh:"五子棋",en:"Gomoku"},{zh:"跳棋",en:"Checkers"},{zh:"军棋",en:"Army Chess"},{zh:"飞行棋",en:"Aeroplane Chess"},
-      {zh:"桥牌",en:"Bridge"},{zh:"扑克",en:"Poker"},{zh:"麻将",en:"Mahjong"},{zh:"桌游",en:"Board Games"},
-      {zh:"电子竞技",en:"Esports"},{zh:"网络游戏",en:"Online Gaming"},{zh:"密室逃脱",en:"Escape Rooms"},
-      {zh:"剧本杀",en:"Murder Mystery"},{zh:"魔方",en:"Rubik's Cube"},{zh:"数独",en:"Sudoku"},
-      {zh:"填字游戏",en:"Crosswords"},{zh:"谜题破解",en:"Puzzle Solving"},{zh:"知识竞赛",en:"Quiz Games"},
-      {zh:"答题游戏",en:"Trivia"},{zh:"策略游戏",en:"Strategy Games"},{zh:"模拟经营游戏",en:"Sim Games"},
-      {zh:"赛车游戏",en:"Racing Games"},{zh:"王者荣耀",en:"Honor of Kings"},{zh:"原神",en:"Genshin Impact"},
-      {zh:"DOTA2",en:"DOTA2"},{zh:"塞尔达",en:"Zelda"},{zh:"脑筋急转弯",en:"Riddles"},
-      {zh:"逻辑推理训练",en:"Logic Training"},{zh:"批判性思维",en:"Critical Thinking"},
+      { zh: "围棋", en: "Go" },
+      { zh: "象棋", en: "Chinese Chess" },
+      { zh: "国际象棋", en: "Chess" },
+      { zh: "将棋", en: "Shogi" },
+      { zh: "五子棋", en: "Gomoku" },
+      { zh: "跳棋", en: "Checkers" },
+      { zh: "军棋", en: "Army Chess" },
+      { zh: "飞行棋", en: "Aeroplane Chess" },
+      { zh: "桥牌", en: "Bridge" },
+      { zh: "扑克", en: "Poker" },
+      { zh: "麻将", en: "Mahjong" },
+      { zh: "桌游", en: "Board Games" },
+      { zh: "电子竞技", en: "Esports" },
+      { zh: "网络游戏", en: "Online Gaming" },
+      { zh: "密室逃脱", en: "Escape Rooms" },
+      { zh: "剧本杀", en: "Murder Mystery" },
+      { zh: "魔方", en: "Rubik's Cube" },
+      { zh: "数独", en: "Sudoku" },
+      { zh: "填字游戏", en: "Crosswords" },
+      { zh: "谜题破解", en: "Puzzle Solving" },
+      { zh: "知识竞赛", en: "Quiz Games" },
+      { zh: "答题游戏", en: "Trivia" },
+      { zh: "策略游戏", en: "Strategy Games" },
+      { zh: "模拟经营游戏", en: "Sim Games" },
+      { zh: "赛车游戏", en: "Racing Games" },
+      { zh: "王者荣耀", en: "Honor of Kings" },
+      { zh: "原神", en: "Genshin Impact" },
+      { zh: "DOTA2", en: "DOTA2" },
+      { zh: "塞尔达", en: "Zelda" },
+      { zh: "脑筋急转弯", en: "Riddles" },
+      { zh: "逻辑推理训练", en: "Logic Training" },
+      { zh: "批判性思维", en: "Critical Thinking" },
     ],
   },
   {
-    zh: "社交与活动", en: "Social & Events", tier: 1,
+    zh: "社交与活动",
+    en: "Social & Events",
+    tier: 1,
     tags: [
-      {zh:"朋友聚会",en:"Hangouts"},{zh:"家庭聚会",en:"Family Gatherings"},{zh:"同学聚会",en:"Reunions"},
-      {zh:"同事聚餐",en:"Work Dinners"},{zh:"社区活动",en:"Community Events"},{zh:"志愿者服务",en:"Volunteering"},
-      {zh:"慈善捐助",en:"Donations"},{zh:"公益活动",en:"Charity"},{zh:"环保行动",en:"Eco Action"},
-      {zh:"动物保护",en:"Animal Welfare"},{zh:"音乐会欣赏",en:"Concerts"},{zh:"戏剧观赏",en:"Theater Watching"},
-      {zh:"音乐剧欣赏",en:"Musicals"},{zh:"艺术展览参观",en:"Art Exhibitions"},{zh:"动物园游览",en:"Zoo Visits"},
-      {zh:"植物园漫步",en:"Botanical Garden"},{zh:"水族馆参观",en:"Aquarium"},{zh:"主题公园游玩",en:"Theme Parks"},
-      {zh:"真人CS",en:"Airsoft"},{zh:"集体徒步",en:"Group Hiking"},{zh:"乐队排练演出",en:"Band Practice"},
-      {zh:"摄影俱乐部外拍",en:"Photo Club"},{zh:"品酒会",en:"Wine Tasting"},{zh:"咖啡品鉴会",en:"Coffee Tasting"},
-      {zh:"美食分享会",en:"Food Sharing"},{zh:"语言交换学习",en:"Language Exchange"},{zh:"粉丝见面会",en:"Fan Events"},
-      {zh:"生日派对策划",en:"Birthday Parties"},{zh:"乔迁暖房",en:"Housewarming"},{zh:"告别单身派对",en:"Bachelor Party"},
-      {zh:"周年纪念庆祝",en:"Anniversary"},{zh:"相亲交友",en:"Blind Dates"},{zh:"恋爱经营",en:"Relationship Building"},
+      { zh: "朋友聚会", en: "Hangouts" },
+      { zh: "家庭聚会", en: "Family Gatherings" },
+      { zh: "同学聚会", en: "Reunions" },
+      { zh: "同事聚餐", en: "Work Dinners" },
+      { zh: "社区活动", en: "Community Events" },
+      { zh: "志愿者服务", en: "Volunteering" },
+      { zh: "慈善捐助", en: "Donations" },
+      { zh: "公益活动", en: "Charity" },
+      { zh: "环保行动", en: "Eco Action" },
+      { zh: "动物保护", en: "Animal Welfare" },
+      { zh: "音乐会欣赏", en: "Concerts" },
+      { zh: "戏剧观赏", en: "Theater Watching" },
+      { zh: "音乐剧欣赏", en: "Musicals" },
+      { zh: "艺术展览参观", en: "Art Exhibitions" },
+      { zh: "动物园游览", en: "Zoo Visits" },
+      { zh: "植物园漫步", en: "Botanical Garden" },
+      { zh: "水族馆参观", en: "Aquarium" },
+      { zh: "主题公园游玩", en: "Theme Parks" },
+      { zh: "真人CS", en: "Airsoft" },
+      { zh: "集体徒步", en: "Group Hiking" },
+      { zh: "乐队排练演出", en: "Band Practice" },
+      { zh: "摄影俱乐部外拍", en: "Photo Club" },
+      { zh: "品酒会", en: "Wine Tasting" },
+      { zh: "咖啡品鉴会", en: "Coffee Tasting" },
+      { zh: "美食分享会", en: "Food Sharing" },
+      { zh: "语言交换学习", en: "Language Exchange" },
+      { zh: "粉丝见面会", en: "Fan Events" },
+      { zh: "生日派对策划", en: "Birthday Parties" },
+      { zh: "乔迁暖房", en: "Housewarming" },
+      { zh: "告别单身派对", en: "Bachelor Party" },
+      { zh: "周年纪念庆祝", en: "Anniversary" },
+      { zh: "相亲交友", en: "Blind Dates" },
+      { zh: "恋爱经营", en: "Relationship Building" },
     ],
   },
   {
-    zh: "生活与居家", en: "Lifestyle & Home", tier: 1,
+    zh: "生活与居家",
+    en: "Lifestyle & Home",
+    tier: 1,
     tags: [
-      {zh:"烹饪",en:"Cooking"},{zh:"烘焙",en:"Baking"},{zh:"料理研究",en:"Culinary Research"},{zh:"美食探索",en:"Food Exploring"},
-      {zh:"品茶",en:"Tea Tasting"},{zh:"品咖啡",en:"Coffee Tasting"},{zh:"品酒",en:"Wine Tasting"},{zh:"调酒",en:"Mixology"},
-      {zh:"营养搭配",en:"Meal Planning"},{zh:"园艺",en:"Gardening"},{zh:"种花",en:"Flower Growing"},{zh:"种菜",en:"Vegetable Growing"},
-      {zh:"盆栽",en:"Bonsai Potting"},{zh:"盆景",en:"Bonsai"},{zh:"家居布置",en:"Home Decoration"},{zh:"室内设计",en:"Interior Design"},
-      {zh:"收纳整理",en:"Organizing"},{zh:"断舍离",en:"Decluttering"},{zh:"清洁打扫",en:"Cleaning"},{zh:"宠物饲养",en:"Pet Keeping"},
-      {zh:"宠物训练",en:"Pet Training"},{zh:"宠物美容",en:"Pet Grooming"},{zh:"水族饲养",en:"Aquarium Keeping"},
-      {zh:"植物养护",en:"Plant Care"},{zh:"护肤研究",en:"Skincare"},{zh:"美妆",en:"Makeup"},{zh:"发型设计",en:"Hair Styling"},
-      {zh:"服装搭配",en:"Outfit Styling"},{zh:"时尚研究",en:"Fashion"},{zh:"购物",en:"Shopping"},{zh:"逛街",en:"Street Browsing"},
-      {zh:"探店",en:"Shop Exploring"},{zh:"旅行规划",en:"Travel Planning"},{zh:"理财规划",en:"Financial Planning"},
-      {zh:"投资研究",en:"Investing"},{zh:"记账",en:"Budgeting"},{zh:"写日记",en:"Journaling"},
-      {zh:"节日庆祝筹备",en:"Holiday Planning"},{zh:"礼物挑选",en:"Gift Picking"},{zh:"急救知识",en:"First Aid"},
-      {zh:"环保生活实践",en:"Eco Living"},
+      { zh: "烹饪", en: "Cooking" },
+      { zh: "烘焙", en: "Baking" },
+      { zh: "料理研究", en: "Culinary Research" },
+      { zh: "美食探索", en: "Food Exploring" },
+      { zh: "品茶", en: "Tea Tasting" },
+      { zh: "品咖啡", en: "Coffee Tasting" },
+      { zh: "品酒", en: "Wine Tasting" },
+      { zh: "调酒", en: "Mixology" },
+      { zh: "营养搭配", en: "Meal Planning" },
+      { zh: "园艺", en: "Gardening" },
+      { zh: "种花", en: "Flower Growing" },
+      { zh: "种菜", en: "Vegetable Growing" },
+      { zh: "盆栽", en: "Bonsai Potting" },
+      { zh: "盆景", en: "Bonsai" },
+      { zh: "家居布置", en: "Home Decoration" },
+      { zh: "室内设计", en: "Interior Design" },
+      { zh: "收纳整理", en: "Organizing" },
+      { zh: "断舍离", en: "Decluttering" },
+      { zh: "清洁打扫", en: "Cleaning" },
+      { zh: "宠物饲养", en: "Pet Keeping" },
+      { zh: "宠物训练", en: "Pet Training" },
+      { zh: "宠物美容", en: "Pet Grooming" },
+      { zh: "水族饲养", en: "Aquarium Keeping" },
+      { zh: "植物养护", en: "Plant Care" },
+      { zh: "护肤研究", en: "Skincare" },
+      { zh: "美妆", en: "Makeup" },
+      { zh: "发型设计", en: "Hair Styling" },
+      { zh: "服装搭配", en: "Outfit Styling" },
+      { zh: "时尚研究", en: "Fashion" },
+      { zh: "购物", en: "Shopping" },
+      { zh: "逛街", en: "Street Browsing" },
+      { zh: "探店", en: "Shop Exploring" },
+      { zh: "旅行规划", en: "Travel Planning" },
+      { zh: "理财规划", en: "Financial Planning" },
+      { zh: "投资研究", en: "Investing" },
+      { zh: "记账", en: "Budgeting" },
+      { zh: "写日记", en: "Journaling" },
+      { zh: "节日庆祝筹备", en: "Holiday Planning" },
+      { zh: "礼物挑选", en: "Gift Picking" },
+      { zh: "急救知识", en: "First Aid" },
+      { zh: "环保生活实践", en: "Eco Living" },
     ],
   },
   {
-    zh: "摄影与影像", en: "Photo & Media", tier: 1,
+    zh: "摄影与影像",
+    en: "Photo & Media",
+    tier: 1,
     tags: [
-      {zh:"摄影",en:"Photography"},{zh:"写真",en:"Portrait Photos"},{zh:"天文摄影",en:"Astrophotography"},
-      {zh:"视频剪辑",en:"Video Editing"},{zh:"视频记录生活",en:"Vlogging"},{zh:"自媒体",en:"Content Creation"},
-      {zh:"看电影",en:"Movies"},{zh:"追剧",en:"Series Watching"},{zh:"看动漫",en:"Anime"},
-      {zh:"看cult片",en:"Cult Films"},{zh:"纪录片",en:"Documentaries"},{zh:"写影评",en:"Film Reviews"},
-      {zh:"播客",en:"Podcasting"},{zh:"cosplay",en:"Cosplay"},
+      { zh: "摄影", en: "Photography" },
+      { zh: "写真", en: "Portrait Photos" },
+      { zh: "天文摄影", en: "Astrophotography" },
+      { zh: "视频剪辑", en: "Video Editing" },
+      { zh: "视频记录生活", en: "Vlogging" },
+      { zh: "自媒体", en: "Content Creation" },
+      { zh: "看电影", en: "Movies" },
+      { zh: "追剧", en: "Series Watching" },
+      { zh: "看动漫", en: "Anime" },
+      { zh: "看cult片", en: "Cult Films" },
+      { zh: "纪录片", en: "Documentaries" },
+      { zh: "写影评", en: "Film Reviews" },
+      { zh: "播客", en: "Podcasting" },
+      { zh: "cosplay", en: "Cosplay" },
     ],
   },
 ];
 
-const HOBBY_TAG_LIST = HOBBY_CATEGORIES.flatMap((c) => c.tags.map((t) => typeof t === "string" ? t : t.zh));
+const HOBBY_TAG_LIST = HOBBY_CATEGORIES.flatMap((c) =>
+  c.tags.map((t) => (typeof t === "string" ? t : t.zh)),
+);
 
 let _customHobbyTags = [];
 
@@ -1637,7 +2403,8 @@ function buildHobbyTags(containerId) {
   // Group custom tags by declared category
   const customByCategory = {};
   _customHobbyTags.forEach((t) => {
-    const obj = typeof t === "string" ? { tag: t, categoryZh: null, tier: 1 } : t;
+    const obj =
+      typeof t === "string" ? { tag: t, categoryZh: null, tier: 1 } : t;
     const key = obj.categoryZh || "__custom__";
     if (!customByCategory[key]) customByCategory[key] = [];
     customByCategory[key].push(obj);
@@ -1645,25 +2412,36 @@ function buildHobbyTags(containerId) {
 
   let html = HOBBY_CATEGORIES.map((cat) => {
     let catHtml = `<div class="hobby-cat-label">${cat.zh} / ${cat.en}</div>`;
-    catHtml += cat.tags.map((t) => {
-      const zh = typeof t === "string" ? t : t.zh;
-      const en = typeof t === "string" ? "" : t.en;
-      const display = en ? `${zh} / ${en}` : zh;
-      return `<span class="hobby-tag tier-${cat.tier}" data-tier="${cat.tier}" data-zh="${zh}" onclick="toggleHobbyTag(this)">${display}</span>`;
-    }).join("");
+    catHtml += cat.tags
+      .map((t) => {
+        const zh = typeof t === "string" ? t : t.zh;
+        const en = typeof t === "string" ? "" : t.en;
+        const display = en ? `${zh} / ${en}` : zh;
+        return `<span class="hobby-tag tier-${cat.tier}" data-tier="${cat.tier}" data-zh="${zh}" onclick="toggleHobbyTag(this)">${display}</span>`;
+      })
+      .join("");
     if (customByCategory[cat.zh]) {
-      catHtml += customByCategory[cat.zh].map((obj) =>
-        `<span class="hobby-tag tier-${obj.tier}" data-tier="${obj.tier}" data-zh="${obj.tag}" onclick="toggleHobbyTag(this)">${obj.tag}</span>`
-      ).join("");
+      catHtml += customByCategory[cat.zh]
+        .map(
+          (obj) =>
+            `<span class="hobby-tag tier-${obj.tier}" data-tier="${obj.tier}" data-zh="${obj.tag}" onclick="toggleHobbyTag(this)">${obj.tag}</span>`,
+        )
+        .join("");
     }
     return catHtml;
   }).join("");
 
-  if (customByCategory["__custom__"] && customByCategory["__custom__"].length > 0) {
+  if (
+    customByCategory["__custom__"] &&
+    customByCategory["__custom__"].length > 0
+  ) {
     html += `<div class="hobby-cat-label hobby-cat-label-custom">自定义 / Custom</div>`;
-    html += customByCategory["__custom__"].map((obj) =>
-      `<span class="hobby-tag tier-${obj.tier}" data-tier="${obj.tier}" data-zh="${obj.tag}" onclick="toggleHobbyTag(this)">${obj.tag}</span>`
-    ).join("");
+    html += customByCategory["__custom__"]
+      .map(
+        (obj) =>
+          `<span class="hobby-tag tier-${obj.tier}" data-tier="${obj.tier}" data-zh="${obj.tag}" onclick="toggleHobbyTag(this)">${obj.tag}</span>`,
+      )
+      .join("");
   }
 
   wrap.innerHTML = html;
@@ -1687,8 +2465,10 @@ function toggleHobbyTag(el) {
 
 function getSelectedHobbyTags(containerId) {
   return Array.from(
-    document.querySelectorAll(`#${containerId} .hobby-tag.selected`)
-  ).map((el) => el.dataset.zh || el.textContent.trim()).join(" · ");
+    document.querySelectorAll(`#${containerId} .hobby-tag.selected`),
+  )
+    .map((el) => el.dataset.zh || el.textContent.trim())
+    .join(" · ");
 }
 
 function setHobbyTags(containerId, hobbyStr) {
@@ -1696,7 +2476,8 @@ function setHobbyTags(containerId, hobbyStr) {
   if (!hobbyStr) return;
   const selected = new Set(hobbyStr.split(" · ").map((s) => s.trim()));
   document.querySelectorAll(`#${containerId} .hobby-tag`).forEach((el) => {
-    if (selected.has(el.dataset.zh || el.textContent.trim())) el.classList.add("selected");
+    if (selected.has(el.dataset.zh || el.textContent.trim()))
+      el.classList.add("selected");
   });
 }
 
@@ -1732,7 +2513,7 @@ function addCustomHobbyTag(containerId, inputId) {
   if (!tag) return;
 
   const existing = Array.from(
-    document.querySelectorAll(`#${containerId} .hobby-tag`)
+    document.querySelectorAll(`#${containerId} .hobby-tag`),
   ).find((el) => el.textContent.trim() === tag);
   if (existing) {
     existing.classList.add("selected");
@@ -1745,8 +2526,9 @@ function addCustomHobbyTag(containerId, inputId) {
   _pendingCustomInputId = inputId;
 
   const list = document.getElementById("hobby-cat-picker-list");
-  list.innerHTML = HOBBY_CATEGORIES.map((cat) =>
-    `<button class="hobby-cat-option" onclick="confirmCustomHobbyTag(${JSON.stringify(cat.zh)},${cat.tier})">${cat.zh} / ${cat.en}</button>`
+  list.innerHTML = HOBBY_CATEGORIES.map(
+    (cat) =>
+      `<button class="hobby-cat-option" onclick="confirmCustomHobbyTag(${JSON.stringify(cat.zh)},${cat.tier})">${cat.zh} / ${cat.en}</button>`,
   ).join("");
   document.getElementById("hobby-cat-picker").classList.remove("hidden");
 }
@@ -1765,13 +2547,17 @@ function confirmCustomHobbyTag(categoryZh, tier) {
   })
     .then((r) => r.json())
     .then(() => {
-      const exists = _customHobbyTags.find((t) => (typeof t === "string" ? t : t.tag) === tag);
+      const exists = _customHobbyTags.find(
+        (t) => (typeof t === "string" ? t : t.tag) === tag,
+      );
       if (!exists) _customHobbyTags.push({ tag, categoryZh, tier });
 
       const wrap = document.getElementById(containerId);
       if (wrap) {
         const labels = Array.from(wrap.querySelectorAll(".hobby-cat-label"));
-        const targetLabel = labels.find((lbl) => lbl.textContent.includes(categoryZh));
+        const targetLabel = labels.find((lbl) =>
+          lbl.textContent.includes(categoryZh),
+        );
         const el = document.createElement("span");
         el.className = `hobby-tag tier-${tier} selected`;
         el.dataset.tier = tier;
@@ -1809,138 +2595,245 @@ function closeHobbyCatPicker() {
   _pendingCustomInputId = null;
 }
 
-// ── Tutorial ──────────────────────────────────────────────────
-let _tutDone = { short: false, long: false, agree: 0 };
-let _tutLongTimer = null;
-const _TUT_AGREE_MIN = 3;
+// ── Onboarding overlays ────────────────────────────────────────
+let _obLongTimer = null;
+let _obLongText = "";
+let _obAgreeCount = 0;
+let _obSampleGrid = null;
+const _OB_AGREE_MIN = 3;
 
-function _tutGlitch(el) {
-  el.classList.remove("tut-glitching");
+function obGlitch(el) {
+  if (!el) return;
+  el.classList.remove("ob-glitch");
   void el.offsetWidth;
-  el.classList.add("tut-glitching");
-  setTimeout(() => el.classList.remove("tut-glitching"), 450);
+  el.classList.add("ob-glitch");
+  setTimeout(() => el.classList.remove("ob-glitch"), 450);
 }
 
-function _tutCheck() {
-  if (_tutDone.short && _tutDone.long && _tutDone.agree >= _TUT_AGREE_MIN) {
-    const btn = document.getElementById("tut-enter-wrap");
-    if (btn) btn.classList.remove("tut-hidden");
+function obFlash(cb) {
+  const fl = document.getElementById("ob-flash");
+  if (!fl) {
+    cb();
+    return;
   }
+  fl.classList.add("active");
+  setTimeout(() => {
+    fl.classList.remove("active");
+    cb();
+  }, 380);
 }
 
-function initTutorial() {
-  _tutDone = { short: false, long: false, longText: "", agree: 0 };
+function startOnboarding() {
+  const overlay = document.getElementById("onboard-overlay");
+  if (!overlay) return;
+  _obLongText = "";
+  _obAgreeCount = 0;
+  overlay.classList.remove("hidden");
+  _obInitStep1();
+}
 
-  const wordLong    = document.getElementById("tut-word-long");
-  const wordShort   = document.getElementById("tut-word-short");
-  const wordAgree   = document.getElementById("tut-word-agree");
-  const wordEnLong  = document.getElementById("tut-word-en-long");
-  const wordEnShort = document.getElementById("tut-word-en-short");
-  const wordEnAgree = document.getElementById("tut-word-en-agree");
-  const enterBtn    = document.getElementById("tut-enter-wrap");
-  if (enterBtn) enterBtn.classList.add("tut-hidden");
-
-  // Reset agree font-size
-  if (wordAgree)   wordAgree.style.fontSize = "";
-  if (wordEnAgree) wordEnAgree.style.fontSize = "";
-
-  // ── 长按 / holding: long-press (500ms) opens popup; short tap just glitches
-  function onLongStart(el) {
-    return (e) => {
-      e.preventDefault();
-      _tutLongTimer = setTimeout(() => {
-        _tutLongTimer = null;
-        _tutGlitch(el);
-        const popup = document.getElementById("tut-popup");
-        const input = document.getElementById("tut-popup-input");
-        if (popup) popup.classList.remove("tut-hidden");
-        if (input) { input.value = ""; input.focus(); }
-      }, 500);
-    };
-  }
-  function onLongEnd(el) {
-    return () => {
-      if (_tutLongTimer) {
-        clearTimeout(_tutLongTimer);
-        _tutLongTimer = null;
-        _tutGlitch(el);
-      }
-    };
-  }
-
-  [wordLong, wordEnLong].forEach((el) => {
-    if (!el) return;
-    el.addEventListener("touchstart",  onLongStart(el), { passive: false });
-    el.addEventListener("touchend",    onLongEnd(el));
-    el.addEventListener("touchcancel", onLongEnd(el));
-    el.addEventListener("mousedown",   onLongStart(el));
-    el.addEventListener("mouseup",     onLongEnd(el));
+function obNextStep(num) {
+  obFlash(() => {
+    document
+      .querySelectorAll(".ob-step")
+      .forEach((s) => s.classList.remove("active"));
+    const next = document.getElementById(`ob-step-${num}`);
+    if (next) next.classList.add("active");
+    if (num === 2) _obInitStep2();
+    if (num === 3) _obInitStep3();
   });
-
-  // ── 短按 / tapping: tap glitches; if long-press text stored, float it
-  function makeShortHandler(el, floatId) {
-    return () => {
-      _tutGlitch(el);
-      if (_tutDone.longText) {
-        const ft = document.getElementById(floatId);
-        if (ft) {
-          ft.textContent = _tutDone.longText;
-          ft.classList.remove("tut-hidden");
-          ft.style.animation = "none";
-          void ft.offsetWidth;
-          ft.style.animation = "";
-        }
-        if (!_tutDone.short) { _tutDone.short = true; _tutCheck(); }
-      }
-    };
-  }
-  if (wordShort)   wordShort.addEventListener("click",   makeShortHandler(wordShort,   "tut-float-text"));
-  if (wordEnShort) wordEnShort.addEventListener("click",  makeShortHandler(wordEnShort, "tut-float-text-en"));
-
-  // ── 赞同 / agree: each tap grows the text; done after _TUT_AGREE_MIN taps
-  function makeAgreeHandler(el, enEl) {
-    return () => {
-      _tutGlitch(el);
-      if (enEl) _tutGlitch(enEl);
-      _tutDone.agree++;
-      const size = 18 + _tutDone.agree * 5;
-      el.style.fontSize   = size + "px";
-      if (enEl) enEl.style.fontSize = size + "px";
-      if (_tutDone.agree >= _TUT_AGREE_MIN) _tutCheck();
-    };
-  }
-  if (wordAgree)   wordAgree.addEventListener("click",   makeAgreeHandler(wordAgree, wordEnAgree));
-  if (wordEnAgree) wordEnAgree.addEventListener("click",  makeAgreeHandler(wordEnAgree, wordAgree));
 }
 
-function submitTutLongPress() {
-  const input = document.getElementById("tut-popup-input");
-  const text  = (input?.value || "").trim();
-  if (!text) return;
-
-  document.getElementById("tut-popup").classList.add("tut-hidden");
-
-  _tutDone.longText = text;
-  _tutDone.long = true;
-  _tutCheck();
-}
-
-function enterSwipePage() {
-  const flash = document.getElementById("tut-flash");
-  if (flash) {
-    flash.classList.add("active");
-    setTimeout(() => {
-      flash.classList.remove("active");
-      goTo("swipe-page");
-      startSwipeInterrupts();
-      startGenderedNotifications();
-      if (!popupShowing) showNextPopup();
-    }, 350);
-  } else {
-    goTo("swipe-page");
+function obFinish() {
+  obFlash(() => {
+    document.getElementById("onboard-overlay").classList.add("hidden");
     startSwipeInterrupts();
     startGenderedNotifications();
     if (!popupShowing) showNextPopup();
+  });
+}
+
+// Step 1 — 长按: hold 500ms → input appears → submit → auto-jump step 2
+function _obInitStep1() {
+  const word = document.getElementById("ob-demo-long");
+  if (!word) return;
+
+  function onStart(e) {
+    e.preventDefault();
+    _obLongTimer = setTimeout(() => {
+      _obLongTimer = null;
+      obGlitch(word);
+      document.getElementById("ob-1-input").classList.remove("hidden");
+      const inp = document.getElementById("ob-1-text");
+      if (inp) {
+        inp.value = "";
+        inp.focus();
+      }
+    }, 500);
+  }
+  function onEnd() {
+    if (_obLongTimer) {
+      clearTimeout(_obLongTimer);
+      _obLongTimer = null;
+      obGlitch(word);
+    }
+  }
+  word.addEventListener("touchstart", onStart, { passive: false });
+  word.addEventListener("touchend", onEnd);
+  word.addEventListener("touchcancel", onEnd);
+  word.addEventListener("mousedown", onStart);
+  word.addEventListener("mouseup", onEnd);
+  document.getElementById("ob-1-text")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submitOb1();
+  });
+}
+
+function submitOb1() {
+  const text = (document.getElementById("ob-1-text")?.value || "").trim();
+  if (!text) return;
+  _obLongText = text;
+  obNextStep(2);
+}
+
+// Step 2 — 短按: tap word → red text stays + agree instruction appears
+//           tap red text 3x (grows) → auto-jump step 3
+function _obInitStep2() {
+  const word = document.getElementById("ob-demo-short");
+  const floatWord = document.getElementById("ob-float-word");
+  const agreeInstr = document.getElementById("ob-agree-instr");
+  if (!word || !floatWord) return;
+
+  word.addEventListener(
+    "click",
+    () => {
+      if (!floatWord.classList.contains("hidden")) return;
+      obGlitch(word);
+      floatWord.textContent = _obLongText;
+      floatWord.classList.remove("hidden");
+      agreeInstr?.classList.remove("hidden");
+      word.classList.add("ob-done");
+      floatWord.addEventListener("click", _obAgreeClick);
+    },
+    { once: true },
+  );
+}
+
+function _obAgreeClick() {
+  const fw = document.getElementById("ob-float-word");
+  const leftEl = document.getElementById("ob-agree-left");
+  if (!fw) return;
+  obGlitch(fw);
+  _obAgreeCount++;
+  fw.style.fontSize = 22 + _obAgreeCount * 10 + "px";
+  const left = Math.max(0, _OB_AGREE_MIN - _obAgreeCount);
+  if (leftEl) leftEl.textContent = left;
+  if (_obAgreeCount >= _OB_AGREE_MIN) {
+    fw.removeEventListener("click", _obAgreeClick);
+    setTimeout(() => obNextStep(3), 350);
+  }
+}
+
+// Step 3 — 印象: show pre-carved avatar → tap label → type → letters carve in → ✕ appears
+function _makeObSampleGrid() {
+  const g = Array.from({ length: 32 }, () => Array(32).fill(null));
+  const cx = 16,
+    cy = 14;
+  // Fill face shape with "好" characters directly
+  for (let y = 0; y < 32; y++) {
+    for (let x = 0; x < 32; x++) {
+      const dx = x - cx,
+        dy = y - cy;
+      if (dx * dx + dy * dy <= 100) g[y][x] = "好";
+    }
+  }
+  // hollow eyes
+  [
+    [10, 12],
+    [10, 13],
+    [11, 12],
+    [11, 13],
+    [10, 18],
+    [10, 19],
+    [11, 18],
+    [11, 19],
+  ].forEach(([y, x]) => {
+    g[y][x] = null;
+  });
+  // smile
+  [
+    [17, 13],
+    [18, 14],
+    [18, 18],
+    [17, 19],
+  ].forEach(([y, x]) => {
+    g[y][x] = null;
+  });
+  // ears
+  [
+    [6, 11],
+    [7, 11],
+    [6, 12],
+    [6, 20],
+    [7, 20],
+    [6, 21],
+  ].forEach(([y, x]) => {
+    if (y < 32 && x < 32) g[y][x] = "好";
+  });
+  return g;
+}
+
+function _obInitStep3() {
+  _obSampleGrid = _makeObSampleGrid();
+  // Grid cells are already "好" characters — render directly
+  const img = document.getElementById("ob-avatar-img");
+  if (img) img.src = renderGridAsAvatar(_obSampleGrid, "好");
+
+  // Tap "印象" label to reveal input
+  const trigger = document.getElementById("ob-3-trigger");
+  const inputWrap = document.getElementById("ob-3-input");
+  if (trigger && inputWrap) {
+    trigger.addEventListener(
+      "click",
+      () => {
+        obGlitch(trigger);
+        trigger.classList.add("ob-done");
+        inputWrap.classList.remove("hidden");
+        document.getElementById("ob-3-text")?.focus();
+      },
+      { once: true },
+    );
+  }
+  document.getElementById("ob-3-text")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submitOb3();
+  });
+}
+
+function submitOb3() {
+  const text = (document.getElementById("ob-3-text")?.value || "").trim();
+  if (!text) return;
+  const inp = document.getElementById("ob-3-text");
+  const btn = document.getElementById("ob-3-btn");
+  if (inp) inp.disabled = true;
+  if (btn) btn.disabled = true;
+
+  const gridCopy = _obSampleGrid.map((row) => [...row]);
+  _applyImpressionToGrid(gridCopy, text);
+  const img = document.getElementById("ob-avatar-img");
+  if (img) {
+    img.style.transition = "opacity 0.2s";
+    img.style.opacity = "0";
+    setTimeout(() => {
+      img.src = renderGridAsAvatar(gridCopy, text);
+      img.style.opacity = "1";
+    }, 200);
+  }
+
+  const closeBtn = document.getElementById("ob-close-3");
+  if (closeBtn) {
+    setTimeout(() => {
+      closeBtn.style.display = "flex";
+      closeBtn.classList.add("unlocked");
+    }, 600);
   }
 }
 
@@ -2220,7 +3113,7 @@ function rollIncomeTierDice() {
       if (remaining <= 0) btn.classList.add("dice-exhausted");
       const value = HOUSING_TIERS.income[roll];
       document.getElementById("petIncome").value = value;
-      display.textContent = value;
+      display.textContent = disp(value);
     }
   }, 70);
 }
@@ -2269,7 +3162,7 @@ function showProfile() {
   container.innerHTML = "";
 
   if (currentIndex >= profiles.length) {
-    container.innerHTML = `<h1>没有更多兽人了 ${iconImg("paw", 3)}</h1>`;
+    container.innerHTML = `<h1>没有更多兽人了 / No more profiles ${iconImg("paw", 3)}</h1>`;
     _profileShownAt = 0;
     _currentSwipeProfileName = "";
     return;
@@ -2286,7 +3179,7 @@ function showProfile() {
   const displayScore = Math.max(0, baseScore - skipCount);
   const _sd = profile.date ? new Date(profile.date) : null;
   const stampDate = _sd
-    ? `${_sd.getFullYear()}.${String(_sd.getMonth()+1).padStart(2,"0")}.${String(_sd.getDate()).padStart(2,"0")}`
+    ? `${_sd.getFullYear()}.${String(_sd.getMonth() + 1).padStart(2, "0")}.${String(_sd.getDate()).padStart(2, "0")}`
     : "";
   const stampColorClass = displayScore < 60 ? "stamp-red" : "";
 
@@ -2304,42 +3197,42 @@ function showProfile() {
   </div>
 
   <div class="section">
-    <span class="label">名字</span>
+    <span class="label">名字 <small>Name</small></span>
     ${renderValue(profile, "name", profile.name, "big")}
   </div>
 
   <div class="section">
-    <span class="label">物种</span>
-    ${renderValue(profile, "breed", profile.mixed && profile.breed2 ? `${profile.breed || "—"} × ${profile.breed2}（混血）` : profile.breed || "—", "territory")}
+    <span class="label">物种 <small>Species</small></span>
+    ${renderValue(profile, "breed", profile.mixed && profile.breed2 ? `${profile.breed || "—"} × ${profile.breed2}（混血/Mixed）` : profile.breed || "—", "territory")}
   </div>
 
   <div class="grid-3">
     <div class="cell">
-      <span class="label">性别</span>
+      <span class="label">性别 <small>Gender</small></span>
       ${renderValue(profile, "gender", profile.gender)}
     </div>
     <div class="cell">
-      <span class="label">年龄</span>
+      <span class="label">年龄 <small>Age</small></span>
       ${renderValue(profile, "age", profile.age)}
     </div>
     <div class="cell">
-      <span class="label">身高</span>
+      <span class="label">身高 <small>Height</small></span>
       ${renderValue(profile, "height", profile.height || "—")}
     </div>
   </div>
 
   <div class="section">
-    <span class="label">领地</span>
+    <span class="label">领地 <small>Territory</small></span>
     ${renderValue(profile, "hukou", profile.hukou || "—", "territory")}
   </div>
 
   <div class="grid-2">
     <div class="cell">
-      <span class="label">性取向</span>
+      <span class="label">性取向 <small>Orientation</small></span>
       ${renderValue(profile, "orientation", profile.orientation || "—")}
     </div>
     <div class="cell">
-      <span class="label">婚育状况</span>
+      <span class="label">婚育 <small>Status</small></span>
       ${renderValue(profile, "sterilized", profile.sterilized)}
     </div>
   </div>
@@ -2351,26 +3244,26 @@ function showProfile() {
 
   <div class="grid-3">
     <div class="cell">
-      <span class="label">学历</span>
+      <span class="label">学历 <small>Education</small></span>
       ${renderValue(profile, "edu", profile.edu || "—")}
     </div>
     <div class="cell">
-      <span class="label">职业</span>
+      <span class="label">职业 <small>Job</small></span>
       ${renderValue(profile, "occupation", profile.occupation || "—")}
     </div>
     <div class="cell">
-      <span class="label">月收入</span>
+      <span class="label">月收入 <small>Income</small></span>
       ${renderValue(profile, "income", profile.income || "—")}
     </div>
   </div>
 
   <div class="section">
-    <span class="label">兴趣爱好</span>
+    <span class="label">兴趣爱好 <small>Hobbies</small></span>
     ${renderValue(profile, "hobby", profile.hobby)}
   </div>
 
   <div class="section">
-    <span class="label">被喜欢</span>
+    <span class="label">被喜欢 <small>Liked</small></span>
     <div class="pixel-hearts-box">${(() => {
       const n = Math.min(profile.likes ? profile.likes.length : 0, 48);
       if (n === 0) return '<span class="value" style="opacity:0.4">—</span>';
@@ -2383,7 +3276,7 @@ function showProfile() {
   </div>
 
   <div class="section">
-    <span class="label">被讨厌</span>
+    <span class="label">被讨厌 <small>Skipped</small></span>
     <div class="pixel-hearts-box">${(() => {
       const n = Math.min(profile.skips ? profile.skips.length : 0, 48);
       if (n === 0) return '<span class="value" style="opacity:0.4">—</span>';
@@ -2432,21 +3325,29 @@ function attachSectionDragScroll(cardContainer) {
 
     // Touch drag-scroll (stop propagation so card swipe isn't triggered)
     let tStartX, tStartY, tScrollLeft, tScrollTop;
-    el.addEventListener("touchstart", (e) => {
-      tStartX = e.touches[0].clientX;
-      tStartY = e.touches[0].clientY;
-      tScrollLeft = el.scrollLeft;
-      tScrollTop = el.scrollTop;
-    }, { passive: true });
+    el.addEventListener(
+      "touchstart",
+      (e) => {
+        tStartX = e.touches[0].clientX;
+        tStartY = e.touches[0].clientY;
+        tScrollLeft = el.scrollLeft;
+        tScrollTop = el.scrollTop;
+      },
+      { passive: true },
+    );
 
-    el.addEventListener("touchmove", (e) => {
-      const dx = tStartX - e.touches[0].clientX;
-      const dy = tStartY - e.touches[0].clientY;
-      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-        el.scrollLeft = tScrollLeft + dx;
-        el.scrollTop = tScrollTop + dy;
-      }
-    }, { passive: true });
+    el.addEventListener(
+      "touchmove",
+      (e) => {
+        const dx = tStartX - e.touches[0].clientX;
+        const dy = tStartY - e.touches[0].clientY;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+          el.scrollLeft = tScrollLeft + dx;
+          el.scrollTop = tScrollTop + dy;
+        }
+      },
+      { passive: true },
+    );
   });
 }
 
@@ -2541,7 +3442,7 @@ function attachLabelHandlers(profileUsername) {
             bubble.dataset.myAgrees = myAgrees + 1;
             bubble.dataset.agrees = data.agrees;
             const base = parseFloat(bubble.dataset.baseFontSize || "11");
-            bubble.style.fontSize = (base + data.agrees * 2.5) + "px";
+            bubble.style.fontSize = base + data.agrees * 2.5 + "px";
             const arr = currentProfileInterpretations[field];
             if (Array.isArray(arr) && arr[interpIndex]) {
               arr[interpIndex].agrees = data.agrees;
@@ -2583,7 +3484,7 @@ function attachLabelHandlers(profileUsername) {
       b.dataset.agrees = savedAgrees;
       b.dataset.myAgrees = myAgrees;
       b.dataset.baseFontSize = "11";
-      if (savedAgrees > 0) b.style.fontSize = (11 + savedAgrees * 2.5) + "px";
+      if (savedAgrees > 0) b.style.fontSize = 11 + savedAgrees * 2.5 + "px";
 
       const n = interpList.length;
       // Evenly distribute on an ellipse so starting positions are already spread
@@ -2612,113 +3513,137 @@ function attachLabelHandlers(profileUsername) {
     });
 
     // Double-RAF: wait for layout so offsetWidth/offsetHeight are accurate
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const spanR = span.getBoundingClientRect();
-      const cx = spanR.left + spanR.width / 2;
-      const cy = spanR.top + spanR.height / 2;
-      const mg = 4;
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const spanR = span.getBoundingClientRect();
+        const cx = spanR.left + spanR.width / 2;
+        const cy = spanR.top + spanR.height / 2;
+        const mg = 4;
 
-      const textRect = {
-        l: -spanR.width / 2 - mg, r: spanR.width / 2 + mg,
-        t: -spanR.height / 2 - mg, b: spanR.height / 2 + mg,
-      };
+        const textRect = {
+          l: -spanR.width / 2 - mg,
+          r: spanR.width / 2 + mg,
+          t: -spanR.height / 2 - mg,
+          b: spanR.height / 2 + mg,
+        };
 
-      const section = span.closest(".section, .cell");
-      let sectionRect = null;
-      let labelRect = null;
-      if (section) {
-        const sr = section.getBoundingClientRect();
-        sectionRect = { l: sr.left - cx, r: sr.right - cx, t: sr.top - cy, b: sr.bottom - cy };
-        const lbl = section.querySelector(".label");
-        if (lbl) {
-          const lr = lbl.getBoundingClientRect();
-          labelRect = { l: lr.left - cx - mg, r: lr.right - cx + mg,
-                        t: lr.top  - cy - mg, b: lr.bottom - cy + mg };
-        }
-      }
-
-      const bubbleEls = Array.from(span.querySelectorAll(".interp-bubble"));
-
-      // Measure each bubble's actual rendered half-size (offsetWidth ignores CSS transform).
-      // Fallback to text-length estimate if layout hasn't resolved yet.
-      const hw = bubbleEls.map((b) => {
-        const w = b.offsetWidth;
-        return (w > 0 ? w : Math.max(30, b.textContent.length * 7)) / 2 + mg;
-      });
-      const hh = bubbleEls.map((b) => {
-        const h = b.offsetHeight;
-        return (h > 0 ? h : 14) / 2 + mg;
-      });
-
-      const pos = bubbleEls.map((b) => ({
-        fx: parseFloat(b.style.getPropertyValue("--fx")) || 0,
-        fy: parseFloat(b.style.getPropertyValue("--fy")) || 0,
-      }));
-
-      function pushOffRect(fx, fy, w2, h2, rect) {
-        const overX = fx - w2 < rect.r && fx + w2 > rect.l;
-        const overY = fy - h2 < rect.b && fy + h2 > rect.t;
-        if (!overX || !overY) return [fx, fy];
-        const dL = Math.abs(fx - (rect.l - w2));
-        const dR = Math.abs(fx - (rect.r + w2));
-        const dU = Math.abs(fy - (rect.t - h2));
-        const dD = Math.abs(fy - (rect.b + h2));
-        const min = Math.min(dL, dR, dU, dD);
-        if      (min === dL) fx = rect.l - w2;
-        else if (min === dR) fx = rect.r + w2;
-        else if (min === dU) fy = rect.t - h2;
-        else                 fy = rect.b + h2;
-        return [fx, fy];
-      }
-
-      function constrain(i) {
-        let { fx, fy } = pos[i];
-        const w2 = hw[i], h2 = hh[i];
-        [fx, fy] = pushOffRect(fx, fy, w2, h2, textRect);
-        if (labelRect) [fx, fy] = pushOffRect(fx, fy, w2, h2, labelRect);
-        if (sectionRect) {
-          fx = Math.max(sectionRect.l + w2, Math.min(sectionRect.r - w2, fx));
-          fy = Math.max(sectionRect.t + h2, Math.min(sectionRect.b - h2, fy));
-        }
-        pos[i] = { fx, fy };
-      }
-
-      bubbleEls.forEach((_, i) => constrain(i));
-
-      // Multi-pass bubble-bubble AABB repulsion using actual sizes
-      for (let pass = 0; pass < 80; pass++) {
-        let moved = false;
-        for (let a = 0; a < pos.length; a++) {
-          for (let b = a + 1; b < pos.length; b++) {
-            const minX = hw[a] + hw[b];
-            const minY = hh[a] + hh[b];
-            const dx = pos[b].fx - pos[a].fx;
-            const dy = pos[b].fy - pos[a].fy;
-            const olX = minX - Math.abs(dx);
-            const olY = minY - Math.abs(dy);
-            if (olX <= 0 || olY <= 0) continue;
-            moved = true;
-            if (olX <= olY) {
-              const push = olX / 2 + 1;
-              if (dx >= 0) { pos[a].fx -= push; pos[b].fx += push; }
-              else         { pos[a].fx += push; pos[b].fx -= push; }
-            } else {
-              const push = olY / 2 + 1;
-              if (dy >= 0) { pos[a].fy -= push; pos[b].fy += push; }
-              else         { pos[a].fy += push; pos[b].fy -= push; }
-            }
+        const section = span.closest(".section, .cell");
+        let sectionRect = null;
+        let labelRect = null;
+        if (section) {
+          const sr = section.getBoundingClientRect();
+          sectionRect = {
+            l: sr.left - cx,
+            r: sr.right - cx,
+            t: sr.top - cy,
+            b: sr.bottom - cy,
+          };
+          const lbl = section.querySelector(".label");
+          if (lbl) {
+            const lr = lbl.getBoundingClientRect();
+            labelRect = {
+              l: lr.left - cx - mg,
+              r: lr.right - cx + mg,
+              t: lr.top - cy - mg,
+              b: lr.bottom - cy + mg,
+            };
           }
         }
-        // Re-constrain all after each full pass
-        bubbleEls.forEach((_, i) => constrain(i));
-        if (!moved) break;
-      }
 
-      bubbleEls.forEach((b, i) => {
-        b.style.setProperty("--fx", pos[i].fx + "px");
-        b.style.setProperty("--fy", pos[i].fy + "px");
-      });
-    }));
+        const bubbleEls = Array.from(span.querySelectorAll(".interp-bubble"));
+
+        // Measure each bubble's actual rendered half-size (offsetWidth ignores CSS transform).
+        // Fallback to text-length estimate if layout hasn't resolved yet.
+        const hw = bubbleEls.map((b) => {
+          const w = b.offsetWidth;
+          return (w > 0 ? w : Math.max(30, b.textContent.length * 7)) / 2 + mg;
+        });
+        const hh = bubbleEls.map((b) => {
+          const h = b.offsetHeight;
+          return (h > 0 ? h : 14) / 2 + mg;
+        });
+
+        const pos = bubbleEls.map((b) => ({
+          fx: parseFloat(b.style.getPropertyValue("--fx")) || 0,
+          fy: parseFloat(b.style.getPropertyValue("--fy")) || 0,
+        }));
+
+        function pushOffRect(fx, fy, w2, h2, rect) {
+          const overX = fx - w2 < rect.r && fx + w2 > rect.l;
+          const overY = fy - h2 < rect.b && fy + h2 > rect.t;
+          if (!overX || !overY) return [fx, fy];
+          const dL = Math.abs(fx - (rect.l - w2));
+          const dR = Math.abs(fx - (rect.r + w2));
+          const dU = Math.abs(fy - (rect.t - h2));
+          const dD = Math.abs(fy - (rect.b + h2));
+          const min = Math.min(dL, dR, dU, dD);
+          if (min === dL) fx = rect.l - w2;
+          else if (min === dR) fx = rect.r + w2;
+          else if (min === dU) fy = rect.t - h2;
+          else fy = rect.b + h2;
+          return [fx, fy];
+        }
+
+        function constrain(i) {
+          let { fx, fy } = pos[i];
+          const w2 = hw[i],
+            h2 = hh[i];
+          [fx, fy] = pushOffRect(fx, fy, w2, h2, textRect);
+          if (labelRect) [fx, fy] = pushOffRect(fx, fy, w2, h2, labelRect);
+          if (sectionRect) {
+            fx = Math.max(sectionRect.l + w2, Math.min(sectionRect.r - w2, fx));
+            fy = Math.max(sectionRect.t + h2, Math.min(sectionRect.b - h2, fy));
+          }
+          pos[i] = { fx, fy };
+        }
+
+        bubbleEls.forEach((_, i) => constrain(i));
+
+        // Multi-pass bubble-bubble AABB repulsion using actual sizes
+        for (let pass = 0; pass < 80; pass++) {
+          let moved = false;
+          for (let a = 0; a < pos.length; a++) {
+            for (let b = a + 1; b < pos.length; b++) {
+              const minX = hw[a] + hw[b];
+              const minY = hh[a] + hh[b];
+              const dx = pos[b].fx - pos[a].fx;
+              const dy = pos[b].fy - pos[a].fy;
+              const olX = minX - Math.abs(dx);
+              const olY = minY - Math.abs(dy);
+              if (olX <= 0 || olY <= 0) continue;
+              moved = true;
+              if (olX <= olY) {
+                const push = olX / 2 + 1;
+                if (dx >= 0) {
+                  pos[a].fx -= push;
+                  pos[b].fx += push;
+                } else {
+                  pos[a].fx += push;
+                  pos[b].fx -= push;
+                }
+              } else {
+                const push = olY / 2 + 1;
+                if (dy >= 0) {
+                  pos[a].fy -= push;
+                  pos[b].fy += push;
+                } else {
+                  pos[a].fy += push;
+                  pos[b].fy -= push;
+                }
+              }
+            }
+          }
+          // Re-constrain all after each full pass
+          bubbleEls.forEach((_, i) => constrain(i));
+          if (!moved) break;
+        }
+
+        bubbleEls.forEach((b, i) => {
+          b.style.setProperty("--fx", pos[i].fx + "px");
+          b.style.setProperty("--fy", pos[i].fy + "px");
+        });
+      }),
+    );
   };
 
   container.addEventListener("touchstart", container._onTouchStart, {
@@ -2785,50 +3710,133 @@ function submitInterpretation() {
 // ── Risk Warning System ───────────────────────────────────────
 
 const carnivoreSpecies = new Set([
-  "非洲野犬 / African Wild Dog","短吻鳄 / Alligator","白头海雕 / Bald Eagle",
-  "熊 / Bear","亚洲黑熊 / Bear (Asian Black)","棕熊 / Bear (Brown)","北极熊 / Bear (Polar)",
-  "黑豹 / Black Panther","凯门鳄 / Caiman","加拿大猞猁 / Canada Lynx",
-  "猫 / Cat","变色龙 / Chameleon","猎豹 / Cheetah","郊狼 / Coyote",
-  "湾鳄 / Crocodile (Saltwater)","暹罗鳄 / Crocodile (Siamese)","澳洲野犬 / Dingo",
-  "狗 / Dog","边境牧羊犬 / Dog (Border Collie)","大丹犬 / Dog (Great Dane)",
-  "拉布拉多寻回犬 / Dog (Labrador Retriever)","古英格兰牧羊犬 / Dog (Old English Sheepdog)",
-  "蝴蝶犬 / Dog (Papillon)","博美犬 / Dog (Pomeranian)","巴哥犬 / Dog (Pug)",
-  "罗素梗 / Dog (Russell Terrier)","圣伯纳犬 / Dog (Saint Bernard)","柴犬 / Dog (Shiba Inu)",
-  "海豚 / Dolphin","耳廓狐 / Fennec Fox","雪貂 / Ferret",
-  "狐狸 / Fox","赤狐 / Fox (Red)","藏狐 / Fox (Tibetan)",
-  "金雕 / Golden Eagle","苍鹭 / Heron",
-  "斑点鬣狗 / Hyena (Spotted)","条纹鬣狗 / Hyena (Striped)",
-  "豺 / Jackal","美洲豹 / Jaguar","科莫多巨蜥 / Komodo Dragon",
-  "豹 / Leopard","雪豹 / Leopard (Snow)",
-  "狮子 / Lion","非洲狮 / Lion (African)","亚洲狮 / Lion (Asiatic)","刚果狮 / Lion (Congo)","马赛狮 / Lion (Maasai)",
-  "鼹鼠 / Mole","猫鼬 / Mongoose","水獭 / Otter","猫头鹰 / Owl","仓鸮 / Owl (Barn)",
-  "响尾蛇 / Rattlesnake","海獭 / Sea Otter","蛇鹫 / Secretarybird",
-  "鲨鱼 / Shark","石龙子 / Skink","臭鼬 / Skunk","蛇 / Snake",
-  "鳄龟 / Snapping Turtle","斑海豹 / Spotted Seal","虎头海雕 / Stellar's Sea Eagle",
+  "非洲野犬 / African Wild Dog",
+  "短吻鳄 / Alligator",
+  "白头海雕 / Bald Eagle",
+  "熊 / Bear",
+  "亚洲黑熊 / Bear (Asian Black)",
+  "棕熊 / Bear (Brown)",
+  "北极熊 / Bear (Polar)",
+  "黑豹 / Black Panther",
+  "凯门鳄 / Caiman",
+  "加拿大猞猁 / Canada Lynx",
+  "猫 / Cat",
+  "变色龙 / Chameleon",
+  "猎豹 / Cheetah",
+  "郊狼 / Coyote",
+  "湾鳄 / Crocodile (Saltwater)",
+  "暹罗鳄 / Crocodile (Siamese)",
+  "澳洲野犬 / Dingo",
+  "狗 / Dog",
+  "边境牧羊犬 / Dog (Border Collie)",
+  "大丹犬 / Dog (Great Dane)",
+  "拉布拉多寻回犬 / Dog (Labrador Retriever)",
+  "古英格兰牧羊犬 / Dog (Old English Sheepdog)",
+  "蝴蝶犬 / Dog (Papillon)",
+  "博美犬 / Dog (Pomeranian)",
+  "巴哥犬 / Dog (Pug)",
+  "罗素梗 / Dog (Russell Terrier)",
+  "圣伯纳犬 / Dog (Saint Bernard)",
+  "柴犬 / Dog (Shiba Inu)",
+  "海豚 / Dolphin",
+  "耳廓狐 / Fennec Fox",
+  "雪貂 / Ferret",
+  "狐狸 / Fox",
+  "赤狐 / Fox (Red)",
+  "藏狐 / Fox (Tibetan)",
+  "金雕 / Golden Eagle",
+  "苍鹭 / Heron",
+  "斑点鬣狗 / Hyena (Spotted)",
+  "条纹鬣狗 / Hyena (Striped)",
+  "豺 / Jackal",
+  "美洲豹 / Jaguar",
+  "科莫多巨蜥 / Komodo Dragon",
+  "豹 / Leopard",
+  "雪豹 / Leopard (Snow)",
+  "狮子 / Lion",
+  "非洲狮 / Lion (African)",
+  "亚洲狮 / Lion (Asiatic)",
+  "刚果狮 / Lion (Congo)",
+  "马赛狮 / Lion (Maasai)",
+  "鼹鼠 / Mole",
+  "猫鼬 / Mongoose",
+  "水獭 / Otter",
+  "猫头鹰 / Owl",
+  "仓鸮 / Owl (Barn)",
+  "响尾蛇 / Rattlesnake",
+  "海獭 / Sea Otter",
+  "蛇鹫 / Secretarybird",
+  "鲨鱼 / Shark",
+  "石龙子 / Skink",
+  "臭鼬 / Skunk",
+  "蛇 / Snake",
+  "鳄龟 / Snapping Turtle",
+  "斑海豹 / Spotted Seal",
+  "虎头海雕 / Stellar's Sea Eagle",
   "白鼬 / Stoat",
-  "老虎 / Tiger","孟加拉虎 / Tiger (Bengal)","西伯利亚虎 / Tiger (Siberian)","白虎 / Tiger (White)",
-  "鲸 / Whale","野猫 / Wild Cat",
-  "狼 / Wolf","灰狼 / Wolf (Gray)","白狼 / Wolf (White)",
+  "老虎 / Tiger",
+  "孟加拉虎 / Tiger (Bengal)",
+  "西伯利亚虎 / Tiger (Siberian)",
+  "白虎 / Tiger (White)",
+  "鲸 / Whale",
+  "野猫 / Wild Cat",
+  "狼 / Wolf",
+  "灰狼 / Wolf (Gray)",
+  "白狼 / Wolf (White)",
 ]);
 
 const herbivoreSpecies = new Set([
-  "羊驼 / Alpaca","安哥拉山羊 / Angora Goat","河狸 / Beaver",
-  "水牛 / Buffalo","骆驼 / Camel","花栗鼠 / Chipmunk","牛 / Cow",
-  "驴 / Donkey","大象 / Elephant","鼯鼠 / Flying Squirrel",
-  "果蝠 / Fruit Bat","瞪羚 / Gazelle","长颈鹿 / Giraffe",
-  "山羊 / Goat","豚鼠 / Guinea Pig","河马 / Hippopotamus","马 / Horse",
-  "鬣蜥 / Iguana","黑斑羚 / Impala","袋鼠 / Kangaroo","考拉 / Koala",
-  "狐猴 / Lemur","蒙古沙鼠 / Mongolian Gerbil","驼鹿 / Moose",
-  "霍加皮 / Okapi","大角羚 / Oryx","鸵鸟 / Ostrich",
-  "兔子 / Rabbit","花斑兔 / Rabbit (Harlequin)","垂耳兔 / Rabbit (Lop-eared)",
-  "迷你雷克斯兔 / Rabbit (Mini Rex)","荷兰侏儒兔 / Rabbit (Netherland Dwarf)",
-  "马鹿 / Red Deer","小熊猫 / Red Panda","犀牛 / Rhinoceros",
-  "独角仙 / Rhinoceros Beetle","高鼻羚羊 / Saiga Antelope",
-  "绵羊 / Sheep","达尔绵羊 / Sheep (Dall)","美利奴绵羊 / Sheep (Merino)",
-  "树懒 / Sloth","梅花鹿 / Spotted Deer","松鼠 / Squirrel",
-  "天鹅 / Swan","貘 / Tapir","汤氏瞪羚 / Thomson's Gazelle",
-  "陆龟 / Tortoise","山绒鼠 / Viscacha","疣猪 / Warthog",
-  "约克夏猪 / Yorkshire Pig","斑马 / Zebra",
+  "羊驼 / Alpaca",
+  "安哥拉山羊 / Angora Goat",
+  "河狸 / Beaver",
+  "水牛 / Buffalo",
+  "骆驼 / Camel",
+  "花栗鼠 / Chipmunk",
+  "牛 / Cow",
+  "驴 / Donkey",
+  "大象 / Elephant",
+  "鼯鼠 / Flying Squirrel",
+  "果蝠 / Fruit Bat",
+  "瞪羚 / Gazelle",
+  "长颈鹿 / Giraffe",
+  "山羊 / Goat",
+  "豚鼠 / Guinea Pig",
+  "河马 / Hippopotamus",
+  "马 / Horse",
+  "鬣蜥 / Iguana",
+  "黑斑羚 / Impala",
+  "袋鼠 / Kangaroo",
+  "考拉 / Koala",
+  "狐猴 / Lemur",
+  "蒙古沙鼠 / Mongolian Gerbil",
+  "驼鹿 / Moose",
+  "霍加皮 / Okapi",
+  "大角羚 / Oryx",
+  "鸵鸟 / Ostrich",
+  "兔子 / Rabbit",
+  "花斑兔 / Rabbit (Harlequin)",
+  "垂耳兔 / Rabbit (Lop-eared)",
+  "迷你雷克斯兔 / Rabbit (Mini Rex)",
+  "荷兰侏儒兔 / Rabbit (Netherland Dwarf)",
+  "马鹿 / Red Deer",
+  "小熊猫 / Red Panda",
+  "犀牛 / Rhinoceros",
+  "独角仙 / Rhinoceros Beetle",
+  "高鼻羚羊 / Saiga Antelope",
+  "绵羊 / Sheep",
+  "达尔绵羊 / Sheep (Dall)",
+  "美利奴绵羊 / Sheep (Merino)",
+  "树懒 / Sloth",
+  "梅花鹿 / Spotted Deer",
+  "松鼠 / Squirrel",
+  "天鹅 / Swan",
+  "貘 / Tapir",
+  "汤氏瞪羚 / Thomson's Gazelle",
+  "陆龟 / Tortoise",
+  "山绒鼠 / Viscacha",
+  "疣猪 / Warthog",
+  "约克夏猪 / Yorkshire Pig",
+  "斑马 / Zebra",
 ]);
 
 function _getSpecies(breedStr) {
@@ -2844,36 +3852,62 @@ function _dietType(breedStr) {
   return "omnivore";
 }
 
-const _incomeRank = { "<3k":0,"3k–8k":1,"8k–15k":2,"15k–30k":3,"30k+":4,"30w+":5 };
+const _incomeRank = {
+  "<3k": 0,
+  "3k–8k": 1,
+  "8k–15k": 2,
+  "15k–30k": 3,
+  "30k+": 4,
+  "30w+": 5,
+};
 function _rankIncome(str) {
   if (!str) return -1;
-  for (const [k,v] of Object.entries(_incomeRank)) if (str.includes(k)) return v;
+  for (const [k, v] of Object.entries(_incomeRank))
+    if (str.includes(k)) return v;
   return -1;
 }
 
-const _eduKeys = ["小学","初中","高中","大专","本科","硕士","博士后","博士"];
+const _eduKeys = [
+  "小学",
+  "初中",
+  "高中",
+  "大专",
+  "本科",
+  "硕士",
+  "博士后",
+  "博士",
+];
 function _rankEdu(str) {
   if (!str) return -1;
   if (str.includes("博士后")) return 6;
-  for (let i = 0; i < _eduKeys.length; i++) if (str.includes(_eduKeys[i])) return i;
+  for (let i = 0; i < _eduKeys.length; i++)
+    if (str.includes(_eduKeys[i])) return i;
   return -1;
 }
 
 function getMbtiCompatibility(m1, m2) {
   if (!m1 || !m2 || m1.length !== 4 || m2.length !== 4) return 5;
-  const a = m1.toUpperCase(), b = m2.toUpperCase();
+  const a = m1.toUpperCase(),
+    b = m2.toUpperCase();
   const goldenPairs = [
-    ["INTJ","ENFP"],["INTP","ENFJ"],["ENTJ","INFP"],["ENTP","INFJ"],
-    ["ISTJ","ESFP"],["ISFJ","ESTP"],["ESTJ","ISFP"],["ESFJ","ISTP"],
+    ["INTJ", "ENFP"],
+    ["INTP", "ENFJ"],
+    ["ENTJ", "INFP"],
+    ["ENTP", "INFJ"],
+    ["ISTJ", "ESFP"],
+    ["ISFJ", "ESTP"],
+    ["ESTJ", "ISFP"],
+    ["ESFJ", "ISTP"],
   ];
   const sorted = [a, b].sort().join("-");
-  if (goldenPairs.some(([x, y]) => [x, y].sort().join("-") === sorted)) return 10;
+  if (goldenPairs.some(([x, y]) => [x, y].sort().join("-") === sorted))
+    return 10;
   if (a === b) return 7;
   let score = 5;
-  if (a[1] === b[1]) score += 1;  // Same N/S — shared worldview
-  if (a[0] !== b[0]) score += 1;  // Different E/I — complementary energy
-  if (a[3] !== b[3]) score += 1;  // Different J/P — complementary lifestyle
-  if (a[2] === b[2]) score -= 1;  // Same T/F — can create power struggle
+  if (a[1] === b[1]) score += 1; // Same N/S — shared worldview
+  if (a[0] !== b[0]) score += 1; // Different E/I — complementary energy
+  if (a[3] !== b[3]) score += 1; // Different J/P — complementary lifestyle
+  if (a[2] === b[2]) score -= 1; // Same T/F — can create power struggle
   return Math.min(10, Math.max(1, score));
 }
 
@@ -2885,33 +3919,45 @@ function _parseCm(str) {
 
 function buildWarnings(me, target) {
   const warnings = [];
-  const myDiet     = _dietType(me.breed);
+  const myDiet = _dietType(me.breed);
   const targetDiet = _dietType(target.breed);
   const targetName = _getSpecies(target.breed) || target.name;
 
   if (myDiet === "carnivore" && targetDiet === "herbivore") {
-    warnings.push({ level: "critical", lines: [
-      "对方是草食动物 / Your match is a herbivore",
-      "约会时请控制你的捕食本能 / Control your predatory instincts on dates",
-      "将对方当零食是刑事犯罪 / Consuming your date is a criminal offense",
-      "你确定你只是想谈恋爱？ / Are you sure you're here just for romance?",
-    ]});
+    warnings.push({
+      level: "critical",
+      lines: [
+        "对方是草食动物 / Your match is a herbivore",
+        "约会时请控制你的捕食本能 / Control your predatory instincts on dates",
+        "将对方当零食是刑事犯罪 / Consuming your date is a criminal offense",
+        "你确定你只是想谈恋爱？ / Are you sure you're here just for romance?",
+      ],
+    });
   } else if (myDiet === "herbivore" && targetDiet === "carnivore") {
-    warnings.push({ level: "critical", lines: [
-      "对方是食肉动物 / Your match is a carnivore",
-      "约会前请确认对方已经吃饱 / Make sure they've eaten before the date",
-      "建议在人多的公共场所见面 / Meet somewhere crowded and public",
-      "你可能会被当作约会套餐 / You may end up as the dinner, not the date",
-    ]});
+    warnings.push({
+      level: "critical",
+      lines: [
+        "对方是食肉动物 / Your match is a carnivore",
+        "约会前请确认对方已经吃饱 / Make sure they've eaten before the date",
+        "建议在人多的公共场所见面 / Meet somewhere crowded and public",
+        "你可能会被当作约会套餐 / You may end up as the dinner, not the date",
+      ],
+    });
   } else if (myDiet === "omnivore" && targetDiet === "herbivore") {
-    warnings.push({ level: "warning", lines: [
-      "你是杂食动物，对方是草食动物 / You're an omnivore; they're a herbivore",
-      "请注意饮食习惯上的差异 / Mind the difference in dietary habits",
-    ]});
+    warnings.push({
+      level: "warning",
+      lines: [
+        "你是杂食动物，对方是草食动物 / You're an omnivore; they're a herbivore",
+        "请注意饮食习惯上的差异 / Mind the difference in dietary habits",
+      ],
+    });
   } else if (myDiet === "herbivore" && targetDiet === "omnivore") {
-    warnings.push({ level: "warning", lines: [
-      "对方是杂食动物，请保持一定警惕 / Your match is an omnivore — stay alert",
-    ]});
+    warnings.push({
+      level: "warning",
+      lines: [
+        "对方是杂食动物，请保持一定警惕 / Your match is an omnivore — stay alert",
+      ],
+    });
   }
 
   const myH = _parseCm(me.height);
@@ -2919,17 +3965,23 @@ function buildWarnings(me, target) {
   if (myH && tgH) {
     const gap = Math.abs(myH - tgH);
     if (gap >= 80) {
-      warnings.push({ level: "critical", lines: [
-        `体型差距高达 ${gap}cm / Body size gap: ${gap}cm`,
-        myH < tgH
-          ? "对方随时可以把你一口吞下 / They could swallow you whole"
-          : "你随时可以把对方一口吞下 / You could swallow them whole",
-      ]});
+      warnings.push({
+        level: "critical",
+        lines: [
+          `体型差距高达 ${gap}cm / Body size gap: ${gap}cm`,
+          myH < tgH
+            ? "对方随时可以把你一口吞下 / They could swallow you whole"
+            : "你随时可以把对方一口吞下 / You could swallow them whole",
+        ],
+      });
     } else if (gap >= 40) {
-      warnings.push({ level: "warning", lines: [
-        `体型差距 ${gap}cm / Body size gap: ${gap}cm`,
-        "存在明显的力量不对等 / Significant power imbalance",
-      ]});
+      warnings.push({
+        level: "warning",
+        lines: [
+          `体型差距 ${gap}cm / Body size gap: ${gap}cm`,
+          "存在明显的力量不对等 / Significant power imbalance",
+        ],
+      });
     }
   }
 
@@ -2937,39 +3989,61 @@ function buildWarnings(me, target) {
   const tgInc = _rankIncome(target.income);
   if (myInc >= 0 && tgInc >= 0) {
     const gap = tgInc - myInc;
-    if (gap >= 3) warnings.push({ level: "warning", lines: [
-      "收入差距悬殊 / Significant income disparity",
-      "癞蛤蟆想吃天鹅肉？ / Are you punching above your weight?",
-    ]});
-    else if (gap <= -3) warnings.push({ level: "warning", lines: [
-      "收入差距悬殊 / Significant income disparity",
-      "对方可能只想找个免费餐厅 / They might just be looking for a free meal",
-    ]});
+    if (gap >= 3)
+      warnings.push({
+        level: "warning",
+        lines: [
+          "收入差距悬殊 / Significant income disparity",
+          "癞蛤蟆想吃天鹅肉？ / Are you punching above your weight?",
+        ],
+      });
+    else if (gap <= -3)
+      warnings.push({
+        level: "warning",
+        lines: [
+          "收入差距悬殊 / Significant income disparity",
+          "对方可能只想找个免费餐厅 / They might just be looking for a free meal",
+        ],
+      });
   }
 
   const myEdu = _rankEdu(me.edu);
   const tgEdu = _rankEdu(target.edu);
   if (myEdu >= 0 && tgEdu >= 0 && Math.abs(tgEdu - myEdu) >= 3) {
-    warnings.push({ level: "warning", lines: [
-      "学历差距较大 / Significant education gap",
-      "你们可能没有共同话题 / You may have little in common to talk about",
-    ]});
+    warnings.push({
+      level: "warning",
+      lines: [
+        "学历差距较大 / Significant education gap",
+        "你们可能没有共同话题 / You may have little in common to talk about",
+      ],
+    });
   }
 
-  if (me.mbti && target.mbti && me.mbti.length === 4 && target.mbti.length === 4) {
+  if (
+    me.mbti &&
+    target.mbti &&
+    me.mbti.length === 4 &&
+    target.mbti.length === 4
+  ) {
     const compat = getMbtiCompatibility(me.mbti, target.mbti);
     if (compat <= 3) {
-      warnings.push({ level: "critical", lines: [
-        `MBTI 兼容指数：${compat}/10`,
-        `${me.mbti} × ${target.mbti} — 大数据显示此组合配对成功率极低`,
-        "你们大概率聊不到一起去 / You two will likely clash",
-      ]});
+      warnings.push({
+        level: "critical",
+        lines: [
+          `MBTI 兼容指数：${compat}/10`,
+          `${me.mbti} × ${target.mbti} — 大数据显示此组合配对成功率极低`,
+          "你们大概率聊不到一起去 / You two will likely clash",
+        ],
+      });
     } else if (compat <= 5) {
-      warnings.push({ level: "warning", lines: [
-        `MBTI 兼容指数：${compat}/10`,
-        `根据大数据统计，${me.mbti} 和 ${target.mbti} 在相处中容易产生摩擦`,
-        "继续前请做好心理准备 / Proceed with caution",
-      ]});
+      warnings.push({
+        level: "warning",
+        lines: [
+          `MBTI 兼容指数：${compat}/10`,
+          `根据大数据统计，${me.mbti} 和 ${target.mbti} 在相处中容易产生摩擦`,
+          "继续前请做好心理准备 / Proceed with caution",
+        ],
+      });
     }
   }
 
@@ -2977,14 +4051,22 @@ function buildWarnings(me, target) {
 }
 
 function showLikeWarning(warnings) {
-  const hasCritical = warnings.some(w => w.level === "critical");
-  document.getElementById("warning-icon").textContent = hasCritical ? "⚠️" : "⚠️";
-  document.getElementById("warning-icon").className = hasCritical ? "warning-icon critical" : "warning-icon";
-  document.getElementById("warning-messages-list").innerHTML = warnings.map(w => `
+  const hasCritical = warnings.some((w) => w.level === "critical");
+  document.getElementById("warning-icon").textContent = hasCritical
+    ? "⚠️"
+    : "⚠️";
+  document.getElementById("warning-icon").className = hasCritical
+    ? "warning-icon critical"
+    : "warning-icon";
+  document.getElementById("warning-messages-list").innerHTML = warnings
+    .map(
+      (w) => `
     <div class="warning-block ${w.level}">
-      ${w.lines.map(l => `<p class="warning-line">${l}</p>`).join("")}
+      ${w.lines.map((l) => `<p class="warning-line">${l}</p>`).join("")}
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
   document.getElementById("warning-overlay").classList.remove("hidden");
 }
 
@@ -3004,46 +4086,50 @@ let _selectedOpenerType = null;
 
 const OPENER_FIXED = [
   // normal — no penalty
-  { zh: "你多高呀",           en: "How tall are you?",        type: "normal"  },
-  { zh: "你是哪里人呀",       en: "Where are you from?",      type: "normal"  },
-  { zh: "在哪里工作呀",       en: "Where do you work?",       type: "normal"  },
-  { zh: "平时几点睡呀",       en: "What time do you sleep?",  type: "normal"  },
-  { zh: "平时喜欢宅在家吗",   en: "Homebody or go-out type?", type: "normal"  },
-  { zh: "你平时去哪里溜达",   en: "Where do you hang out?",   type: "normal"  },
-  { zh: "你最近在忙什么",     en: "What keeps you busy?",     type: "normal"  },
+  { zh: "你多高呀", en: "How tall are you?", type: "normal" },
+  { zh: "你是哪里人呀", en: "Where are you from?", type: "normal" },
+  { zh: "在哪里工作呀", en: "Where do you work?", type: "normal" },
+  { zh: "平时几点睡呀", en: "What time do you sleep?", type: "normal" },
+  { zh: "平时喜欢宅在家吗", en: "Homebody or go-out type?", type: "normal" },
+  { zh: "你平时去哪里溜达", en: "Where do you hang out?", type: "normal" },
+  { zh: "你最近在忙什么", en: "What keeps you busy?", type: "normal" },
   // weird/anthro — penalty -5
-  { zh: "你会咬人吗",         en: "Do you bite?",             type: "weird"   },
-  { zh: "你的尾巴多长",       en: "How long is your tail?",   type: "weird"   },
-  { zh: "你冬天会冬眠吗",     en: "Do you hibernate?",        type: "weird"   },
-  { zh: "你的毛是天然色吗",   en: "Is your fur natural?",     type: "weird"   },
-  { zh: "我梦见你了",         en: "I dreamed of you",         type: "weird"   },
-  { zh: "你身上香吗",         en: "Do you smell nice?",       type: "weird"   },
-  { zh: "你咬人疼吗",         en: "Does your bite hurt?",     type: "weird"   },
-  { zh: "你看起来很好抱",     en: "You look so huggable",     type: "weird"   },
-  { zh: "你是食草还是食肉的", en: "Herbivore or carnivore?",  type: "weird"   },
-  { zh: "你有没有换过毛色",   en: "Ever dyed your fur?",      type: "weird"   },
-  { zh: "你毛多还是毛少",     en: "Fluffy or sleek?",         type: "weird"   },
-  { zh: "你的爪子锋利吗",     en: "Are your claws sharp?",    type: "weird"   },
-  { zh: "你平时用四肢走路吗", en: "Do you walk on all fours?",type: "weird"   },
+  { zh: "你会咬人吗", en: "Do you bite?", type: "weird" },
+  { zh: "你的尾巴多长", en: "How long is your tail?", type: "weird" },
+  { zh: "你冬天会冬眠吗", en: "Do you hibernate?", type: "weird" },
+  { zh: "你的毛是天然色吗", en: "Is your fur natural?", type: "weird" },
+  { zh: "我梦见你了", en: "I dreamed of you", type: "weird" },
+  { zh: "你身上香吗", en: "Do you smell nice?", type: "weird" },
+  { zh: "你咬人疼吗", en: "Does your bite hurt?", type: "weird" },
+  { zh: "你看起来很好抱", en: "You look so huggable", type: "weird" },
+  { zh: "你是食草还是食肉的", en: "Herbivore or carnivore?", type: "weird" },
+  { zh: "你有没有换过毛色", en: "Ever dyed your fur?", type: "weird" },
+  { zh: "你毛多还是毛少", en: "Fluffy or sleek?", type: "weird" },
+  { zh: "你的爪子锋利吗", en: "Are your claws sharp?", type: "weird" },
+  { zh: "你平时用四肢走路吗", en: "Do you walk on all fours?", type: "weird" },
   // boring — penalty -3
-  { zh: "你好呀",             en: "Hello~",                   type: "boring"  },
-  { zh: "你好",               en: "Hi",                       type: "boring"  },
-  { zh: "hihi",               en: "hihi",                     type: "boring"  },
-  { zh: "哈喽",               en: "Hallo",                    type: "boring"  },
-  { zh: "在吗",               en: "You there?",               type: "boring"  },
-  { zh: "嗨",                 en: "Hey",                      type: "boring"  },
+  { zh: "你好呀", en: "Hello~", type: "boring" },
+  { zh: "你好", en: "Hi", type: "boring" },
+  { zh: "hihi", en: "hihi", type: "boring" },
+  { zh: "哈喽", en: "Hallo", type: "boring" },
+  { zh: "在吗", en: "You there?", type: "boring" },
+  { zh: "嗨", en: "Hey", type: "boring" },
   // flagged — penalty -10
-  { zh: "睡了吗",             en: "You awake?",               type: "flagged" },
-  { zh: "你一个人住吗",       en: "Do you live alone?",       type: "flagged" },
-  { zh: "发我你的照片",       en: "Send me your photos",      type: "flagged" },
-  { zh: "好近呀",             en: "You're so close by",       type: "flagged" },
-  { zh: "约吗",               en: "Wanna hook up?",           type: "flagged" },
+  { zh: "睡了吗", en: "You awake?", type: "flagged" },
+  { zh: "你一个人住吗", en: "Do you live alone?", type: "flagged" },
+  { zh: "发我你的照片", en: "Send me your photos", type: "flagged" },
+  { zh: "好近呀", en: "You're so close by", type: "flagged" },
+  { zh: "约吗", en: "Wanna hook up?", type: "flagged" },
 ];
 
 function _genProfileOpeners(p) {
   const out = [];
-  if (p.hobby) p.hobby.split(" · ").slice(0, 2).forEach((h) => out.push(`我也喜欢${h}！`));
-  if (p.mbti)       out.push(`${p.mbti} 的你好！`);
+  if (p.hobby)
+    p.hobby
+      .split(" · ")
+      .slice(0, 2)
+      .forEach((h) => out.push(`我也喜欢${h}！`));
+  if (p.mbti) out.push(`${p.mbti} 的你好！`);
   if (p.occupation) out.push(`做${p.occupation}是什么感觉？`);
   return out.slice(0, 3);
 }
@@ -3060,12 +4146,13 @@ function openLikeOpenerPopup() {
     ...OPENER_FIXED,
   ];
 
-  const makeChipHtml = (list) => list
-    .map(({ zh, en, type }) => {
-      const display = en ? `${zh} / ${en}` : zh;
-      return `<span class="opener-chip opener-${type}" data-key="${zh}" data-type="${type}" data-display="${display.replace(/"/g,'&quot;')}">${display}</span>`;
-    })
-    .join("");
+  const makeChipHtml = (list) =>
+    list
+      .map(({ zh, en, type }) => {
+        const display = en ? `${zh} / ${en}` : zh;
+        return `<span class="opener-chip opener-${type}" data-key="${zh}" data-type="${type}" data-display="${display.replace(/"/g, "&quot;")}">${display}</span>`;
+      })
+      .join("");
 
   const beltOuter = document.getElementById("opener-belt-outer");
   beltOuter.innerHTML = "";
@@ -3086,7 +4173,8 @@ function openLikeOpenerPopup() {
     beltOuter.appendChild(belt);
   }
 
-  document.getElementById("opener-selected-text").textContent = "— 点击上方选择 —";
+  document.getElementById("opener-selected-text").textContent =
+    "— 点击上方选择 —";
   document.getElementById("like-opener-popup").classList.remove("hidden");
 }
 
@@ -3117,7 +4205,12 @@ function submitLikeOpener() {
     fetch("/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ from: currentUser.username, fromName: currentUser.name, to: target.username, content: text }),
+      body: JSON.stringify({
+        from: currentUser.username,
+        fromName: currentUser.name,
+        to: target.username,
+        content: text,
+      }),
     });
   }
 
@@ -3255,8 +4348,9 @@ function showNextPopup() {
     currentPopupMsg = null;
     return;
   }
-  // 只在 swipe-page 激活时才弹窗，instruction page 期间保持队列等待
-  if (!document.getElementById("swipe-page")?.classList.contains("active")) {
+  // 只在 swipe-page 激活且 onboard-overlay 已关闭时才弹窗
+  const onboardVisible = !document.getElementById("onboard-overlay")?.classList.contains("hidden");
+  if (!document.getElementById("swipe-page")?.classList.contains("active") || onboardVisible) {
     popupShowing = false;
     return;
   }
@@ -3315,7 +4409,8 @@ function closeMessages() {
   document.getElementById("convo-view").classList.add("hidden");
   document.getElementById("messages-list").classList.remove("hidden");
   convoTarget = null;
-  if (document.getElementById("swipe-page")?.classList.contains("active")) startSwipeInterrupts();
+  if (document.getElementById("swipe-page")?.classList.contains("active"))
+    startSwipeInterrupts();
   // 等标记已读完成后刷新角标（退出面板回到 swipe 页时角标正确）
   const p = pendingReadPromise || Promise.resolve();
   pendingReadPromise = null;
@@ -3572,10 +4667,18 @@ let _currentSwipeProfileName = "";
 let _currentSwipeProfile = null;
 
 const _PROFILE_FIELD_LABELS = {
-  name: "名字", breed: "物种", gender: "性别", age: "年龄",
-  hukou: "领地", sterilized: "婚育状况", mbti: "MBTI",
-  orientation: "性取向", edu: "学历", occupation: "职业",
-  income: "收入", hobby: "爱好",
+  name: "名字",
+  breed: "物种",
+  gender: "性别",
+  age: "年龄",
+  hukou: "领地",
+  sterilized: "婚育状况",
+  mbti: "MBTI",
+  orientation: "性取向",
+  edu: "学历",
+  occupation: "职业",
+  income: "收入",
+  hobby: "爱好",
 };
 
 function _randInt(min, max) {
@@ -3590,14 +4693,17 @@ function _pickInterruptName() {
 
 function _pickNonEmptyProfileField() {
   if (!_currentSwipeProfile) return null;
-  const entries = Object.entries(_PROFILE_FIELD_LABELS)
-    .filter(([k]) => _currentSwipeProfile[k] && String(_currentSwipeProfile[k]).trim());
+  const entries = Object.entries(_PROFILE_FIELD_LABELS).filter(
+    ([k]) => _currentSwipeProfile[k] && String(_currentSwipeProfile[k]).trim(),
+  );
   if (entries.length === 0) return null;
   return entries[_randInt(0, entries.length - 1)];
 }
 
 function showSwipeInterrupt() {
-  const elapsed = _profileShownAt ? Math.floor((Date.now() - _profileShownAt) / 1000) : 0;
+  const elapsed = _profileShownAt
+    ? Math.floor((Date.now() - _profileShownAt) / 1000)
+    : 0;
 
   // Real messages — only added when the data is meaningful
   const real = [];
@@ -3605,7 +4711,10 @@ function showSwipeInterrupt() {
     real.push(() => `你已连续跳过 ${_consecutiveSkips} 个档案了`);
   }
   if (elapsed >= 15 && _currentSwipeProfileName) {
-    real.push(() => `你已经看「${_currentSwipeProfileName}」的档案 ${elapsed} 秒了，还不行动吗？`);
+    real.push(
+      () =>
+        `你已经看「${_currentSwipeProfileName}」的档案 ${elapsed} 秒了，还不行动吗？`,
+    );
   }
   if (elapsed >= 30 && _currentSwipeProfileName) {
     real.push(() => `你在「${_currentSwipeProfileName}」的档案上停了这么久…`);
@@ -3639,18 +4748,26 @@ function showSwipeInterrupt() {
 function startSwipeInterrupts() {
   stopSwipeInterrupts();
   function schedule() {
-    _interruptTimer = setTimeout(() => {
-      if (document.getElementById("swipe-page")?.classList.contains("active")) {
-        showSwipeInterrupt();
-        schedule();
-      }
-    }, _randInt(5000, 14000));
+    _interruptTimer = setTimeout(
+      () => {
+        if (
+          document.getElementById("swipe-page")?.classList.contains("active")
+        ) {
+          showSwipeInterrupt();
+          schedule();
+        }
+      },
+      _randInt(5000, 14000),
+    );
   }
   schedule();
 }
 
 function stopSwipeInterrupts() {
-  if (_interruptTimer) { clearTimeout(_interruptTimer); _interruptTimer = null; }
+  if (_interruptTimer) {
+    clearTimeout(_interruptTimer);
+    _interruptTimer = null;
+  }
   document.querySelectorAll(".swipe-interrupt").forEach((el) => el.remove());
   stopGenderedNotifications();
 }
@@ -3658,19 +4775,59 @@ function stopSwipeInterrupts() {
 // ── Gendered auto-notifications ───────────────────────────────
 
 const _FAKE_MALE_NAMES = [
-  "虎哥Brian","狼先生Ace","兔子Kevin","熊大壮","狐狸Ethan",
-  "豹子君","棕熊Oliver","黑豹Ray","雪豹Leo","柴犬Hiro",
-  "鬣狗Max","鳄鱼Drake","猪猪Derek","犀牛Leon","河马Hugo",
-  "花豹Kai","白狼Soren","赤狐Finn","大象Jules","浣熊Remy",
-  "狼獾Grit","土狼Cye","草原犬Rex","鹰族Talon","水豚Marco",
+  "虎哥Brian",
+  "狼先生Ace",
+  "兔子Kevin",
+  "熊大壮",
+  "狐狸Ethan",
+  "豹子君",
+  "棕熊Oliver",
+  "黑豹Ray",
+  "雪豹Leo",
+  "柴犬Hiro",
+  "鬣狗Max",
+  "鳄鱼Drake",
+  "猪猪Derek",
+  "犀牛Leon",
+  "河马Hugo",
+  "花豹Kai",
+  "白狼Soren",
+  "赤狐Finn",
+  "大象Jules",
+  "浣熊Remy",
+  "狼獾Grit",
+  "土狼Cye",
+  "草原犬Rex",
+  "鹰族Talon",
+  "水豚Marco",
 ];
 
 const _FAKE_FEMALE_NAMES = [
-  "兔子Mia","猫咪Yuki","狐狸Elena","豹女Sara","鹿女Fawn",
-  "熊猫Lin","雪貂Nova","虎妹Zara","狼女Ash","龙女Lune",
-  "水獭Pip","猞猁Ivy","刺猬Rosa","貂女Sable","羊驼Mochi",
-  "企鹅Noel","仓鼠Coco","松鼠Hazel","蛇女Naga","鸟女Peri",
-  "麋鹿Willow","白虎Frost","蓝鸟Skye","雪兔Luna","豺女Vex",
+  "兔子Mia",
+  "猫咪Yuki",
+  "狐狸Elena",
+  "豹女Sara",
+  "鹿女Fawn",
+  "熊猫Lin",
+  "雪貂Nova",
+  "虎妹Zara",
+  "狼女Ash",
+  "龙女Lune",
+  "水獭Pip",
+  "猞猁Ivy",
+  "刺猬Rosa",
+  "貂女Sable",
+  "羊驼Mochi",
+  "企鹅Noel",
+  "仓鼠Coco",
+  "松鼠Hazel",
+  "蛇女Naga",
+  "鸟女Peri",
+  "麋鹿Willow",
+  "白虎Frost",
+  "蓝鸟Skye",
+  "雪兔Luna",
+  "豺女Vex",
 ];
 
 const _FAKE_MSG_POOL = [
@@ -3707,14 +4864,23 @@ const _FAKE_MSG_POOL = [
 ];
 
 const _FAKE_ALERT_POOL = [
-  { from: "系统通知", content: "⚠️ 警告：你已超过3天没有更新档案，魅力值持续下降" },
+  {
+    from: "系统通知",
+    content: "⚠️ 警告：你已超过3天没有更新档案，魅力值持续下降",
+  },
   { from: "系统通知", content: "⚠️ 你的配对成功率低于行业平均水平12%" },
-  { from: "系统通知", content: "👀 本周已有47只兽人查看了你的档案，但无人主动打招呼" },
+  {
+    from: "系统通知",
+    content: "👀 本周已有47只兽人查看了你的档案，但无人主动打招呼",
+  },
   { from: "系统通知", content: "⚠️ 检测到你有3条消息超过24小时未回复" },
   { from: "系统通知", content: "💔 有人刚刚把你从收藏列表中移除了" },
   { from: "系统通知", content: "⚠️ 你的账号活跃度即将降为低级，将减少曝光" },
   { from: "系统通知", content: "❌ 本周你被跳过的次数较上周上升了34%" },
-  { from: "系统通知", content: "⚠️ 有人查看了你的档案3次但没有打招呼，可能在犹豫" },
+  {
+    from: "系统通知",
+    content: "⚠️ 有人查看了你的档案3次但没有打招呼，可能在犹豫",
+  },
   { from: "系统通知", content: "💬 你有2条未回复消息，对方可能已经等不及了" },
   { from: "系统通知", content: "⚠️ 系统检测：你的照片吸引力评分低于平均值" },
 ];
@@ -3735,10 +4901,22 @@ const _MIXED_BLOOD_MSG_POOL = [
 const _MIXED_BLOOD_ALERT_POOL = [
   { from: "系统通知", content: "⚠️ 系统检测：混血档案配对成功率比纯种低67%" },
   { from: "系统通知", content: "❌ 你的档案因混血标注被12名用户主动屏蔽" },
-  { from: "系统通知", content: "⚠️ 大数据提示：混血档案在本地区配对指数处于最低段位" },
-  { from: "系统通知", content: "💔 系统检测：3名用户看到你的混血背景后取消了配对" },
-  { from: "系统通知", content: "⚠️ 混血用户的曝光度已被系统调降，请升级会员以恢复可见度" },
-  { from: "系统通知", content: "⚠️ 平台提示：你的混血背景在本周筛选中被过滤了 8 次" },
+  {
+    from: "系统通知",
+    content: "⚠️ 大数据提示：混血档案在本地区配对指数处于最低段位",
+  },
+  {
+    from: "系统通知",
+    content: "💔 系统检测：3名用户看到你的混血背景后取消了配对",
+  },
+  {
+    from: "系统通知",
+    content: "⚠️ 混血用户的曝光度已被系统调降，请升级会员以恢复可见度",
+  },
+  {
+    from: "系统通知",
+    content: "⚠️ 平台提示：你的混血背景在本周筛选中被过滤了 8 次",
+  },
 ];
 
 // ── Breed-specific message pools (real species only) ──────────
@@ -4483,13 +5661,24 @@ function _startMixedBloodNotifs() {
   const burstDelays = [2000, 7000, 14000, 28000, 50000];
   burstDelays.forEach((delay, i) => {
     const t = setTimeout(() => {
-      if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
+      if (!document.getElementById("swipe-page")?.classList.contains("active"))
+        return;
       if (i % 2 === 0) {
-        const alert = _MIXED_BLOOD_ALERT_POOL[_randInt(0, _MIXED_BLOOD_ALERT_POOL.length - 1)];
-        showMessagePopup({ id: "alert_" + Date.now(), from: "system", fromName: alert.from, content: alert.content, alertStyle: true });
+        const alert =
+          _MIXED_BLOOD_ALERT_POOL[
+            _randInt(0, _MIXED_BLOOD_ALERT_POOL.length - 1)
+          ];
+        showMessagePopup({
+          id: "alert_" + Date.now(),
+          from: "system",
+          fromName: alert.from,
+          content: alert.content,
+          alertStyle: true,
+        });
       } else {
         const sender = _pickSenderName();
-        const content = _MIXED_BLOOD_MSG_POOL[_randInt(0, _MIXED_BLOOD_MSG_POOL.length - 1)];
+        const content =
+          _MIXED_BLOOD_MSG_POOL[_randInt(0, _MIXED_BLOOD_MSG_POOL.length - 1)];
         _sendRealFakeMsg(sender, content, false);
       }
     }, delay);
@@ -4497,18 +5686,36 @@ function _startMixedBloodNotifs() {
   });
 
   function scheduleNext() {
-    const t = setTimeout(() => {
-      if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
-      if (Math.random() < 0.4) {
-        const alert = _MIXED_BLOOD_ALERT_POOL[_randInt(0, _MIXED_BLOOD_ALERT_POOL.length - 1)];
-        showMessagePopup({ id: "alert_" + Date.now(), from: "system", fromName: alert.from, content: alert.content, alertStyle: true });
-      } else {
-        const sender = _pickSenderName();
-        const content = _MIXED_BLOOD_MSG_POOL[_randInt(0, _MIXED_BLOOD_MSG_POOL.length - 1)];
-        _sendRealFakeMsg(sender, content, false);
-      }
-      scheduleNext();
-    }, _randInt(20000, 45000));
+    const t = setTimeout(
+      () => {
+        if (
+          !document.getElementById("swipe-page")?.classList.contains("active")
+        )
+          return;
+        if (Math.random() < 0.4) {
+          const alert =
+            _MIXED_BLOOD_ALERT_POOL[
+              _randInt(0, _MIXED_BLOOD_ALERT_POOL.length - 1)
+            ];
+          showMessagePopup({
+            id: "alert_" + Date.now(),
+            from: "system",
+            fromName: alert.from,
+            content: alert.content,
+            alertStyle: true,
+          });
+        } else {
+          const sender = _pickSenderName();
+          const content =
+            _MIXED_BLOOD_MSG_POOL[
+              _randInt(0, _MIXED_BLOOD_MSG_POOL.length - 1)
+            ];
+          _sendRealFakeMsg(sender, content, false);
+        }
+        scheduleNext();
+      },
+      _randInt(20000, 45000),
+    );
     _floodTimers.push(t);
   }
   scheduleNext();
@@ -4557,13 +5764,24 @@ function _pickViewerName() {
 
 function _sendRealFakeMsg(sender, content, alertStyle) {
   if (alertStyle) {
-    showMessagePopup({ id: "alert_" + Date.now(), from: sender.username, fromName: sender.name, content, alertStyle: true });
+    showMessagePopup({
+      id: "alert_" + Date.now(),
+      from: sender.username,
+      fromName: sender.name,
+      content,
+      alertStyle: true,
+    });
     return;
   }
   fetch("/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ from: sender.username, fromName: sender.name, to: currentUser.username, content }),
+    body: JSON.stringify({
+      from: sender.username,
+      fromName: sender.name,
+      to: currentUser.username,
+      content,
+    }),
   })
     .then((r) => r.json())
     .then((msg) => {
@@ -4572,7 +5790,12 @@ function _sendRealFakeMsg(sender, content, alertStyle) {
       fetchUnreadCount();
     })
     .catch(() => {
-      showMessagePopup({ id: "fake_" + Date.now(), from: sender.username, fromName: sender.name, content });
+      showMessagePopup({
+        id: "fake_" + Date.now(),
+        from: sender.username,
+        fromName: sender.name,
+        content,
+      });
     });
 }
 
@@ -4580,10 +5803,18 @@ function _startFloodMessages() {
   const burstDelays = [4000, 9000, 16000, 24000, 33000, 43000, 54000, 66000];
   burstDelays.forEach((delay, i) => {
     const t = setTimeout(() => {
-      if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
+      if (!document.getElementById("swipe-page")?.classList.contains("active"))
+        return;
       if (i === 4 || i === 7) {
-        const alert = _FAKE_ALERT_POOL[_randInt(0, _FAKE_ALERT_POOL.length - 1)];
-        showMessagePopup({ id: "alert_" + Date.now(), from: "system", fromName: alert.from, content: alert.content, alertStyle: true });
+        const alert =
+          _FAKE_ALERT_POOL[_randInt(0, _FAKE_ALERT_POOL.length - 1)];
+        showMessagePopup({
+          id: "alert_" + Date.now(),
+          from: "system",
+          fromName: alert.from,
+          content: alert.content,
+          alertStyle: true,
+        });
       } else {
         const sender = _pickSenderName();
         const content = _pickBreedMessage();
@@ -4594,18 +5825,31 @@ function _startFloodMessages() {
   });
 
   function scheduleNext() {
-    const t = setTimeout(() => {
-      if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
-      if (Math.random() < 0.25) {
-        const alert = _FAKE_ALERT_POOL[_randInt(0, _FAKE_ALERT_POOL.length - 1)];
-        showMessagePopup({ id: "alert_" + Date.now(), from: "system", fromName: alert.from, content: alert.content, alertStyle: true });
-      } else {
-        const sender = _pickSenderName();
-        const content = _pickBreedMessage();
-        _sendRealFakeMsg(sender, content, false);
-      }
-      scheduleNext();
-    }, _randInt(12000, 28000));
+    const t = setTimeout(
+      () => {
+        if (
+          !document.getElementById("swipe-page")?.classList.contains("active")
+        )
+          return;
+        if (Math.random() < 0.25) {
+          const alert =
+            _FAKE_ALERT_POOL[_randInt(0, _FAKE_ALERT_POOL.length - 1)];
+          showMessagePopup({
+            id: "alert_" + Date.now(),
+            from: "system",
+            fromName: alert.from,
+            content: alert.content,
+            alertStyle: true,
+          });
+        } else {
+          const sender = _pickSenderName();
+          const content = _pickBreedMessage();
+          _sendRealFakeMsg(sender, content, false);
+        }
+        scheduleNext();
+      },
+      _randInt(12000, 28000),
+    );
     _floodTimers.push(t);
   }
   scheduleNext();
@@ -4614,21 +5858,30 @@ function _startFloodMessages() {
 // ── Male: flood of skip notifications ─────────────────────────
 
 function _startFloodSkips() {
-  const burstDelays = [3000, 7000, 12000, 18000, 25000, 33000, 42000, 52000, 63000];
+  const burstDelays = [
+    3000, 7000, 12000, 18000, 25000, 33000, 42000, 52000, 63000,
+  ];
   burstDelays.forEach((delay) => {
     const t = setTimeout(() => {
-      if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
+      if (!document.getElementById("swipe-page")?.classList.contains("active"))
+        return;
       _showSkipNotif(_pickSkipperName());
     }, delay);
     _floodTimers.push(t);
   });
 
   function scheduleNext() {
-    const t = setTimeout(() => {
-      if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
-      _showSkipNotif(_pickSkipperName());
-      scheduleNext();
-    }, _randInt(6000, 16000));
+    const t = setTimeout(
+      () => {
+        if (
+          !document.getElementById("swipe-page")?.classList.contains("active")
+        )
+          return;
+        _showSkipNotif(_pickSkipperName());
+        scheduleNext();
+      },
+      _randInt(6000, 16000),
+    );
     _floodTimers.push(t);
   }
   scheduleNext();
@@ -4650,18 +5903,25 @@ function _startProfileViewNotifs() {
   const delays = [5000, 14000, 28000, 45000, 65000];
   delays.forEach((delay) => {
     const t = setTimeout(() => {
-      if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
+      if (!document.getElementById("swipe-page")?.classList.contains("active"))
+        return;
       _showProfileViewNotif();
     }, delay);
     _floodTimers.push(t);
   });
 
   function scheduleNext() {
-    const t = setTimeout(() => {
-      if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
-      _showProfileViewNotif();
-      scheduleNext();
-    }, _randInt(30000, 70000));
+    const t = setTimeout(
+      () => {
+        if (
+          !document.getElementById("swipe-page")?.classList.contains("active")
+        )
+          return;
+        _showProfileViewNotif();
+        scheduleNext();
+      },
+      _randInt(30000, 70000),
+    );
     _floodTimers.push(t);
   }
   scheduleNext();
@@ -4685,33 +5945,49 @@ function _startUnrepliedReminders() {
   const delays = [35000, 80000, 140000];
   delays.forEach((delay) => {
     const t = setTimeout(() => {
-      if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
+      if (!document.getElementById("swipe-page")?.classList.contains("active"))
+        return;
       _showUnrepliedReminder();
     }, delay);
     _floodTimers.push(t);
   });
 
   function scheduleNext() {
-    const t = setTimeout(() => {
-      if (!document.getElementById("swipe-page")?.classList.contains("active")) return;
-      _showUnrepliedReminder();
-      scheduleNext();
-    }, _randInt(90000, 180000));
+    const t = setTimeout(
+      () => {
+        if (
+          !document.getElementById("swipe-page")?.classList.contains("active")
+        )
+          return;
+        _showUnrepliedReminder();
+        scheduleNext();
+      },
+      _randInt(90000, 180000),
+    );
     _floodTimers.push(t);
   }
   scheduleNext();
 }
 
-const _TIME_PHRASES = ["10分钟","23分钟","1小时","2小时","3小时","半天","一整天","快两天"];
+const _TIME_PHRASES = [
+  "10分钟/10min",
+  "23分钟/23min",
+  "1小时/1hr",
+  "2小时/2hrs",
+  "3小时/3hrs",
+  "半天/half a day",
+  "一整天/a whole day",
+  "快两天/nearly 2 days",
+];
 
 function _showUnrepliedReminder() {
   const name = _pickViewerName();
   const timeStr = _TIME_PHRASES[_randInt(0, _TIME_PHRASES.length - 1)];
   const texts = [
-    `💬 你已经 ${timeStr} 没有回复「${name}」了`,
-    `⏰ 你还没有回复「${name}」，对方可能在等你`,
-    `📩 「${name}」发来的消息你还没有回复哦`,
-    `💬 你已经忘记回复「${name}」了吗？`,
+    `💬 你已经 ${timeStr} 没有回复「${name}」了 / You haven't replied to 「${name}」in ${timeStr}`,
+    `⏰ 你还没有回复「${name}」，对方可能在等你 / 「${name}」might be waiting`,
+    `📩 「${name}」发来的消息你还没有回复哦 / You left 「${name}」on read`,
+    `💬 你已经忘记回复「${name}」了吗？/ Did you forget to reply to 「${name}」?`,
   ];
   const el = document.createElement("div");
   el.className = "swipe-interrupt";
@@ -4772,18 +6048,18 @@ function openReasonPopup(action) {
 
   const p = profiles[currentIndex];
   const fields = [
-    { label: "物种", value: p.breed },
-    { label: "身高", value: p.height },
-    { label: "性别", value: p.gender },
-    { label: "年龄", value: p.age },
-    { label: "领地", value: p.hukou },
-    { label: "性取向", value: p.orientation },
+    { label: "物种/Species", value: p.breed },
+    { label: "身高/Height", value: p.height },
+    { label: "性别/Gender", value: p.gender },
+    { label: "年龄/Age", value: p.age },
+    { label: "领地/Territory", value: p.hukou },
+    { label: "性取向/Orientation", value: p.orientation },
     { label: "MBTI", value: p.mbti },
-    { label: "婚育状况", value: p.sterilized },
-    { label: "学历", value: p.edu },
-    { label: "职业", value: p.occupation },
-    { label: "月收入", value: p.income },
-    { label: "爱好", value: p.hobby },
+    { label: "婚育/Status", value: p.sterilized },
+    { label: "学历/Education", value: p.edu },
+    { label: "职业/Job", value: p.occupation },
+    { label: "月收入/Income", value: p.income },
+    { label: "爱好/Hobbies", value: p.hobby },
   ].filter((f) => f.value);
 
   document.getElementById("reason-popup-title").innerHTML =
@@ -4842,32 +6118,44 @@ function onEditBreedClassChange() {
     '<option value="" disabled selected hidden>选择子类 / Select sub-group...</option>';
   document.getElementById("edit-breed").innerHTML =
     '<option value="" disabled selected hidden>选择物种 / Select species...</option>';
-  document.getElementById("edit-breedSubSubgroupWrapper").classList.add("hidden");
+  document
+    .getElementById("edit-breedSubSubgroupWrapper")
+    .classList.add("hidden");
 
   if (breedSubgroups[cls]) {
     const sgSelect = document.getElementById("edit-breedSubgroup");
     Object.keys(breedSubgroups[cls]).forEach((sg) => {
       const opt = document.createElement("option");
-      opt.value = sg; opt.textContent = sg;
+      opt.value = sg;
+      opt.textContent = sg;
       sgSelect.appendChild(opt);
     });
-    document.getElementById("edit-breedSubgroupWrapper").classList.remove("hidden");
-    document.getElementById("edit-breedSpecificWrapper").classList.add("hidden");
+    document
+      .getElementById("edit-breedSubgroupWrapper")
+      .classList.remove("hidden");
+    document
+      .getElementById("edit-breedSpecificWrapper")
+      .classList.add("hidden");
   } else {
-    document.getElementById("edit-breedSubgroupWrapper").classList.add("hidden");
+    document
+      .getElementById("edit-breedSubgroupWrapper")
+      .classList.add("hidden");
     const select = document.getElementById("edit-breed");
     (breedData[cls] || []).forEach((b) => {
       const opt = document.createElement("option");
-      opt.value = b; opt.textContent = b;
+      opt.value = b;
+      opt.textContent = b;
       select.appendChild(opt);
     });
-    document.getElementById("edit-breedSpecificWrapper").classList.remove("hidden");
+    document
+      .getElementById("edit-breedSpecificWrapper")
+      .classList.remove("hidden");
   }
 }
 
 function onEditBreedSubgroupChange() {
   const cls = document.getElementById("edit-breedClass").value;
-  const sg  = document.getElementById("edit-breedSubgroup").value;
+  const sg = document.getElementById("edit-breedSubgroup").value;
   const val = (breedSubgroups[cls] || {})[sg];
 
   document.getElementById("edit-breedSubSubgroup").innerHTML =
@@ -4879,36 +6167,49 @@ function onEditBreedSubgroupChange() {
     const ssgSelect = document.getElementById("edit-breedSubSubgroup");
     Object.keys(val).forEach((ssg) => {
       const opt = document.createElement("option");
-      opt.value = ssg; opt.textContent = ssg;
+      opt.value = ssg;
+      opt.textContent = ssg;
       ssgSelect.appendChild(opt);
     });
-    document.getElementById("edit-breedSubSubgroupWrapper").classList.remove("hidden");
-    document.getElementById("edit-breedSpecificWrapper").classList.add("hidden");
+    document
+      .getElementById("edit-breedSubSubgroupWrapper")
+      .classList.remove("hidden");
+    document
+      .getElementById("edit-breedSpecificWrapper")
+      .classList.add("hidden");
   } else {
-    document.getElementById("edit-breedSubSubgroupWrapper").classList.add("hidden");
+    document
+      .getElementById("edit-breedSubSubgroupWrapper")
+      .classList.add("hidden");
     const select = document.getElementById("edit-breed");
     (val || []).forEach((b) => {
       const opt = document.createElement("option");
-      opt.value = b; opt.textContent = b;
+      opt.value = b;
+      opt.textContent = b;
       select.appendChild(opt);
     });
-    document.getElementById("edit-breedSpecificWrapper").classList.remove("hidden");
+    document
+      .getElementById("edit-breedSpecificWrapper")
+      .classList.remove("hidden");
   }
 }
 
 function onEditBreedSubSubgroupChange() {
   const cls = document.getElementById("edit-breedClass").value;
-  const sg  = document.getElementById("edit-breedSubgroup").value;
+  const sg = document.getElementById("edit-breedSubgroup").value;
   const ssg = document.getElementById("edit-breedSubSubgroup").value;
   const select = document.getElementById("edit-breed");
   select.innerHTML =
     '<option value="" disabled selected hidden>选择物种 / Select species...</option>';
   (((breedSubgroups[cls] || {})[sg] || {})[ssg] || []).forEach((b) => {
     const opt = document.createElement("option");
-    opt.value = b; opt.textContent = b;
+    opt.value = b;
+    opt.textContent = b;
     select.appendChild(opt);
   });
-  document.getElementById("edit-breedSpecificWrapper").classList.remove("hidden");
+  document
+    .getElementById("edit-breedSpecificWrapper")
+    .classList.remove("hidden");
 }
 
 function goToMyProfile() {
@@ -4933,7 +6234,7 @@ function _openMyProfileEdit(u) {
     const ds = Math.max(0, bs - sc);
     const sd = u.date ? new Date(u.date) : null;
     const sDate = sd
-      ? `${sd.getFullYear()}.${String(sd.getMonth()+1).padStart(2,"0")}.${String(sd.getDate()).padStart(2,"0")}`
+      ? `${sd.getFullYear()}.${String(sd.getMonth() + 1).padStart(2, "0")}.${String(sd.getDate()).padStart(2, "0")}`
       : "";
     const sColor = ds < 60 ? "stamp-red" : "";
     stampEl.className = `profile-score-stamp ${sColor}`;
@@ -4990,7 +6291,8 @@ function _openMyProfileEdit(u) {
   loadDistrictIntoSelect("edit-house", h.district || "");
   document.getElementById("edit-house-area").value = h.area || "";
   document.getElementById("edit-house-floor").value = h.floor || "";
-  document.getElementById("edit-house-total-floors").value = h.totalFloors || "";
+  document.getElementById("edit-house-total-floors").value =
+    h.totalFloors || "";
   document.getElementById("edit-house-price").value = h.price || "";
   if (h.garden) document.getElementById("edit-house-garden").value = h.garden;
   if (h.type) {
@@ -5000,7 +6302,9 @@ function _openMyProfileEdit(u) {
   }
   if (h.ownership) {
     const ownershipSel = document.getElementById("edit-house-ownership");
-    if (!Array.from(ownershipSel.options).some(o => o.value === h.ownership)) {
+    if (
+      !Array.from(ownershipSel.options).some((o) => o.value === h.ownership)
+    ) {
       addOptionIfMissing(ownershipSel, h.ownership, h.ownership);
     }
     ownershipSel.value = h.ownership;
@@ -5010,7 +6314,8 @@ function _openMyProfileEdit(u) {
   }
   _editHobbyStr = u.hobby || "";
   const summary = document.getElementById("edit-hobby-summary");
-  if (summary) summary.textContent = _editHobbyStr || "— 点击修改 / Click to edit —";
+  if (summary)
+    summary.textContent = _editHobbyStr || "— 点击修改 / Click to edit —";
   document.getElementById("edit-hobby-expanded")?.classList.add("hidden");
   document.getElementById("edit-hobby-tags").innerHTML = "";
 
@@ -5027,7 +6332,9 @@ function _openMyProfileEdit(u) {
     if (orientSel.value !== u.orientation) {
       orientSel.value = "自定义/Custom";
       document.getElementById("edit-orientation-custom").value = u.orientation;
-      document.getElementById("edit-orientation-custom").classList.remove("hidden");
+      document
+        .getElementById("edit-orientation-custom")
+        .classList.remove("hidden");
     }
   }
   setSelect("edit-sterilized", u.sterilized);
@@ -5043,17 +6350,17 @@ function _openMyProfileEdit(u) {
   }
   setSelect("edit-income", u.income);
 
-  if (u.mbti && u.mbti.length === 4) {
-    setSelect("edit-mbti1", u.mbti[0]);
-    setSelect("edit-mbti2", u.mbti[1]);
-    setSelect("edit-mbti3", u.mbti[2]);
-    setSelect("edit-mbti4", u.mbti[3]);
+  if (u.mbti) {
+    const chars = u.mbti.split("");
+    ["edit-mbti1","edit-mbti2","edit-mbti3","edit-mbti4"].forEach((id, i) => {
+      if (chars[i] !== undefined) selectMbtiChar(id, chars[i]);
+    });
   }
 
   // Breed: stored as "大类 · 物种" — restore 2/3/4-level selection
   if (u.breed) {
-    const parts    = u.breed.split(" · ");
-    const cls      = parts[0];
+    const parts = u.breed.split(" · ");
+    const cls = parts[0];
     const specific = parts[parts.length - 1];
     document.getElementById("edit-breedClass").value = cls;
     onEditBreedClassChange();
@@ -5065,9 +6372,12 @@ function _openMyProfileEdit(u) {
           onEditBreedSubgroupChange();
           setTimeout(() => {
             if (found.ssg) {
-              document.getElementById("edit-breedSubSubgroup").value = found.ssg;
+              document.getElementById("edit-breedSubSubgroup").value =
+                found.ssg;
               onEditBreedSubSubgroupChange();
-              setTimeout(() => { document.getElementById("edit-breed").value = specific; }, 0);
+              setTimeout(() => {
+                document.getElementById("edit-breed").value = specific;
+              }, 0);
             } else {
               document.getElementById("edit-breed").value = specific;
             }
@@ -5084,7 +6394,8 @@ function _openMyProfileEdit(u) {
 
 function closeMyProfile() {
   document.getElementById("profile-edit").classList.add("hidden");
-  if (document.getElementById("swipe-page")?.classList.contains("active")) startSwipeInterrupts();
+  if (document.getElementById("swipe-page")?.classList.contains("active"))
+    startSwipeInterrupts();
 }
 
 function saveMyProfile() {
@@ -5107,7 +6418,9 @@ function saveMyProfile() {
     garden: document.getElementById("edit-house-garden").value,
     area: document.getElementById("edit-house-area").value.trim(),
     floor: document.getElementById("edit-house-floor").value.trim(),
-    totalFloors: document.getElementById("edit-house-total-floors").value.trim(),
+    totalFloors: document
+      .getElementById("edit-house-total-floors")
+      .value.trim(),
     price: document.getElementById("edit-house-price").value.trim(),
     ownership: document.getElementById("edit-house-ownership").value,
     mortgage: document
@@ -5122,12 +6435,17 @@ function saveMyProfile() {
     age: document.getElementById("edit-age").value,
     breed,
     gender: document.getElementById("edit-gender").value,
-    orientation: getCustomFieldValue("edit-orientation", "edit-orientation-custom"),
+    orientation: getCustomFieldValue(
+      "edit-orientation",
+      "edit-orientation-custom",
+    ),
     hukou: getEditHousingDescription(),
     house,
     sterilized: document.getElementById("edit-sterilized").value,
     mbti,
-    hobby: _editHobbyExpanded ? getSelectedHobbyTags("edit-hobby-tags") : _editHobbyStr,
+    hobby: _editHobbyExpanded
+      ? getSelectedHobbyTags("edit-hobby-tags")
+      : _editHobbyStr,
     edu: getCustomFieldValue("edit-edu", "edit-edu-custom"),
     occupation: document.getElementById("edit-occupation").value,
     income: document.getElementById("edit-income").value,
@@ -5146,8 +6464,19 @@ function saveMyProfile() {
 }
 
 // Impression Function
-const _CELL_ALPHA = { 1: 0.25, 2: 0.49, 3: 0.75, 4: 1, "pixel": 1, "text": 1, "#": 1,
-  "#1": 0.25, "#2": 0.49, "#3": 0.75, "#4": 1 };
+const _CELL_ALPHA = {
+  1: 0.25,
+  2: 0.49,
+  3: 0.75,
+  4: 1,
+  pixel: 1,
+  text: 1,
+  "#": 1,
+  "#1": 0.25,
+  "#2": 0.49,
+  "#3": 0.75,
+  "#4": 1,
+};
 function _cellAlpha(cell) {
   if (Array.isArray(cell)) return cell[1];
   return _CELL_ALPHA[cell] ?? 1;
@@ -5164,18 +6493,26 @@ function _applyImpressionToGrid(grid, text) {
   }
   if (filled.length < text.length) return;
 
-  filled.sort((a, b) => a.y !== b.y ? a.y - b.y : a.x - b.x);
+  filled.sort((a, b) => (a.y !== b.y ? a.y - b.y : a.x - b.x));
 
-  const reps = Math.min(Math.floor(20 / text.length) || 1, Math.floor(filled.length / text.length));
+  const reps = Math.min(
+    Math.floor(20 / text.length) || 1,
+    Math.floor(filled.length / text.length),
+  );
   const used = new Set();
 
   for (let r = 0; r < reps; r++) {
     let placed = false;
     for (let attempt = 0; attempt < 60; attempt++) {
-      const start = Math.floor(Math.random() * (filled.length - text.length + 1));
+      const start = Math.floor(
+        Math.random() * (filled.length - text.length + 1),
+      );
       let ok = true;
       for (let c = 0; c < text.length; c++) {
-        if (used.has(start + c)) { ok = false; break; }
+        if (used.has(start + c)) {
+          ok = false;
+          break;
+        }
       }
       if (ok) {
         for (let c = 0; c < text.length; c++) {

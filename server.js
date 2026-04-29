@@ -4,6 +4,12 @@ const express = require("express");
 const https = require("https");
 // to read certificates from the filesystem (fs)
 const fs = require("fs");
+const { spawn } = require("child_process");
+
+function generateAvatar(name) {
+  const py = spawn("python3", ["generate_avatars.py", "--name", name]);
+  py.stderr.on("data", (d) => console.error("[avatar]", d.toString()));
+}
 
 const app = express(); // the server "app", the server behaviour
 
@@ -95,6 +101,8 @@ app.post("/profiles", function (req, res) {
   profiles.push(profile);
   // and save all current messages to a file (for permanence)
   fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
+  // generate avatar PNG in the background
+  if (profile.grid && profile.name) generateAvatar(profile.name);
   // its a good practice return the final message to the client
   res.json(profile);
 });

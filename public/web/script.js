@@ -73,6 +73,24 @@ function showSpotlight(idx) {
 
   const v = (val) => val || "—";
 
+  function displayBilingual(val) {
+    if (!val) return "—";
+    if (val.includes(" · ")) {
+      const parts = val.split(" · ");
+      const zh = parts.map(p => p.split(" / ")[0].trim()).join(" · ");
+      const en = parts.map(p => { const s = p.split(" / "); return s.length > 1 ? s.slice(1).join(" / ").trim() : ""; }).filter(Boolean).join(" · ");
+      return en ? `${zh}<br><small>${en}</small>` : zh;
+    }
+    if (val.includes("/")) {
+      const idx = val.indexOf("/");
+      const zh = val.substring(0, idx).trim();
+      const en = val.substring(idx + 1).replace(/·/g, " · ").trim();
+      if (zh.length + en.length > 14) return `${zh}<br><small>${en}</small>`;
+      return `${zh} ${en}`;
+    }
+    return val;
+  }
+
   const baseScore = p.score ?? 60;
   const skipCount = p.skips ? p.skips.length : 0;
   const displayScore = Math.max(0, baseScore - skipCount);
@@ -87,8 +105,8 @@ function showSpotlight(idx) {
     : `<div class="avatar-placeholder">${getEmoji(p.breed)}</div>`;
 
   const breedDisplay = p.mixed && p.breed2
-    ? `${p.breed || "—"} <span class="mixed-mark">× ${p.breed2}（混血）</span>`
-    : v(p.breed);
+    ? `${displayBilingual(p.breed)} <span class="mixed-mark">× ${displayBilingual(p.breed2)}（混血 Mixed）</span>`
+    : displayBilingual(p.breed);
 
   const likesCount = p.likes?.length || 0;
   const skipsCount = p.skips?.length || 0;
@@ -123,36 +141,36 @@ function showSpotlight(idx) {
 
     <div class="card">
       <div class="grid-2">
-        <div class="cell"><span class="label">名字</span><span class="value big">${v(p.name)}</span></div>
-        <div class="cell"><span class="label">物种</span><span class="value">${breedDisplay}</span></div>
+        <div class="cell"><span class="label">名字<br><small>Name</small></span><span class="value big">${v(p.name)}</span></div>
+        <div class="cell"><span class="label">物种<br><small>Species</small></span><span class="value">${breedDisplay}</span></div>
       </div>
 
       <div class="grid-3">
-        <div class="cell"><span class="label">性别</span><span class="value">${v(p.gender)}</span></div>
-        <div class="cell"><span class="label">年龄</span><span class="value">${v(p.age)}</span></div>
-        <div class="cell"><span class="label">身高</span><span class="value">${v(p.height)}</span></div>
+        <div class="cell"><span class="label">性别<br><small>Gender</small></span><span class="value">${displayBilingual(p.gender)}</span></div>
+        <div class="cell"><span class="label">年龄<br><small>Age</small></span><span class="value">${v(p.age)}</span></div>
+        <div class="cell"><span class="label">身高<br><small>Height</small></span><span class="value">${v(p.height)}</span></div>
       </div>
 
       <div class="section">
-        <span class="label">领地</span>
+        <span class="label">领地 <small>Territory</small></span>
         <span class="value">${v(p.hukou)}</span>
       </div>
 
       <div class="grid-3">
         <div class="cell"><span class="label">MBTI</span><span class="value big">${v(p.mbti)}</span></div>
-        <div class="cell"><span class="label">性取向</span><span class="value">${v(p.orientation)}</span></div>
-        <div class="cell"><span class="label">婚育状况</span><span class="value">${v(p.sterilized)}</span></div>
+        <div class="cell"><span class="label">性取向<br><small>Orientation</small></span><span class="value">${displayBilingual(p.orientation)}</span></div>
+        <div class="cell"><span class="label">婚育<br><small>Status</small></span><span class="value">${displayBilingual(p.sterilized)}</span></div>
       </div>
 
       <div class="grid-3">
-        <div class="cell"><span class="label">学历</span><span class="value">${v(p.edu)}</span></div>
-        <div class="cell"><span class="label">职业</span><span class="value">${v(p.occupation)}</span></div>
-        <div class="cell"><span class="label">月收入</span><span class="value">${v(p.income)}</span></div>
+        <div class="cell"><span class="label">学历<br><small>Education</small></span><span class="value">${displayBilingual(p.edu)}</span></div>
+        <div class="cell"><span class="label">职业<br><small>Job</small></span><span class="value">${v(p.occupation)}</span></div>
+        <div class="cell"><span class="label">月收入<br><small>Income</small></span><span class="value">${displayBilingual(p.income)}</span></div>
       </div>
 
       <div class="grid-2">
-        <div class="cell"><span class="label">兴趣爱好</span><span class="value">${v(p.hobby)}</span></div>
-        <div class="cell"><span class="label">交友目的</span><span class="value">${v(p.goal)}</span></div>
+        <div class="cell"><span class="label">兴趣爱好<br><small>Hobbies</small></span><span class="value">${v(p.hobby)}</span></div>
+        <div class="cell"><span class="label">交友目的<br><small>Goal</small></span><span class="value">${v(p.goal)}</span></div>
       </div>
     </div>
   `;
@@ -210,28 +228,28 @@ function generateTickerMessages(profiles) {
   const msgs = [];
 
   profiles.forEach((p) => {
-    const name = p.name || p.username || "未知用户";
+    const name = p.name || p.username || "Unknown User";
     const score = Math.max(0, (p.score ?? 60) - (p.skips?.length || 0));
 
     if (p.mixed && p.breed2) {
-      msgs.push({ text: `⚠ 混血用户「${name}」已进入系统 · ${p.breed} × ${p.breed2}（混血）`, type: "alert" });
+      msgs.push({ text: `⚠ 混血用户 Mixed-heritage user「${name}」已进入 entered · ${p.breed} × ${p.breed2}（混血 Mixed）`, type: "alert" });
     }
     if (score < 50) {
-      msgs.push({ text: `📊 用户「${name}」综合评分 ${score} / 100`, type: "low" });
+      msgs.push({ text: `📊 用户「${name}」综合评分 Score: ${score} / 100`, type: "low" });
     }
     if (isNonMammal(p.breed)) {
-      msgs.push({ text: `🦎 「${name}」物种为 ${p.breed}（非哺乳类）`, type: "species" });
+      msgs.push({ text: `🦎 「${name}」物种 Species: ${p.breed}（非哺乳类 non-mammal）`, type: "species" });
     }
     if (isNonStraight(p.orientation)) {
-      msgs.push({ text: `🏳 「${name}」性取向：${p.orientation}`, type: "orientation" });
+      msgs.push({ text: `🏳 「${name}」性取向 Orientation: ${p.orientation}`, type: "orientation" });
     }
     if (p.likes && p.likes.length >= 5) {
-      msgs.push({ text: `💗 「${name}」已获得 ${p.likes.length} 个喜欢`, type: "like" });
+      msgs.push({ text: `💗 「${name}」已获得 received ${p.likes.length} 个 likes`, type: "like" });
     }
   });
 
   if (msgs.length === 0) {
-    msgs.push({ text: "暂无值得关注的异常数据", type: "neutral" });
+    msgs.push({ text: "暂无数据 No notable data yet", type: "neutral" });
   }
 
   return msgs;
@@ -271,8 +289,8 @@ function pushTickerMessage(text, type = "alert") {
 
 socket.on("like-event", (data) => {
   const reasonPart =
-    data.label && data.reason ? ` 因为【${data.label}】它觉得${data.reason}` : "";
-  spawnDanmaku(`💗 ${data.by} 对 ${data.name} 上头${reasonPart}`, "like");
+    data.label && data.reason ? ` 因为[${data.label}]它觉得 thinks: ${data.reason}` : "";
+  spawnDanmaku(`💗 ${data.by} 对 ${data.name} 上头 fell for them${reasonPart}`, "like");
 
   const profile = ranking.find((p) => p.name === data.name);
   if (profile && data.likesCount !== undefined) {
@@ -289,14 +307,14 @@ socket.on("like-event", (data) => {
   }
 
   if (data.likesCount && data.likesCount % 5 === 0) {
-    pushTickerMessage(`💗 「${data.name}」累计获得 ${data.likesCount} 个喜欢`, "like");
+    pushTickerMessage(`💗 「${data.name}」累计 total ${data.likesCount} 个喜欢 likes`, "like");
   }
 });
 
 socket.on("skip-event", (data) => {
   const reasonPart =
-    data.label && data.reason ? ` 因为【${data.label}】它觉得${data.reason}` : "";
-  spawnDanmaku(`❌ ${data.by} 跳过了 ${data.name}${reasonPart}`, "skip");
+    data.label && data.reason ? ` 因为[${data.label}]它觉得 thinks: ${data.reason}` : "";
+  spawnDanmaku(`❌ ${data.by} 跳过 skipped ${data.name}${reasonPart}`, "skip");
 });
 
 // ── 工具函数 ──────────────────────────────────────────
