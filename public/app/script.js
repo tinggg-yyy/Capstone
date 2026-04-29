@@ -4202,6 +4202,7 @@ function submitLikeOpener() {
   closeLikeOpenerPopup();
 
   if (currentUser) {
+    _cacheOutbox(currentUser.username, currentUser.name, target.username, target.name, text);
     fetch("/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -4274,6 +4275,18 @@ function checkNotifications() {
 
 let msgPollingInterval = null;
 let seenMessageIds = new Set(); // 已经弹过窗的消息 id
+
+// ── Outbox cache (sessionStorage) — persists sent messages when server lacks /conversation ──
+const _OUTBOX_KEY = "anthro_outbox_v1";
+function _getOutbox() {
+  try { return JSON.parse(sessionStorage.getItem(_OUTBOX_KEY) || "[]"); }
+  catch { return []; }
+}
+function _cacheOutbox(from, fromName, to, toName, content) {
+  const cache = _getOutbox();
+  cache.push({ id: "local_" + Date.now() + "_" + (Math.random() * 1e6 | 0), from, fromName, to, toName, content, date: new Date().toISOString(), read: true });
+  try { sessionStorage.setItem(_OUTBOX_KEY, JSON.stringify(cache)); } catch {}
+}
 
 function startMessagePolling() {
   if (!currentUser) return;
@@ -4439,8 +4452,14 @@ function loadMessages() {
   Promise.all([receivedP, allP]).then(([received, all]) => {
     updateBadge(received);
 
-    // 若 /allMessages 不可用，降级只显示收到的消息
-    const msgs = all !== null ? all : received;
+    // 若 /allMessages 不可用，降级只显示收到的消息，并合并 outbox 缓存
+    const outbox = _getOutbox();
+    const msgs = all !== null
+      ? all
+      : [...received, ...outbox].filter(
+          (m, i, arr) =>
+            arr.findIndex((x) => x.content === m.content && x.from === m.from && x.to === m.to) === i,
+        );
 
     if (!msgs || msgs.length === 0) {
       showEmpty();
@@ -4607,36 +4626,54 @@ function _renderConvoBubbles(msgs) {
   fetchUnreadCount();
 }
 
+function _mergeWithOutbox(serverMsgs, other) {
+  const outbox = _getOutbox().filter(
+    (m) => m.from === currentUser.username && m.to === other,
+  );
+  // 去重：outbox 里已被服务端确认的消息（内容+to相同且时间接近）跳过
+  const serverContents = new Set(serverMsgs.map((m) => m.content + "|" + m.from));
+  const newLocal = outbox.filter((m) => !serverContents.has(m.content + "|" + m.from));
+  return [...serverMsgs, ...newLocal].sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
 function loadConvo() {
   if (!currentUser || !convoTarget) return;
   const u1 = encodeURIComponent(currentUser.username);
   const u2 = encodeURIComponent(convoTarget.username);
   const other = convoTarget.username;
 
+  // 级别1: /conversation
   fetch(`/conversation/${u1}/${u2}`)
     .then((res) => (res.ok ? res.json() : null))
     .then((msgs) => {
-      // 若 /conversation 路由不存在或失败，降级到从 /allMessages 过滤
       if (msgs !== null) {
-        _renderConvoBubbles(msgs);
+        _renderConvoBubbles(_mergeWithOutbox(msgs, other));
         return;
       }
+      // 级别2: /allMessages 过滤
       return fetch(`/allMessages/${encodeURIComponent(currentUser.username)}`)
-        .then((r) => (r.ok ? r.json() : []))
+        .then((r) => (r.ok ? r.json() : null))
         .then((all) => {
-          const filtered = all
-            .filter(
+          if (all !== null) {
+            const filtered = all.filter(
               (m) =>
                 (m.from === currentUser.username && m.to === other) ||
                 (m.from === other && m.to === currentUser.username),
-            )
-            .sort((a, b) => new Date(a.date) - new Date(b.date));
-          _renderConvoBubbles(filtered);
+            ).sort((a, b) => new Date(a.date) - new Date(b.date));
+            _renderConvoBubbles(_mergeWithOutbox(filtered, other));
+            return;
+          }
+          // 级别3: /messages (只收件) + outbox 缓存
+          return fetch(`/messages/${encodeURIComponent(currentUser.username)}`)
+            .then((r) => (r.ok ? r.json() : []))
+            .then((received) => {
+              const fromOther = received.filter((m) => m.from === other);
+              _renderConvoBubbles(_mergeWithOutbox(fromOther, other));
+            });
         });
     })
     .catch(() => {
-      document.getElementById("convo-bubbles").innerHTML =
-        '<p class="convo-empty">暂无消息 / No messages yet</p>';
+      _renderConvoBubbles(_mergeWithOutbox([], other));
     });
 }
 
@@ -4649,6 +4686,7 @@ function sendConvoMessage() {
   // 立即追加气泡，不等服务器
   input.value = "";
   appendBubble(content, true);
+  _cacheOutbox(currentUser.username, currentUser.name, convoTarget.username, convoTarget.name, content);
 
   fetch("/messages", {
     method: "POST",
@@ -6463,6 +6501,7 @@ function submitSwipeSendMsg() {
   const text = document.getElementById("swipe-sendmsg-input").value.trim();
   if (!text || !currentUser || currentIndex >= profiles.length) return;
   const target = profiles[currentIndex];
+  _cacheOutbox(currentUser.username, currentUser.name, target.username, target.name, text);
   fetch("/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
