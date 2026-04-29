@@ -248,7 +248,12 @@ app.put("/profiles/:username", function (req, res) {
     if (!locked.includes(key)) profile[key] = updates[key];
   });
 
-  fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
+  try {
+    fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
+  } catch (e) {
+    console.error("Failed to write profiles.json:", e);
+    return res.status(500).json({ error: "Failed to save" });
+  }
   res.json(profile);
 });
 

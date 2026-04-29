@@ -4572,8 +4572,13 @@ function closeConvoView() {
 
 function loadConvo() {
   if (!currentUser || !convoTarget) return;
-  fetch(`/conversation/${currentUser.username}/${convoTarget.username}`)
-    .then((res) => res.json())
+  const u1 = encodeURIComponent(currentUser.username);
+  const u2 = encodeURIComponent(convoTarget.username);
+  fetch(`/conversation/${u1}/${u2}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("not found");
+      return res.json();
+    })
     .then((msgs) => {
       const bubbles = document.getElementById("convo-bubbles");
 
@@ -4613,6 +4618,10 @@ function loadConvo() {
       // 滚到底部
       bubbles.scrollTop = bubbles.scrollHeight;
       fetchUnreadCount();
+    })
+    .catch(() => {
+      document.getElementById("convo-bubbles").innerHTML =
+        '<p class="convo-empty">暂无消息 / No messages yet</p>';
     });
 }
 
@@ -6464,15 +6473,27 @@ function saveMyProfile() {
     income: document.getElementById("edit-income").value,
   };
 
-  fetch(`/profiles/${currentUser.username}`, {
+  const saveBtn = document.querySelector("#profile-edit .nes-btn.is-success");
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "保存中…"; }
+
+  fetch(`/profiles/${encodeURIComponent(currentUser.username)}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updates),
   })
-    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) throw new Error("save failed");
+      return res.json();
+    })
     .then((data) => {
       currentUser = data;
       closeMyProfile();
+    })
+    .catch(() => {
+      alert("保存失败，请重试 / Save failed, please try again");
+    })
+    .finally(() => {
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "保存 Save"; }
     });
 }
 
