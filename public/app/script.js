@@ -4209,6 +4209,7 @@ function submitLikeOpener() {
         from: currentUser.username,
         fromName: currentUser.name,
         to: target.username,
+        toName: target.name,
         content: text,
       }),
     });
@@ -4420,24 +4421,35 @@ function closeMessages() {
 function loadMessages() {
   if (!currentUser) return;
 
+  const list = document.getElementById("messages-list");
+  const showEmpty = () => {
+    list.innerHTML =
+      '<p style="text-align:center; opacity:0.6;">暂无消息 / No messages yet</p>';
+  };
+
   // 同时取收到的（用于角标）和所有收发（用于预览）
-  Promise.all([
-    fetch(`/messages/${currentUser.username}`).then((r) => r.json()),
-    fetch(`/allMessages/${currentUser.username}`).then((r) => r.json()),
-  ]).then(([received, all]) => {
-    // 角标只计收到的未读
+  // 若 /allMessages 不存在则降级到只用 /messages
+  const receivedP = fetch(`/messages/${currentUser.username}`)
+    .then((r) => r.json())
+    .catch(() => []);
+  const allP = fetch(`/allMessages/${currentUser.username}`)
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null);
+
+  Promise.all([receivedP, allP]).then(([received, all]) => {
     updateBadge(received);
 
-    const list = document.getElementById("messages-list");
-    if (all.length === 0) {
-      list.innerHTML =
-        '<p style="text-align:center; opacity:0.6;">暂无消息 / No messages yet</p>';
+    // 若 /allMessages 不可用，降级只显示收到的消息
+    const msgs = all !== null ? all : received;
+
+    if (!msgs || msgs.length === 0) {
+      showEmpty();
       return;
     }
 
     // 按"对方"分组，最新一条无论谁发都算
     const grouped = {};
-    all.forEach((m) => {
+    msgs.forEach((m) => {
       const otherUser = m.from === currentUser.username ? m.to : m.from;
       const otherName =
         m.from === currentUser.username
@@ -4621,6 +4633,7 @@ function sendConvoMessage() {
       from: currentUser.username,
       fromName: currentUser.name,
       to: convoTarget.username,
+      toName: convoTarget.name,
       content,
     }),
   });
@@ -6595,6 +6608,7 @@ function submitSwipeSendMsg() {
       from: currentUser.username,
       fromName: currentUser.name,
       to: target.username,
+      toName: target.name,
       content: text,
     }),
   }).then(() => closeSendMsgPopup());

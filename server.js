@@ -294,7 +294,7 @@ app.post("/interpretation/agree", function (req, res) {
 
 // POST /messages — 发送消息
 app.post("/messages", function (req, res) {
-  const { from, fromName, to, content } = req.body;
+  const { from, fromName, to, toName, content } = req.body;
   if (!from || !to || !content)
     return res.status(400).json({ error: "Missing fields" });
 
@@ -303,6 +303,7 @@ app.post("/messages", function (req, res) {
     from,
     fromName,
     to,
+    toName,
     content,
     date: new Date().toISOString(),
     read: false,
