@@ -4570,54 +4570,69 @@ function closeConvoView() {
   p.then(() => loadMessages());
 }
 
+function _renderConvoBubbles(msgs) {
+  const bubbles = document.getElementById("convo-bubbles");
+  const other = convoTarget.username;
+
+  const unread = msgs.filter((m) => m.to === currentUser.username && !m.read);
+  pendingReadPromise = Promise.all(
+    unread.map((m) => fetch(`/messages/${m.id}/read`, { method: "PUT" })),
+  );
+
+  if (msgs.length === 0) {
+    bubbles.innerHTML = '<p class="convo-empty">暂无消息 / No messages yet</p>';
+    return;
+  }
+
+  bubbles.innerHTML = msgs
+    .map((m) => {
+      const isMine = m.from === currentUser.username;
+      const time = new Date(m.date).toLocaleString("zh-CN", {
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return `
+        <div class="bubble-row ${isMine ? "bubble-mine" : "bubble-theirs"}">
+          <div class="bubble">
+            <div class="bubble-text">${escapeHtml(m.content)}</div>
+            <div class="bubble-time">${time}</div>
+          </div>
+        </div>`;
+    })
+    .join("");
+
+  bubbles.scrollTop = bubbles.scrollHeight;
+  fetchUnreadCount();
+}
+
 function loadConvo() {
   if (!currentUser || !convoTarget) return;
   const u1 = encodeURIComponent(currentUser.username);
   const u2 = encodeURIComponent(convoTarget.username);
+  const other = convoTarget.username;
+
   fetch(`/conversation/${u1}/${u2}`)
-    .then((res) => {
-      if (!res.ok) throw new Error("not found");
-      return res.json();
-    })
+    .then((res) => (res.ok ? res.json() : null))
     .then((msgs) => {
-      const bubbles = document.getElementById("convo-bubbles");
-
-      // 标记已读，存储 Promise 供 close 时等待
-      const unread = msgs.filter(
-        (m) => m.to === currentUser.username && !m.read,
-      );
-      pendingReadPromise = Promise.all(
-        unread.map((m) => fetch(`/messages/${m.id}/read`, { method: "PUT" })),
-      );
-
-      if (msgs.length === 0) {
-        bubbles.innerHTML =
-          '<p class="convo-empty">暂无消息 / No messages yet</p>';
+      // 若 /conversation 路由不存在或失败，降级到从 /allMessages 过滤
+      if (msgs !== null) {
+        _renderConvoBubbles(msgs);
         return;
       }
-
-      bubbles.innerHTML = msgs
-        .map((m) => {
-          const isMine = m.from === currentUser.username;
-          const time = new Date(m.date).toLocaleString("zh-CN", {
-            month: "numeric",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-          return `
-            <div class="bubble-row ${isMine ? "bubble-mine" : "bubble-theirs"}">
-              <div class="bubble">
-                <div class="bubble-text">${escapeHtml(m.content)}</div>
-                <div class="bubble-time">${time}</div>
-              </div>
-            </div>`;
-        })
-        .join("");
-
-      // 滚到底部
-      bubbles.scrollTop = bubbles.scrollHeight;
-      fetchUnreadCount();
+      return fetch(`/allMessages/${encodeURIComponent(currentUser.username)}`)
+        .then((r) => (r.ok ? r.json() : []))
+        .then((all) => {
+          const filtered = all
+            .filter(
+              (m) =>
+                (m.from === currentUser.username && m.to === other) ||
+                (m.from === other && m.to === currentUser.username),
+            )
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+          _renderConvoBubbles(filtered);
+        });
     })
     .catch(() => {
       document.getElementById("convo-bubbles").innerHTML =
@@ -6267,7 +6282,7 @@ function _openMyProfileEdit(u) {
     `;
   }
 
-  // Avatar (impression-modified grid)
+  // Avatar
   const avatarEl = document.getElementById("my-self-avatar");
   if (u.grid) {
     const url = renderGridAsAvatar(u.grid, u.gridText);
@@ -6283,10 +6298,7 @@ function _openMyProfileEdit(u) {
     likesEl.innerHTML = '<span class="value" style="opacity:0.4">—</span>';
   } else {
     const h = getPixelHeartUrl();
-    likesEl.innerHTML = Array(likesN)
-      .fill(0)
-      .map(() => `<img src="${h}" class="pixel-heart">`)
-      .join("");
+    likesEl.innerHTML = Array(likesN).fill(0).map(() => `<img src="${h}" class="pixel-heart">`).join("");
   }
 
   // Dislikes
@@ -6296,120 +6308,26 @@ function _openMyProfileEdit(u) {
     dislikesEl.innerHTML = '<span class="value" style="opacity:0.4">—</span>';
   } else {
     const v = getPixelVomitUrl();
-    dislikesEl.innerHTML = Array(dislikesN)
-      .fill(0)
-      .map(() => `<img src="${v}" class="pixel-heart pixel-vomit">`)
-      .join("");
+    dislikesEl.innerHTML = Array(dislikesN).fill(0).map(() => `<img src="${v}" class="pixel-heart pixel-vomit">`).join("");
   }
 
-  // Edit fields
-  document.getElementById("edit-name").value = u.name || "";
-  document.getElementById("edit-age").value = u.age || "";
-  document.getElementById("edit-occupation").value = u.occupation || "";
-
-  // Housing fields
-  const h = u.house || {};
-  loadCityIntoSelect("edit-house", h.city || "");
-  loadDistrictIntoSelect("edit-house", h.district || "");
-  document.getElementById("edit-house-area").value = h.area || "";
-  document.getElementById("edit-house-floor").value = h.floor || "";
-  document.getElementById("edit-house-total-floors").value =
-    h.totalFloors || "";
-  document.getElementById("edit-house-price").value = h.price || "";
-  if (h.garden) document.getElementById("edit-house-garden").value = h.garden;
-  if (h.type) {
-    loadHouseTypeIntoSelect("edit-house", h.type);
-    if (h.villaFloors)
-      document.getElementById("edit-house-villa-floors").value = h.villaFloors;
-  }
-  if (h.ownership) {
-    const ownershipSel = document.getElementById("edit-house-ownership");
-    if (
-      !Array.from(ownershipSel.options).some((o) => o.value === h.ownership)
-    ) {
-      addOptionIfMissing(ownershipSel, h.ownership, h.ownership);
-    }
-    ownershipSel.value = h.ownership;
-    onEditHouseOwnershipChange();
-    if (h.mortgage)
-      document.getElementById("edit-house-mortgage").value = h.mortgage;
-  }
-  _editHobbyStr = u.hobby || "";
-  const summary = document.getElementById("edit-hobby-summary");
-  if (summary)
-    summary.textContent = _editHobbyStr || "— 点击修改 / Click to edit —";
-  document.getElementById("edit-hobby-expanded")?.classList.add("hidden");
-  document.getElementById("edit-hobby-tags").innerHTML = "";
-
-  const setSelect = (id, val) => {
+  // Read-only fields
+  const set = (id, val) => {
     const el = document.getElementById(id);
-    if (val) el.value = val;
+    if (el) el.textContent = val || "—";
   };
-
-  setSelect("edit-gender", u.gender);
-  // Orientation: check if it matches a known option, else use custom
-  if (u.orientation) {
-    const orientSel = document.getElementById("edit-orientation");
-    orientSel.value = u.orientation;
-    if (orientSel.value !== u.orientation) {
-      orientSel.value = "自定义/Custom";
-      document.getElementById("edit-orientation-custom").value = u.orientation;
-      document
-        .getElementById("edit-orientation-custom")
-        .classList.remove("hidden");
-    }
-  }
-  setSelect("edit-sterilized", u.sterilized);
-  // Edu: check if it matches a known option, else use custom
-  if (u.edu) {
-    const eduSel = document.getElementById("edit-edu");
-    eduSel.value = u.edu;
-    if (eduSel.value !== u.edu) {
-      eduSel.value = "自定义/Custom";
-      document.getElementById("edit-edu-custom").value = u.edu;
-      document.getElementById("edit-edu-custom").classList.remove("hidden");
-    }
-  }
-  setSelect("edit-income", u.income);
-
-  if (u.mbti) {
-    const chars = u.mbti.split("");
-    ["edit-mbti1","edit-mbti2","edit-mbti3","edit-mbti4"].forEach((id, i) => {
-      if (chars[i] !== undefined) selectMbtiChar(id, chars[i]);
-    });
-  }
-
-  // Breed: stored as "大类 · 物种" — restore 2/3/4-level selection
-  if (u.breed) {
-    const parts = u.breed.split(" · ");
-    const cls = parts[0];
-    const specific = parts[parts.length - 1];
-    document.getElementById("edit-breedClass").value = cls;
-    onEditBreedClassChange();
-    setTimeout(() => {
-      if (breedSubgroups[cls] && specific) {
-        const found = findSubgroupForSpecies(cls, specific);
-        if (found) {
-          document.getElementById("edit-breedSubgroup").value = found.sg;
-          onEditBreedSubgroupChange();
-          setTimeout(() => {
-            if (found.ssg) {
-              document.getElementById("edit-breedSubSubgroup").value =
-                found.ssg;
-              onEditBreedSubSubgroupChange();
-              setTimeout(() => {
-                document.getElementById("edit-breed").value = specific;
-              }, 0);
-            } else {
-              document.getElementById("edit-breed").value = specific;
-            }
-          }, 0);
-        }
-      } else if (specific) {
-        document.getElementById("edit-breed").value = specific;
-      }
-    }, 0);
-  }
+  set("view-name", u.name);
+  set("view-age", u.age);
+  set("view-breed", u.breed);
+  set("view-gender", u.gender);
+  set("view-orientation", u.orientation);
+  set("view-hukou", u.hukou);
+  set("view-sterilized", u.sterilized);
+  set("view-mbti", u.mbti);
+  set("view-edu", u.edu);
+  set("view-occupation", u.occupation);
+  set("view-income", u.income);
+  set("view-hobby", u.hobby);
 
   document.getElementById("profile-edit").classList.remove("hidden");
 }
@@ -6418,83 +6336,6 @@ function closeMyProfile() {
   document.getElementById("profile-edit").classList.add("hidden");
   if (document.getElementById("swipe-page")?.classList.contains("active"))
     startSwipeInterrupts();
-}
-
-function saveMyProfile() {
-  const mbti = ["edit-mbti1", "edit-mbti2", "edit-mbti3", "edit-mbti4"]
-    .map((id) => document.getElementById(id).value)
-    .join("");
-
-  const breedClass = document.getElementById("edit-breedClass").value;
-  const breedSpecific = document.getElementById("edit-breed").value;
-  const breed =
-    breedClass && breedSpecific
-      ? `${breedClass} · ${breedSpecific}`
-      : breedSpecific || breedClass;
-
-  const house = {
-    city: getHousingCityValue("edit-house"),
-    district: getHousingDistrictValue("edit-house"),
-    type: getHouseTypeValue("edit-house"),
-    villaFloors: document.getElementById("edit-house-villa-floors").value,
-    garden: document.getElementById("edit-house-garden").value,
-    area: document.getElementById("edit-house-area").value.trim(),
-    floor: document.getElementById("edit-house-floor").value.trim(),
-    totalFloors: document
-      .getElementById("edit-house-total-floors")
-      .value.trim(),
-    price: document.getElementById("edit-house-price").value.trim(),
-    ownership: document.getElementById("edit-house-ownership").value,
-    mortgage: document
-      .getElementById("edit-house-mortgage-wrapper")
-      .classList.contains("hidden")
-      ? ""
-      : document.getElementById("edit-house-mortgage").value,
-  };
-
-  const updates = {
-    name: document.getElementById("edit-name").value,
-    age: document.getElementById("edit-age").value,
-    breed,
-    gender: document.getElementById("edit-gender").value,
-    orientation: getCustomFieldValue(
-      "edit-orientation",
-      "edit-orientation-custom",
-    ),
-    hukou: getEditHousingDescription(),
-    house,
-    sterilized: document.getElementById("edit-sterilized").value,
-    mbti,
-    hobby: _editHobbyExpanded
-      ? getSelectedHobbyTags("edit-hobby-tags")
-      : _editHobbyStr,
-    edu: getCustomFieldValue("edit-edu", "edit-edu-custom"),
-    occupation: document.getElementById("edit-occupation").value,
-    income: document.getElementById("edit-income").value,
-  };
-
-  const saveBtn = document.querySelector("#profile-edit .nes-btn.is-success");
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "保存中…"; }
-
-  fetch(`/profiles/${encodeURIComponent(currentUser.username)}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(updates),
-  })
-    .then((res) => {
-      if (!res.ok) throw new Error("save failed");
-      return res.json();
-    })
-    .then((data) => {
-      currentUser = data;
-      closeMyProfile();
-    })
-    .catch(() => {
-      alert("保存失败，请重试 / Save failed, please try again");
-    })
-    .finally(() => {
-      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "保存 Save"; }
-    });
 }
 
 // Impression Function

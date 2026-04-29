@@ -1095,6 +1095,25 @@ li.other .words {
   margin: 0 auto;
 }
 
+.profile-view-row {
+  display: flex;
+  gap: 10px;
+  padding: 8px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  align-items: baseline;
+}
+.profile-view-label {
+  flex: 0 0 110px;
+  font-size: 12px;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+.profile-view-value {
+  flex: 1;
+  font-size: 14px;
+  word-break: break-word;
+}
+
 #my-self-stats {
   display: flex;
   flex-direction: column;
