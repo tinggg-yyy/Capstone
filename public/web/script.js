@@ -64,7 +64,9 @@ async function loadRanking() {
 
   showSpotlight(0);
   startCycle();
-  initTicker(data.filter((p) => p.name));
+  const namedProfiles = data.filter((p) => p.name);
+  initTicker(namedProfiles);
+  startFakeDanmaku(namedProfiles);
 }
 
 function showSpotlight(idx) {
@@ -193,6 +195,122 @@ function resetProgress() {
   bar.classList.remove("running");
   void bar.offsetWidth;
   bar.classList.add("running");
+}
+
+// ── 假弹幕生成系统 ────────────────────────────────────────
+
+const _ADJ = ["香", "屑", "迷", "可以", "抽象", "在线", "离谱", "真实", "猛", "怪", "稳", "炸", "秀", "可疑", "上头", "危险", "哲学", "清醒", "迷惑", "敢说", "挺好", "有趣", "一般", "不行", "震撼", "高级", "接地气", "有点东西", "说不清楚", "耐人寻味", "确实如此", "不明觉厉"];
+const _SKIP_REASONS = [
+  "年龄差太大", "领地距离有点远", "MBTI感觉不合", "收入那栏看了一眼就划走了",
+  "爱好完全不重合", "看了五秒感觉不是很合适", "物种匹配率太低", "第一印象太普通了",
+  "直觉告诉它不行", "好像见过面不太合拍", "感觉对方不太在线", "综合考量了一下算了",
+  "学历那栏让它犹豫了", "职业方向差太多", "想了想还是跳过", "头像看起来不太对味",
+  "婚育状态不符合预期", "感觉双方目标不一样", "无法解释 就是没感觉",
+];
+const _LIKE_REASONS = [
+  "物种加分项", "MBTI很对味", "爱好高度重合", "领地离得近", "学历让它心动了",
+  "职业很加分", "收入让它眼前一亮", "头像看起来很顺眼", "综合评分太高了没忍住",
+  "感觉气场相符", "看了三秒就决定了", "直觉说可以", "某个爱好标签戳到它了",
+  "无法解释 就是感觉对", "感觉对方很有品味", "档案写得很真实",
+];
+const _COMMENT_TEMPLATES = [
+  (a, b, tag, adj) => `💬「${a}」评论了「${b}」的[${tag}]标签：有点${adj}`,
+  (a, b, tag, adj) => `💬「${a}」看了「${b}」的[${tag}]，觉得有点${adj}`,
+  (a, b, tag, adj) => `💬「${a}」对「${b}」的[${tag}]留下印象：${adj}`,
+  (a, b, tag, adj) => `🗨「${a}」评价「${b}」的[${tag}]：确实有点${adj}`,
+  (a, b, tag, adj) => `💬「${a}」看到「${b}」写了[${tag}]，评价说：${adj}`,
+];
+const _LIKE_TEMPLATES = [
+  (a, b, reason) => `💗「${a}」喜欢了「${b}」· ${reason}`,
+  (a, b, reason) => `💗「${a}」对「${b}」上头 · 原因：${reason}`,
+  (a, b, reason) => `💗「${a}」给「${b}」点了喜欢 · ${reason}`,
+  (a, b, reason) => `💗「${a}」→「${b}」✓ · ${reason}`,
+  (a, b, reason) => `「${a}」💗「${b}」· ${reason}`,
+];
+const _SKIP_TEMPLATES = [
+  (a, b, reason) => `❌「${a}」跳过了「${b}」· ${reason}`,
+  (a, b, reason) => `❌「${a}」划走了「${b}」· ${reason}`,
+  (a, b, reason) => `❌「${a}」→「${b}」✗ · ${reason}`,
+  (a, b, reason) => `「${a}」❌「${b}」· ${reason}`,
+  (a, b, reason) => `❌「${a}」没有选择「${b}」· ${reason}`,
+];
+
+function _rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function _extractTags(p) {
+  const tags = [];
+  if (p.hobby) {
+    p.hobby.split(/[,，、\s]+/).filter(Boolean).forEach((t) => tags.push(t.trim()));
+  }
+  if (p.mbti) tags.push(`MBTI ${p.mbti}`);
+  if (p.breed) tags.push(p.breed.split(" · ").pop().split(" / ")[0].trim());
+  if (p.occupation) tags.push(p.occupation);
+  if (p.edu) tags.push(p.edu.split("/")[0].trim());
+  return tags.filter((t) => t.length > 0 && t.length < 12);
+}
+
+function buildFakeDanmakuPool(profiles) {
+  if (profiles.length < 2) return [];
+  const pool = [];
+  const names = profiles.map((p) => p.name || p.username);
+
+  for (let i = 0; i < profiles.length; i++) {
+    const a = profiles[i];
+    const aName = a.name || a.username;
+
+    // 每个人随机对几个他人生成 like / skip / comment
+    const others = profiles.filter((_, j) => j !== i);
+    const picks = others.sort(() => Math.random() - 0.5).slice(0, Math.min(4, others.length));
+
+    picks.forEach((b) => {
+      const bName = b.name || b.username;
+
+      // like
+      pool.push({
+        text: _rnd(_LIKE_TEMPLATES)(aName, bName, _rnd(_LIKE_REASONS)),
+        type: "like",
+      });
+
+      // skip
+      pool.push({
+        text: _rnd(_SKIP_TEMPLATES)(aName, bName, _rnd(_SKIP_REASONS)),
+        type: "skip",
+      });
+
+      // comment on a tag
+      const tags = _extractTags(b);
+      if (tags.length > 0) {
+        const tag = _rnd(tags);
+        const adj = _rnd(_ADJ);
+        const tpl = _rnd(_COMMENT_TEMPLATES);
+        pool.push({ text: tpl(aName, bName, tag, adj), type: "comment" });
+      }
+    });
+  }
+
+  // Shuffle
+  return pool.sort(() => Math.random() - 0.5);
+}
+
+let _fakeDanmakuPool = [];
+let _fakeDanmakuIdx = 0;
+let _fakeDanmakuTimer = null;
+
+function startFakeDanmaku(profiles) {
+  _fakeDanmakuPool = buildFakeDanmakuPool(profiles);
+  if (_fakeDanmakuPool.length === 0) return;
+
+  function fire() {
+    if (_fakeDanmakuPool.length === 0) return;
+    const item = _fakeDanmakuPool[_fakeDanmakuIdx % _fakeDanmakuPool.length];
+    _fakeDanmakuIdx++;
+    spawnDanmaku(item.text, item.type);
+    // 每条随机间隔 1.8~4.5s
+    _fakeDanmakuTimer = setTimeout(fire, 1800 + Math.random() * 2700);
+  }
+
+  // 延迟 1s 开始，避免页面加载时爆发
+  _fakeDanmakuTimer = setTimeout(fire, 1000);
 }
 
 // ── 弹幕 ──────────────────────────────────────────────

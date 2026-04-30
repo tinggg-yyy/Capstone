@@ -486,6 +486,13 @@ body::after {
   background: rgba(0,0,0,0.7);
 }
 
+.danmaku-comment {
+  color: #ffe066;
+  text-shadow: 0 0 20px rgba(255,224,102,0.9);
+  border: 3px solid rgba(255,224,102,0.4);
+  background: rgba(0,0,0,0.7);
+}
+
 @keyframes fly-left {
   from { transform: translateX(0); }
   to   { transform: translateX(calc(-2160px - 100%)); }
