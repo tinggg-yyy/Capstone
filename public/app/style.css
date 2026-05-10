@@ -22,9 +22,12 @@
   --grid-bg:
     repeating-linear-gradient(0deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 4px, transparent 4px, transparent 5px),
     repeating-linear-gradient(90deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 4px, transparent 4px, transparent 5px);
-  --grid-bg-page:
-    repeating-linear-gradient(0deg, transparent 0px, transparent 4px, rgba(0,0,0,0.09) 4px, rgba(0,0,0,0.09) 5px),
-    repeating-linear-gradient(90deg, transparent 0px, transparent 4px, rgba(0,0,0,0.09) 4px, rgba(0,0,0,0.09) 5px);
+  --grid-btn:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0px, rgba(0,0,0,0.10) 4px, transparent 4px, transparent 5px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.10) 0px, rgba(0,0,0,0.10) 4px, transparent 4px, transparent 5px);
+  --grid-dark:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 4px, transparent 4px, transparent 5px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 4px, transparent 4px, transparent 5px);
 }
 
 /* Global Styles */
@@ -319,7 +322,7 @@ canvas {
   color: var(--c-text);
   margin: 0;
   text-align: center;
-  text-shadow: 2px 1px 0 rgba(42,56,32,0.12);
+  text-shadow: 1px 1px 0 rgba(42,56,32,0.20);
   letter-spacing: 0.1em;
 }
 .ob-title-en {
@@ -338,7 +341,7 @@ canvas {
   margin: 0;
   text-align: center;
   line-height: 1.9;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.20);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.22);
 }
 .ob-sub-en {
   font-family: "Zpix", monospace;
@@ -364,7 +367,7 @@ canvas {
   -webkit-tap-highlight-color: transparent;
   position: relative;
   transition: opacity 0.2s;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 .ob-demo-word.ob-glitch { animation: wordGlitch 0.45s ease-out forwards; }
 .ob-demo-word.ob-done {
@@ -384,7 +387,7 @@ canvas {
   color: var(--c-text);
   pointer-events: none;
   animation: tutFloatIn 0.4s ease-out forwards;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 .ob-float-text.hidden { display: none; }
 
@@ -401,7 +404,7 @@ canvas {
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition: font-size 0.15s;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 .ob-agree-word.ob-glitch { animation: wordGlitch 0.45s ease-out forwards; }
 
@@ -476,6 +479,7 @@ canvas {
   font-family: "Zpix", monospace;
   transition: opacity 0.3s, box-shadow 0.3s;
   -webkit-tap-highlight-color: transparent;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 .ob-close-btn.locked {
   opacity: 0.2;
@@ -493,7 +497,7 @@ canvas {
   font-family: "Zpix", monospace;
   font-size: 48px;
   color: var(--c-text);
-  text-shadow: 2px 1px 0 rgba(42,56,32,0.12);
+  text-shadow: 1px 1px 0 rgba(42,56,32,0.20);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -523,7 +527,7 @@ canvas {
   font-family: "Zpix", monospace;
   font-size: 22px;
   color: #cc1e1e;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -566,7 +570,7 @@ canvas {
   font-family: "Zpix", monospace;
   font-size: 28px;
   color: var(--c-text);
-  text-shadow: 2px 1px 0 rgba(42,56,32,0.12);
+  text-shadow: 1px 1px 0 rgba(42,56,32,0.20);
   letter-spacing: 0.05em;
 }
 
@@ -619,7 +623,7 @@ canvas {
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.12s, color 0.12s;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 .hobby-tag.selected {
   background: var(--c-btn-shadow);
@@ -638,7 +642,7 @@ canvas {
   display: flex;
   align-items: center;
   gap: 6px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.20);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.22);
 }
 .hobby-cat-label:first-child {
   padding-top: 0;
@@ -794,7 +798,7 @@ canvas {
   cursor: pointer;
   text-align: left;
   width: 100%;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 .hobby-cat-option:active { background: var(--c-btn-shadow); color: var(--c-btn-text); }
 .edit-hobby-collapsed {
@@ -976,9 +980,7 @@ canvas {
     0 0 0 1px rgba(55,63,48,0.6),
     inset -2px -2px 0 rgba(55,63,48,0.25),
     inset 1px 1px 0 rgba(255,255,255,0.15) !important;
-  background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px),
-    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px) !important;
+  background-image: var(--grid-btn) !important;
   letter-spacing: 1px;
   text-shadow: 3px 3px 0 rgba(0,0,0,0.20);
 }
@@ -1014,7 +1016,7 @@ canvas {
 .nes-select select {
   background-color: var(--t-bg);
   color: var(--t-text);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
   border-image: none !important;
   border: 2px solid rgba(55, 63, 48, 0.45) !important;
   border-radius: 2px !important;
@@ -1041,7 +1043,7 @@ h1,
 h2,
 label,
 p {
-  text-shadow: 2px 2px 0 rgba(46, 54, 40, 0.18);
+  text-shadow: 1px 1px 0 rgba(46,54,40,0.22);
   letter-spacing: 1px;
 }
 
@@ -1206,6 +1208,7 @@ li.other .words {
   padding: 8px 12px;
   z-index: 1000;
   background: var(--bg);
+  background-image: var(--grid-bg);
 }
 
 #swipe-page .phone {
@@ -1245,7 +1248,7 @@ li.other .words {
   pointer-events: none;
   z-index: 2;
   opacity: 0.92;
-  filter: drop-shadow(2px 3px 0 rgba(40,48,35,0.30));
+  filter: drop-shadow(1px 1px 0 rgba(40,48,35,0.28));
 }
 .profile-score-stamp::after {
   content: "";
@@ -1299,23 +1302,20 @@ li.other .words {
 .profile-score-stamp.stamp-red .stamp-lines span { background: rgba(200, 30, 30, 0.92); }
 
 .avatar-box {
-  background: var(--c-bg);
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: none;
-  box-shadow: none;
+  border: 2px solid rgba(55, 63, 48, 0.45);
+  box-shadow: 0 0 0 1px rgba(55,63,48,0.5);
   margin: 3px 0;
+  overflow: hidden;
+  line-height: 0;
 }
 
 .avatar {
-  width: 300px;
-  height: 300px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
   image-rendering: pixelated;
   display: block;
-  box-shadow: 3px 4px 0 rgba(40, 48, 35, 0.35);
 }
 
 .section,
@@ -1332,10 +1332,12 @@ li.other .words {
   width: 100%;
   max-width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   margin: 3px 0;
-  padding: 26px 10px 8px;
+  padding: 8px 10px 8px;
+  gap: 3px;
   box-sizing: border-box;
   overflow: hidden;
   cursor: grab;
@@ -1351,13 +1353,16 @@ li.other .words {
 
 
 .label {
-  position: absolute;
-  top: 4px;
-  left: 6px;
   font-size: clamp(10px, 4cqi, 14px);
   opacity: 0.7;
-  padding: 4px 8px 4px 6px;
+  padding: 0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  width: 100%;
+  align-self: flex-start;
+  flex-shrink: 0;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -1370,10 +1375,31 @@ li.other .words {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
-  word-break: break-word;
+  word-break: normal;
   overflow-wrap: break-word;
   max-width: 100%;
+  width: 100%;
   line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bi-zh {
+  display: block;
+  width: 100%;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.bi-en {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 0.78em;
+  opacity: 0.72;
+  line-height: 1.2;
+  margin-top: 1px;
 }
 
 .value.big {
@@ -1580,7 +1606,7 @@ li.other .words {
   color: var(--c-text);
   font-size: 12px;
   margin: 0;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 .reason-hint {
   opacity: 0.6;
@@ -1600,7 +1626,7 @@ li.other .words {
   font-family: "Zpix", monospace;
   cursor: pointer;
   line-height: 1.4;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.20);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.22);
 }
 .reason-label-btn.selected {
   background: var(--c-btn-shadow);
@@ -1655,7 +1681,7 @@ li.other .words {
   color: var(--c-text);
   margin: 0;
   font-size: 12px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 
 .interpret-btn-row {
@@ -1675,6 +1701,8 @@ li.other .words {
 /* 给 swipe 页的滚动区域留出 topbar 的高度 */
 #swipe-page.active .scroll {
   padding-top: 52px;
+  background: #828980;
+  background-image: var(--grid-dark);
 }
 
 /* ── Notification badge ── */
@@ -1743,6 +1771,7 @@ li.other .words {
   cursor: pointer;
   line-height: 1;
   padding: 2px 6px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 
 .panel-close-btn:active {
@@ -1893,7 +1922,7 @@ li.other .words {
   animation: interrupt-in 0.18s ease-out;
   pointer-events: all;
   image-rendering: pixelated;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 
 .swipe-interrupt .interrupt-close {
@@ -1908,6 +1937,7 @@ li.other .words {
   padding: 0;
   font-family: inherit;
   line-height: 1;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 
 .swipe-interrupt .interrupt-close:hover {
@@ -1943,7 +1973,7 @@ li.other .words {
   transition: opacity 0.3s, transform 0.3s;
   pointer-events: none;
   white-space: nowrap;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 
 #toast-notif.toast-show {
@@ -2012,20 +2042,20 @@ li.other .words {
 }
 
 .bubble-mine .bubble {
-  background: rgba(46, 54, 40, 0.18);
-  border: 1px solid rgba(55, 63, 48, 0.40);
+  background: rgba(46, 54, 40, 0.52);
+  border: 1px solid rgba(55, 63, 48, 0.70);
   border-radius: 3px 1px 3px 3px;
 }
 
 .bubble-theirs .bubble {
-  background: rgba(188, 211, 180, 0.5);
-  border: 1px solid #373f30;
+  background: rgba(220, 232, 210, 0.88);
+  border: 1px solid rgba(55, 63, 48, 0.55);
   border-radius: 1px 3px 3px 3px;
 }
 
 .bubble-text {
   color: var(--c-text);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 
 .bubble-mine .bubble-text {
@@ -2037,7 +2067,7 @@ li.other .words {
   color: #373f30;
   margin-top: 3px;
   text-align: right;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.20);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.22);
 }
 
 .convo-input-row {
@@ -2101,7 +2131,7 @@ li.other .words {
   color: var(--c-text);
   font-size: 12px;
   font-weight: bold;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 
 .msg-popup-close {
@@ -2112,6 +2142,7 @@ li.other .words {
   cursor: pointer;
   padding: 0 4px;
   font-family: inherit;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 
 .msg-popup-box.msg-alert {
@@ -2130,7 +2161,7 @@ li.other .words {
   word-break: break-word;
   border-left: 2px solid var(--c-btn-shadow);
   padding-left: 8px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 
 .msg-popup-open-btn {
@@ -2185,6 +2216,7 @@ li.other .words {
   color: var(--c-text);
   font-size: 16px;
   cursor: pointer;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
 }
 .profile-view-content {
   overflow-y: auto;
@@ -2268,6 +2300,7 @@ li.other .words {
   width: 21px;
   height: 18px;
   image-rendering: pixelated;
+  filter: drop-shadow(1px 1px 0 rgba(40,48,35,0.30));
 }
 
 .pixel-vomit {
@@ -2329,7 +2362,7 @@ li.other .words {
 }
 
 .dice-roll-btn img {
-  filter: drop-shadow(2px 3px 0 rgba(40, 48, 35, 0.35));
+  filter: drop-shadow(1px 1px 0 rgba(40,48,35,0.28));
 }
 
 .dice-roll-btn:active {
@@ -2351,7 +2384,7 @@ li.other .words {
   box-shadow: 0 0 0 1px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(0,0,0,0.10), inset -1px -1px 0 rgba(255,255,255,0.12);
   font-size: 12px;
   font-family: inherit;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
   display: flex;
   align-items: center;
   min-width: 0;
@@ -2396,7 +2429,7 @@ li.other .words {
   text-align: center;
   line-height: 1;
   transition: background 0.08s;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
   box-shadow: 1px 1px 0 rgba(40,48,35,0.20);
 }
 
@@ -2425,9 +2458,7 @@ li.other .words {
   border: 3px solid rgba(55, 63, 48, 0.45);
   box-shadow: inset -2px -2px 0 var(--c-btn-shadow), inset 1px 1px 0 rgba(255,255,255,0.12);
   background: var(--c-bg);
-  background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.10) 3px, rgba(0,0,0,0.10) 4px),
-    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.10) 3px, rgba(0,0,0,0.10) 4px);
+  background-image: var(--grid-btn);
   color: var(--c-text);
   cursor: pointer;
   letter-spacing: 0;
@@ -2483,7 +2514,7 @@ li.other .words {
   box-shadow: 0 0 0 1px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(0,0,0,0.10), inset -1px -1px 0 rgba(255,255,255,0.12);
   font-size: 16px;
   font-family: monospace;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2505,7 +2536,7 @@ li.other .words {
   padding: 4px 8px;
   border: 2px solid rgba(55, 63, 48, 0.45);
   box-shadow: 0 0 0 1px rgba(55,63,48,0.5), 2px 3px 0 rgba(40,48,35,0.25);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
   display: none;
   pointer-events: none;
   image-rendering: pixelated;
@@ -2522,7 +2553,7 @@ li.other .words {
   color: var(--c-text);
   pointer-events: none;
   text-align: center;
-  text-shadow: 2px 1px 0 rgba(42,56,32,0.2);
+  text-shadow: 1px 1px 0 rgba(42,56,32,0.22);
   animation: score-delta-anim 1.8s ease-out forwards;
 }
 
@@ -2565,7 +2596,7 @@ li.other .words {
 #score-settlement .settle-number {
   font-size: 80px;
   line-height: 1;
-  text-shadow: 2px 1px 0 rgba(42,56,32,0.2);
+  text-shadow: 1px 1px 0 rgba(42,56,32,0.22);
 }
 
 #score-settlement .settle-suffix {
@@ -2731,11 +2762,24 @@ li.other .words {
 }
 
 /* ── 全局格子纹理 — 所有实心背景容器 ── */
+
+/* 最深格子：instruction / tutorial 页面背景 */
 .tutorial-page,
 .tut-popup-inner,
 #onboard-overlay,
-.ob-input-wrap,
 .ob-step,
+#swipe-topbar {
+  background-image: var(--grid-dark);
+}
+
+/* 按钮格子：稍浅的深色格子 */
+.swipebutton,
+.ob-close-btn {
+  background-image: var(--grid-btn);
+}
+
+/* 普通格子：模态框 / 面板 / 弹窗 */
+.ob-input-wrap,
 #profile-edit,
 .edit-overlay-inner,
 .opener-modal,
@@ -2752,9 +2796,6 @@ li.other .words {
 #score-settlement,
 .date-picker,
 .wheel,
-#swipe-topbar,
-.swipebutton,
-.mbti-char-picker,
-.ob-close-btn {
+.mbti-char-picker {
   background-image: var(--grid-bg);
 }

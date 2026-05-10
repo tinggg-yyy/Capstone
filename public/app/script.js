@@ -47,6 +47,7 @@ const _setupPageOrder = [
   "profile-mbti",
   "profile-edu",
   "profile-hobbies",
+  "profile-standards",
   "profile-photo",
 ];
 let _currentScore = 100;
@@ -435,7 +436,8 @@ function rollGenericTierDice(btnId, displayId, inputId, tierMap, onRoll) {
       btn.disabled = remaining <= 0;
       if (remaining <= 0) btn.classList.add("dice-exhausted");
       else btn.title = `还可摇 ${remaining} 次 / ${remaining} rolls left`;
-      const value = tierMap[roll];
+      const raw = tierMap[roll];
+      const value = Array.isArray(raw) ? raw[Math.floor(Math.random() * raw.length)] : raw;
       if (inputId) document.getElementById(inputId).value = value;
       display.textContent = disp(value);
       if (onRoll) onRoll(value);
@@ -1679,19 +1681,19 @@ const HOUSING_TIERS = {
     6: "一直有/Always",
   },
   hasKids: {
-    1: "无/No Kids",
-    2: "无/No Kids",
-    3: "无/No Kids",
-    4: "1个/1 Kid",
-    5: "2个/2 Kids",
-    6: "3+个/3+ Kids",
+    1: "无/None",
+    2: "无/None",
+    3: "无/None",
+    4: "1/1",
+    5: "2/2",
+    6: "3+/3+",
   },
   currentPartner: {
     1: "无/None",
     2: "无/None",
     3: "无/None",
-    4: "男友/Boyfriend",
-    5: "女友/Girlfriend",
+    4: "雄友 / Boyfriend",
+    5: "雌友 / Girlfriend",
     6: "伴侣/Partner",
   },
   ambiguousCount: {
@@ -1719,12 +1721,12 @@ const HOUSING_TIERS = {
     6: "多个/Multiple",
   },
   partnerCount: {
-    1: "1个/1",
-    2: "1个/1",
-    3: "2个/2",
-    4: "2个/2",
-    5: "3个/3",
-    6: "3+个/3+",
+    1: "1/1",
+    2: "1/1",
+    3: "2/2",
+    4: "2/2",
+    5: "3/3",
+    6: "3+/3+",
   },
   secretPartner: {
     1: "否/No",
@@ -1754,7 +1756,7 @@ const HOUSING_TIERS = {
     1: "结交朋友/Make Friends",
     2: "长期炮友/Long-term FWB",
     3: "搭子/Buddy",
-    4: "男女朋友/Dating",
+    4: "雌雄伴侣 / Dating",
     5: "结婚对象/Marriage",
     6: "随缘/Whatever",
   },
@@ -1767,12 +1769,12 @@ const HOUSING_TIERS = {
     6: "硕士+",
   },
   occupation: {
-    1: "无业",
-    2: "体力劳动",
-    3: "服务业",
-    4: "办公室职员",
-    5: "专业人士",
-    6: "企业高管",
+    1: ["无业 / Unemployed", "洞穴看守 / Cave Guard", "树懒学徒 / Sloth Apprentice"],
+    2: ["体力劳动 / Manual Labor", "搬运工 / Porter", "挖洞工 / Burrow Digger", "伐木兽 / Lumberbeast"],
+    3: ["服务业 / Service Industry", "毛发造型师 / Fur Stylist", "嗅觉侦探 / Scent Detective", "领地中介 / Territory Agent"],
+    4: ["办公室职员 / Office Worker", "族群书记 / Clan Scribe", "信息素分析员 / Pheromone Analyst"],
+    5: ["专业人士 / Professional", "兽医 / Vet", "族群顾问 / Pack Advisor", "猎物评估师 / Prey Assessor"],
+    6: ["企业高管 / Executive", "首席领地官 / Chief Territory Officer", "族群酋长助理 / Alpha Assistant"],
   },
   mbtiEI: { 1: "I", 2: "I", 3: "I", 4: "E", 5: "E", 6: "E" },
   mbtiSN: { 1: "N", 2: "N", 3: "N", 4: "S", 5: "S", 6: "S" },
@@ -1914,12 +1916,12 @@ const SCORE_DEDUCTIONS = {
   本科: 0,
   "硕士+": +8,
   // 职业 / Occupation — only 企业高管 gets bonus
-  无业: -10,
-  体力劳动: -5,
-  服务业: -2,
-  办公室职员: 0,
-  专业人士: 0,
-  企业高管: +12,
+  "无业 / Unemployed": -10,
+  "体力劳动 / Manual Labor": -5,
+  "服务业 / Service Industry": -2,
+  "办公室职员 / Office Worker": 0,
+  "专业人士 / Professional": 0,
+  "企业高管 / Executive": +12,
   // 婚恋状况 / Relationship status — only 单身 gets bonus
   "单身/Single": +5,
   "离异/Divorced": -3,
@@ -2035,6 +2037,107 @@ const DISP = {
   "仅父亲健在": "仅父亲健在 / Father Alive",
   "仅母亲健在": "仅母亲健在 / Mother Alive",
   "均已故": "均已故 / Both Passed",
+  // district / neighborhood
+  "郊区": "郊区 / Suburb",
+  "老城区": "老城区 / Old Town",
+  "新区": "新区 / New District",
+  "学区": "学区 / School Zone",
+  "科技园区": "科技园区 / Tech Zone",
+  "市中心": "市中心 / City Center",
+  "滨水区": "滨水区 / Waterfront",
+  "豪华住宅区": "豪华住宅区 / Luxury Zone",
+  // apt floor
+  "1-5层": "1-5层 / Fl.1-5",
+  "6-10层": "6-10层 / Fl.6-10",
+  "11-20层": "11-20层 / Fl.11-20",
+  "21-30层": "21-30层 / Fl.21-30",
+  "31-40层": "31-40层 / Fl.31-40",
+  "40层以上": "40层以上 / Fl.40+",
+  // apt total floors
+  "6层以下": "6层以下 / <6F",
+  "10层": "10层 / 10F",
+  "18层": "18层 / 18F",
+  "28层": "28层 / 28F",
+  "35层": "35层 / 35F",
+  "50层以上": "50层以上 / 50F+",
+  // villa floors
+  "1层独栋": "1层独栋 / 1-Story",
+  "2层别墅": "2层别墅 / 2-Story Villa",
+  "3层别墅": "3层别墅 / 3-Story Villa",
+  "4层及以上": "4层及以上 / 4F+",
+  // vehicle count
+  "1辆": "1辆 / 1",
+  "2辆": "2辆 / 2",
+  "3辆": "3辆 / 3",
+  "4辆+": "4辆+ / 4+",
+  // vehicle price (bicycle)
+  "500元以下": "500元以下 / <¥500",
+  "500-2000元": "500-2000元 / ¥500-2k",
+  "2000元-1w": "2000元-1w / ¥2k-10k",
+  "1w-5w": "1w-5w / ¥10k-50k",
+  "5w-30w": "5w-30w / ¥50k-300k",
+  "30w+": "30w+ / ¥300k+",
+  // vehicle price (ebike)
+  "2000元以下": "2000元以下 / <¥2k",
+  "2000-5000元": "2000-5000元 / ¥2k-5k",
+  "5000元-1w": "5000元-1w / ¥5k-10k",
+  "1w-2w": "1w-2w / ¥10k-20k",
+  "2w-5w": "2w-5w / ¥20k-50k",
+  "5w+": "5w+ / ¥50k+",
+  // vehicle price (motorcycle)
+  "5000元以下": "5000元以下 / <¥5k",
+  "5000元-2w": "5000元-2w / ¥5k-20k",
+  "2w-5w": "2w-5w / ¥20k-50k",
+  "5w-15w": "5w-15w / ¥50k-150k",
+  "15w-50w": "15w-50w / ¥150k-500k",
+  "50w+": "50w+ / ¥500k+",
+  // vehicle price (regular car)
+  "3w以下": "3w以下 / <¥30k",
+  "3w-8w": "3w-8w / ¥30k-80k",
+  "8w-15w": "8w-15w / ¥80k-150k",
+  "15w-25w": "15w-25w / ¥150k-250k",
+  "25w-40w": "25w-40w / ¥250k-400k",
+  "40w-80w": "40w-80w / ¥400k-800k",
+  // vehicle price (luxury car)
+  "30w-60w": "30w-60w / ¥300k-600k",
+  "60w-100w": "60w-100w / ¥600k-1M",
+  "100w-200w": "100w-200w / ¥1M-2M",
+  "200w-500w": "200w-500w / ¥2M-5M",
+  "500w-1000w": "500w-1000w / ¥5M-10M",
+  "1000w+": "1000w+ / ¥10M+",
+  // extra edu
+  "博士/PhD": "博士 / PhD",
+  "硕士/Master": "硕士 / Master",
+  "本科/Bachelor": "本科 / Bachelor",
+  "大专/Associate": "大专 / Associate",
+  "高中/High School": "高中 / High School",
+  "初中/Middle School": "初中 / Middle School",
+  "小学/Primary": "小学 / Primary",
+  // marriage/sterilized
+  "单身/Single": "单身 / Single",
+  "已配对/Mated": "已配对 / Mated",
+  "开放关系/Open": "开放关系 / Open",
+  "开放关系/Open Relationship": "开放关系 / Open Rel.",
+  "离异/Divorced": "离异 / Divorced",
+  // orientation
+  "异性恋/Straight": "异性恋 / Straight",
+  "同性恋/Gay·Lesbian": "同性恋 / Gay & Lesbian",
+  "双性恋/Bisexual": "双性恋 / Bisexual",
+  "泛性恋/Pansexual": "泛性恋 / Pansexual",
+  "无性恋/Asexual": "无性恋 / Asexual",
+  "不透露/Prefer not to say": "不透露 / Prefer Not to Say",
+  "自定义/Custom": "自定义 / Custom",
+  // gender
+  "雄/Male": "雄 / Male",
+  "雌/Female": "雌 / Female",
+  "非二元/Non-binary": "非二元 / Non-binary",
+  // parents relationship (already has /)
+  "离婚/Divorced": "离婚 / Divorced",
+  "冷战/Cold War": "冷战 / Cold War",
+  "普通/Ordinary": "普通 / Ordinary",
+  "和睦/Harmonious": "和睦 / Harmonious",
+  "恩爱/Loving": "恩爱 / Loving",
+  "神仙眷侣/Perfect Couple ✨": "神仙眷侣 / Perfect Couple ✨",
 };
 function disp(v) {
   return DISP[v] || v;
@@ -2335,7 +2438,7 @@ function getEditHousingDescription() {
 
   const parts = [];
   if (city || district)
-    parts.push([city, district].filter(Boolean).join(" · "));
+    parts.push([city, district].filter(Boolean).join(" "));
   if (area) parts.push(`${area}㎡`);
   if (type)
     parts.push(type === "别墅" ? `${disp(type)}(${villaFloors})` : disp(type));
@@ -2346,7 +2449,7 @@ function getEditHousingDescription() {
   if (price) parts.push(disp(price));
   if (ownership) parts.push(disp(ownership));
   if (mortgage) parts.push(disp(mortgage));
-  return parts.join(" · ");
+  return parts.join(" ");
 }
 
 function getHousingDescription() {
@@ -2367,7 +2470,7 @@ function getHousingDescription() {
 
   const parts = [];
   if (city || district)
-    parts.push([city, district].filter(Boolean).join(" · "));
+    parts.push([city, district].filter(Boolean).join(" "));
   if (area) parts.push(`${area}㎡`);
   if (type)
     parts.push(type === "别墅" ? `${disp(type)}(${villaFloors})` : disp(type));
@@ -2378,7 +2481,7 @@ function getHousingDescription() {
   if (price) parts.push(disp(price));
   if (ownership) parts.push(disp(ownership));
   if (mortgage) parts.push(disp(mortgage));
-  return parts.join(" · ");
+  return parts.join(" ");
 }
 
 function onBreedClassChange() {
@@ -2607,6 +2710,7 @@ function createCard() {
 
   const mbti = mbti1 + mbti2 + mbti3 + mbti4;
   const hobby = getSelectedHobbyTags("hobby-tags");
+  const standards = getSelectedStandardTags();
   const edu = document.getElementById("petEdu").value;
   const occupation = document.getElementById("petOccupation").value;
   const income = document.getElementById("petIncome").value;
@@ -2684,6 +2788,7 @@ function createCard() {
     sterilized: sterilized,
     mbti: mbti,
     hobby: hobby,
+    standards: standards,
     edu: edu,
     occupation: occupation,
     income: income,
@@ -2755,7 +2860,7 @@ function createCard() {
   <span class="value territory">${fmt(hukou || "—")}</span>
 </div>
 <div class="grid-2">
-  <div class="cell"><span class="label">来这里的目的 <small>Here For</small></span><span class="value">${fmt(rel.datingPurpose || "—")}</span></div>
+  <div class="cell"><span class="label">目的 <small>Here For</small></span><span class="value">${fmt(rel.datingPurpose || "—")}</span></div>
   <div class="cell"><span class="label">期望关系 <small>Looking For</small></span><span class="value">${fmt(rel.relationshipGoal || "—")}</span></div>
 </div>
 <div class="grid-3">
@@ -2792,7 +2897,7 @@ function createCard() {
   <span class="value">${fmt(hobby || "—")}</span>
 </div>
 <div class="section">
-  <span class="label">车辆 <small>Vehicles</small></span>
+  <span class="label">车 <small>Vehicles</small></span>
   <span class="value">${vehicleStr}</span>
 </div>
 <div class="section">
@@ -3507,22 +3612,80 @@ function getSelectedHobbyTags(containerId) {
   return Array.from(
     document.querySelectorAll(`#${containerId} .hobby-tag.selected`),
   )
-    .map((el) => el.dataset.zh || el.textContent.trim())
+    .map((el) => {
+      const zh = el.dataset.zh || "";
+      const full = el.textContent.trim();
+      // full is "zh / en"; if it contains " / " return as-is, else return zh
+      return full.includes(" / ") ? full : zh || full;
+    })
     .join(" · ");
 }
 
 function setHobbyTags(containerId, hobbyStr) {
   buildHobbyTags(containerId);
   if (!hobbyStr) return;
-  const selected = new Set(hobbyStr.split(" · ").map((s) => s.trim()));
+  // Support both old Chinese-only and new "zh / en" bilingual stored formats
+  const selected = new Set(
+    hobbyStr.split(" · ").map((s) => {
+      const t = s.trim();
+      const slashIdx = t.indexOf(" / ");
+      return slashIdx !== -1 ? t.slice(0, slashIdx).trim() : t;
+    }),
+  );
   document.querySelectorAll(`#${containerId} .hobby-tag`).forEach((el) => {
-    if (selected.has(el.dataset.zh || el.textContent.trim()))
-      el.classList.add("selected");
+    const zh = el.dataset.zh || el.textContent.trim();
+    if (selected.has(zh)) el.classList.add("selected");
   });
 }
 
 let _editHobbyStr = "";
 let _editHobbyExpanded = false;
+
+// ── 择偶标准 Mate Standards ────────────────────────────────────
+const MATE_STANDARDS = [
+  { zh: "软萌",       en: "Soft & Cute" },
+  { zh: "身高要求",   en: "Height Req." },
+  { zh: "专一",       en: "Exclusive" },
+  { zh: "体贴",       en: "Considerate" },
+  { zh: "没有怪癖",   en: "No Weird Quirks" },
+  { zh: "有怪癖",     en: "Quirky OK" },
+  { zh: "无浓烈异味", en: "No Strong Odor" },
+  { zh: "作息昼出夜伏", en: "Nocturnal" },
+  { zh: "毛发整洁",   en: "Groomed Fur" },
+  { zh: "领地稳固",   en: "Stable Territory" },
+  { zh: "不介意杂交", en: "Mixed OK" },
+  { zh: "同物种优先", en: "Same Species Pref." },
+  { zh: "体型相近",   en: "Similar Build" },
+  { zh: "无幼崽",     en: "No Cubs" },
+  { zh: "已绝育",     en: "Sterilized" },
+];
+
+function buildStandardsTags(containerId) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  wrap.innerHTML = MATE_STANDARDS.map(
+    (t) => `<span class="hobby-tag tier-1" data-zh="${t.zh}" onclick="toggleStandardTag(this)">${t.zh} / ${t.en}</span>`
+  ).join("");
+}
+
+function toggleStandardTag(el) {
+  el.classList.toggle("selected");
+}
+
+function getSelectedStandardTags() {
+  return Array.from(document.querySelectorAll("#standards-tags .hobby-tag.selected"))
+    .map((el) => el.dataset.zh)
+    .join(" · ");
+}
+
+function setStandardTags(tagStr) {
+  buildStandardsTags("standards-tags");
+  if (!tagStr) return;
+  const selected = new Set(tagStr.split(" · ").map((s) => s.trim()));
+  document.querySelectorAll("#standards-tags .hobby-tag").forEach((el) => {
+    if (selected.has(el.dataset.zh)) el.classList.add("selected");
+  });
+}
 
 function expandEditHobby() {
   if (_editHobbyExpanded) return;
@@ -4119,6 +4282,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initPixelButtons();
   await loadCustomHobbyTags();
   buildHobbyTags("hobby-tags");
+  buildStandardsTags("standards-tags");
 });
 
 function getPixelHeartUrl() {
@@ -4235,10 +4399,57 @@ function fmt(v) {
   return v.replace(/\s*[·×\/]\s*/g, " ").replace(/\s{2,}/g, " ").trim() || "—";
 }
 
+// Two-line bilingual display: Chinese on top, English below
+function fmtBI(v) {
+  if (!v || v === "—") return "—";
+  // normalize "X/Y" (no spaces) → "X / Y" so both stored formats split correctly
+  const normalized = v.replace(/([^\s])\s*\/\s*([^\s])/g, "$1 / $2");
+  const segs = normalized.split(/\s*·\s*/);
+  const zhParts = [], enParts = [];
+  let hasBilingual = false;
+  for (let seg of segs) {
+    seg = seg.trim();
+    const slashIdx = seg.indexOf(" / ");
+    if (slashIdx !== -1) {
+      zhParts.push(seg.slice(0, slashIdx).trim());
+      enParts.push(seg.slice(slashIdx + 3).trim());
+      hasBilingual = true;
+    } else {
+      zhParts.push(seg);
+      enParts.push(seg);
+    }
+  }
+  const zhLine = zhParts.join("  ");
+  const enLine = enParts.join("  ");
+  if (hasBilingual) {
+    return `<span class="bi-zh">${zhLine}</span><span class="bi-en">${enLine}</span>`;
+  }
+  return `<span class="bi-zh">${zhLine}</span>`;
+}
+
+function buildTerritoryDisplay(profile) {
+  const h = profile.house;
+  if (!h || (!h.city && !h.district)) return profile.hukou || "—";
+  const parts = [];
+  if (h.city || h.district) parts.push([h.city, disp(h.district)].filter(Boolean).join(" "));
+  if (h.area) parts.push(`${h.area}㎡`);
+  if (h.type) {
+    const typeDisp = disp(h.type);
+    parts.push(h.type === "别墅" && h.villaFloors ? `${typeDisp} (${disp(h.villaFloors)})` : typeDisp);
+  }
+  if (h.garden === "有院子") parts.push(disp("有院子"));
+  if (h.aptFloor) parts.push(disp(h.aptFloor));
+  if (h.aptTotal) parts.push(disp(h.aptTotal));
+  if (h.price) parts.push(disp(h.price));
+  if (h.ownership) parts.push(disp(h.ownership));
+  if (h.mortgage) parts.push(disp(h.mortgage));
+  return parts.join(" ") || profile.hukou || "—";
+}
+
 function renderValue(profile, field, valueText, extraClass = "") {
   const raw = profile.interpretations && profile.interpretations[field];
   const interps = Array.isArray(raw) ? raw : raw ? [raw] : [];
-  const display = fmt(valueText);
+  const display = fmtBI(valueText);
   if (interps.length > 0) {
     return `<span class="value ${extraClass} has-interpretations" data-field="${field}">${display}</span>`;
   }
@@ -4280,7 +4491,7 @@ function renderCardHTML(profile) {
   <div class="grid-3">
     <div class="cell">
       <span class="label">性别 <small>Gender</small></span>
-      ${renderValue(profile, "gender", profile.gender || "—")}
+      ${renderValue(profile, "gender", disp(profile.gender) || "—")}
     </div>
     <div class="cell">
       <span class="label">年龄 <small>Age</small></span>
@@ -4295,22 +4506,58 @@ function renderCardHTML(profile) {
   <div class="grid-2">
     <div class="cell">
       <span class="label">性取向 <small>Orientation</small></span>
-      ${renderValue(profile, "orientation", profile.orientation || "—")}
+      ${renderValue(profile, "orientation", disp(profile.orientation) || "—")}
     </div>
     <div class="cell">
       <span class="label">婚恋 <small>Status</small></span>
-      ${renderValue(profile, "sterilized", profile.sterilized || profile.relationship?.status || "—")}
+      ${renderValue(profile, "sterilized", disp(profile.sterilized || profile.relationship?.status) || "—")}
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="cell">
+      <span class="label">MBTI</span>
+      ${renderValue(profile, "mbti", profile.mbti || "—", "big")}
+    </div>
+    <div class="cell">
+      <span class="label">星座 <small>Horoscope</small></span>
+      ${renderValue(profile, "horoscope", profile.horoscope || getHoroscope(profile.birth) || "—")}
     </div>
   </div>
 
   <div class="section">
     <span class="label">领地 <small>Territory</small></span>
-    ${renderValue(profile, "hukou", profile.hukou || "—", "territory")}
+    ${renderValue(profile, "hukou", buildTerritoryDisplay(profile), "territory")}
+  </div>
+
+  <div class="section">
+    <span class="label">车辆 <small>Vehicles</small></span>
+    ${renderValue(profile, "vehicle", [
+      profile.vehicle?.types?.length ? profile.vehicle.types.join(" ") : null,
+      profile.vehicle?.model || null,
+      profile.vehicle?.count ? disp(profile.vehicle.count) : null,
+      profile.vehicle?.price ? disp(profile.vehicle.price) : null,
+    ].filter(Boolean).join(" ") || "—")}
+  </div>
+
+  <div class="grid-3">
+    <div class="cell">
+      <span class="label">学历 <small>Education</small></span>
+      ${renderValue(profile, "edu", disp(profile.edu) || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">职业 <small>Job</small></span>
+      ${renderValue(profile, "occupation", disp(profile.occupation) || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">月收入 <small>Income</small></span>
+      ${renderValue(profile, "income", disp(profile.income) || "—")}
+    </div>
   </div>
 
   <div class="grid-2">
     <div class="cell">
-      <span class="label">来这里的目的 <small>Here For</small></span>
+      <span class="label">目的 <small>Here For</small></span>
       ${renderValue(profile, "datingPurpose", profile.relationship?.datingPurpose || "—")}
     </div>
     <div class="cell">
@@ -4379,54 +4626,24 @@ function renderCardHTML(profile) {
     </div>
   </div>
 
-  <div class="grid-2">
-    <div class="cell">
-      <span class="label">MBTI</span>
-      ${renderValue(profile, "mbti", profile.mbti || "—", "big")}
-    </div>
-    <div class="cell">
-      <span class="label">星座 <small>Horoscope</small></span>
-      ${renderValue(profile, "horoscope", profile.horoscope || getHoroscope(profile.birth) || "—")}
-    </div>
-  </div>
-
-  <div class="grid-3">
-    <div class="cell">
-      <span class="label">学历 <small>Education</small></span>
-      ${renderValue(profile, "edu", profile.edu || "—")}
-    </div>
-    <div class="cell">
-      <span class="label">职业 <small>Job</small></span>
-      ${renderValue(profile, "occupation", profile.occupation || "—")}
-    </div>
-    <div class="cell">
-      <span class="label">月收入 <small>Income</small></span>
-      ${renderValue(profile, "income", profile.income || "—")}
-    </div>
-  </div>
-
   <div class="section">
     <span class="label">兴趣爱好 <small>Hobbies</small></span>
     ${renderValue(profile, "hobby", profile.hobby || "—")}
   </div>
 
-  <div class="section">
-    <span class="label">车辆 <small>Vehicles</small></span>
-    ${renderValue(profile, "vehicle", fmt([
-      profile.vehicle?.types?.length ? profile.vehicle.types.join(" ") : null,
-      profile.vehicle?.model || null,
-      profile.vehicle?.count || null,
-      profile.vehicle?.price ? disp(profile.vehicle.price) : null,
-    ].filter(Boolean).join(" ") || "—"))}
-  </div>
+  ${profile.standards ? `<div class="section">
+    <span class="label">择偶标准 <small>Looking For</small></span>
+    ${renderValue(profile, "standards", profile.standards)}
+  </div>` : ""}
 
   <div class="section">
     <span class="label">父母 <small>Parents</small></span>
-    ${renderValue(profile, "parents", fmt([
+    ${renderValue(profile, "parents", [
       profile.parents?.status ? disp(profile.parents.status) : null,
-      profile.parents?.fatherOrigin ? `父 ${profile.parents.fatherOrigin}` : null,
-      profile.parents?.motherOrigin ? `母 ${profile.parents.motherOrigin}` : null,
-    ].filter(Boolean).join(" ") || "—"))}
+      profile.parents?.relationship ? disp(profile.parents.relationship) : null,
+      profile.parents?.fatherOrigin ? `父(Dad) ${profile.parents.fatherOrigin}` : null,
+      profile.parents?.motherOrigin ? `母(Mom) ${profile.parents.motherOrigin}` : null,
+    ].filter(Boolean).join(" ") || "—")}
   </div>
 
   <div class="section">
@@ -4440,7 +4657,7 @@ function renderCardHTML(profile) {
   </div>
 
   <div class="section">
-    <span class="label">被讨厌 <small>Skipped</small></span>
+    <span class="label">被跳过 <small>Skipped</small></span>
     <div class="pixel-hearts-box">${(() => {
       const n = Math.min(profile.skips ? profile.skips.length : 0, 48);
       if (n === 0) return '<span class="value" style="opacity:0.4">—</span>';
@@ -5308,7 +5525,7 @@ function _genProfileOpeners(p) {
       .slice(0, 2)
       .forEach((h) => out.push(`我也喜欢${h}！`));
   if (p.mbti) out.push(`${p.mbti} 的你好！`);
-  if (p.occupation) out.push(`做${p.occupation}是什么感觉？`);
+  if (p.occupation) out.push(`做${p.occupation.split("/")[0].trim()}是什么感觉？`);
   return out.slice(0, 3);
 }
 
@@ -7727,6 +7944,11 @@ function renderGridAsAvatar(grid, gridText) {
 
   const pixelAlpha = { 1: 0.25, 2: 0.49, 3: 0.75, 4: 1 };
   const textAlpha  = { "#1": 0.25, "#2": 0.49, "#3": 0.75, "#4": 1 };
+
+  ctx.shadowColor = "rgba(40,56,24,0.60)";
+  ctx.shadowOffsetX = 3;
+  ctx.shadowOffsetY = 3;
+  ctx.shadowBlur = 0;
 
   const drawPixel = (x, y, alpha) => {
     ctx.fillStyle = alpha >= 1 ? INK : `rgba(40,56,24,${alpha})`;

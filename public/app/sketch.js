@@ -54,13 +54,13 @@ function draw() {
 
       if (cell === "pixel" || cell === 4) {
         fill(40, 48, 35, 255); noStroke();
-        drawingContext.shadowColor = "rgba(0,0,0,0.35)";
+        drawingContext.shadowColor = "rgba(40,48,35,0.60)";
         drawingContext.shadowOffsetX = 2; drawingContext.shadowOffsetY = 2; drawingContext.shadowBlur = 0;
         rect(x * cellSize, y * cellSize, cellSize, cellSize);
         drawingContext.shadowColor = "rgba(0,0,0,0)";
       } else if (pixelAlpha[cell] !== undefined) {
         fill(40, 48, 35, pixelAlpha[cell]); noStroke();
-        drawingContext.shadowColor = "rgba(0,0,0,0.35)";
+        drawingContext.shadowColor = "rgba(40,48,35,0.60)";
         drawingContext.shadowOffsetX = 2; drawingContext.shadowOffsetY = 2; drawingContext.shadowBlur = 0;
         rect(x * cellSize, y * cellSize, cellSize, cellSize);
         drawingContext.shadowColor = "rgba(0,0,0,0)";
@@ -70,7 +70,7 @@ function draw() {
           : currentText;
         fill(40, 48, 35, 255);
         textAlign(CENTER, CENTER); textSize(cellSize);
-        drawingContext.shadowColor = "rgba(0,0,0,0.35)";
+        drawingContext.shadowColor = "rgba(40,48,35,0.60)";
         drawingContext.shadowOffsetX = 2; drawingContext.shadowOffsetY = 2; drawingContext.shadowBlur = 0;
         text(ch, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
         drawingContext.shadowColor = "rgba(0,0,0,0)";
@@ -80,14 +80,14 @@ function draw() {
           : currentText;
         fill(40, 48, 35, textAlpha[cell]);
         textAlign(CENTER, CENTER); textSize(cellSize);
-        drawingContext.shadowColor = "rgba(0,0,0,0.35)";
+        drawingContext.shadowColor = "rgba(40,48,35,0.60)";
         drawingContext.shadowOffsetX = 2; drawingContext.shadowOffsetY = 2; drawingContext.shadowBlur = 0;
         text(ch, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
         drawingContext.shadowColor = "rgba(0,0,0,0)";
       } else if (cell !== null && cell !== "/") {
         fill(40, 48, 35, 255);
         textAlign(CENTER, CENTER); textSize(cellSize);
-        drawingContext.shadowColor = "rgba(0,0,0,0.35)";
+        drawingContext.shadowColor = "rgba(40,48,35,0.60)";
         drawingContext.shadowOffsetX = 2; drawingContext.shadowOffsetY = 2; drawingContext.shadowBlur = 0;
         text(cell, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
         drawingContext.shadowColor = "rgba(0,0,0,0)";

@@ -928,12 +928,23 @@
           <button class="nes-btn" onclick="addCustomHobbyTag('hobby-tags','hobby-custom-input')">+</button>
         </div>
       </div>
-      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-hobbies','profile-photo')">▶</button>
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-hobbies','profile-standards')">▶</button>
+    </section>
+
+    <!-- Profile - Mate Standards -->
+    <section id="profile-standards" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-hobbies')">◀</button>
+      <div class="phone setup-content">
+        <label>择偶标准 Mate Standards</label>
+        <p class="hobby-hint">可多选 · 不选也没关系 Pick any that apply</p>
+        <div class="hobby-tags-wrap" id="standards-tags"></div>
+      </div>
+      <button class="nes-btn setup-next-btn" onclick="goTo('profile-photo')">▶</button>
     </section>
 
     <!-- Profile - Fursona -->
     <section id="profile-photo" class="page setup-page">
-      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-hobbies')">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-standards')">
         ◀
       </button>
       <div class="phone setup-content">

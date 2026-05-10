@@ -39,6 +39,10 @@ function getPixelHeartUrl() {
   const c = document.createElement("canvas");
   c.width = 7 * px; c.height = 6 * px;
   const ctx = c.getContext("2d");
+  ctx.shadowColor = "rgba(40,48,35,0.60)";
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+  ctx.shadowBlur = 0;
   ctx.fillStyle = "rgb(40,48,35)";
   pattern.forEach((row, ry) => row.forEach((v, rx) => { if (v) ctx.fillRect(rx*px, ry*px, px, px); }));
   getPixelHeartUrl._cache = c.toDataURL();
@@ -62,6 +66,10 @@ function getPixelVomitUrl() {
   const c = document.createElement("canvas");
   c.width = 7 * px; c.height = 9 * px;
   const ctx = c.getContext("2d");
+  ctx.shadowColor = "rgba(40,48,35,0.60)";
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+  ctx.shadowBlur = 0;
   ctx.fillStyle = "rgb(40,48,35)";
   pattern.forEach((row, ry) => row.forEach((v, rx) => { if (v) ctx.fillRect(rx*px, ry*px, px, px); }));
   getPixelVomitUrl._cache = c.toDataURL();
@@ -96,18 +104,35 @@ function showSpotlight(idx) {
 
   const v = (val) => val || "—";
 
+  function bilingualParts(arr) {
+    const zh = arr.map(p => p.split(" / ")[0].trim()).join("  ");
+    const en = arr.map(p => { const s = p.split(" / "); return s.length > 1 ? s.slice(1).join(" / ").trim() : ""; }).filter(Boolean).join("  ");
+    return en ? `${zh} <small>${en}</small>` : zh;
+  }
+
+  function displayTerritory(hukou, houseType) {
+    if (!hukou) return "—";
+    const parts = hukou.split(" · ");
+    let splitIdx = parts.findIndex(seg => seg.split(" / ")[0].trim().includes(houseType));
+    if (splitIdx === -1) return displayBilingual(hukou);
+    const line1 = bilingualParts(parts.slice(0, splitIdx + 1));
+    const rest = parts.slice(splitIdx + 1);
+    if (rest.length === 0) return line1;
+    return `${line1}<br>${bilingualParts(rest)}`;
+  }
+
   function displayBilingual(val) {
     if (!val) return "—";
     if (val.includes(" · ")) {
       const parts = val.split(" · ");
-      const zh = parts.map(p => p.split(" / ")[0].trim()).join(" · ");
-      const en = parts.map(p => { const s = p.split(" / "); return s.length > 1 ? s.slice(1).join(" / ").trim() : ""; }).filter(Boolean).join(" · ");
+      const zh = parts.map(p => p.split(" / ")[0].trim()).join("  ");
+      const en = parts.map(p => { const s = p.split(" / "); return s.length > 1 ? s.slice(1).join(" / ").trim() : ""; }).filter(Boolean).join("  ");
       return en ? `${zh}<br><small>${en}</small>` : zh;
     }
     if (val.includes("/")) {
       const idx = val.indexOf("/");
       const zh = val.substring(0, idx).trim();
-      const en = val.substring(idx + 1).replace(/·/g, " · ").trim();
+      const en = val.substring(idx + 1).replace(/·/g, "  ").trim();
       if (zh.length + en.length > 14) return `${zh}<br><small>${en}</small>`;
       return `${zh} ${en}`;
     }
@@ -147,11 +172,12 @@ function showSpotlight(idx) {
   document.getElementById("spotlight").innerHTML = `
     <div class="s-rank-bar">
       <div class="s-rank">No.${idx + 1}</div>
-      <div class="profile-score-stamp ${stampColorClass}">
-        <span class="stamp-date">${stampDate}</span>
-        <span class="stamp-num">${displayScore}</span>
-        <span class="stamp-lines"><span></span><span></span></span>
-      </div>
+    </div>
+
+    <div class="profile-score-stamp ${stampColorClass}">
+      <span class="stamp-date">${stampDate}</span>
+      <span class="stamp-num">${displayScore}</span>
+      <span class="stamp-lines"><span></span><span></span></span>
     </div>
 
     <div class="avatar-row">
@@ -163,96 +189,96 @@ function showSpotlight(idx) {
     </div>
 
     <div class="card">
-      <!-- 行1: 名字 + 物种 — 混血时内容多，row-tall 给足高度，物种用 xs -->
       <div class="grid-2 row-tall">
-        <div class="cell"><span class="label">名字<br><small>Name</small></span><span class="value big">${v(p.name)}</span></div>
-        <div class="cell"><span class="label">物种<br><small>Species</small></span><span class="value xs">${breedDisplay}</span></div>
+        <div class="cell"><span class="label">名字<br><small>Name</small></span><span class="value">${v(p.name)}</span></div>
+        <div class="cell"><span class="label">物种<br><small>Species</small></span><span class="value">${breedDisplay}</span></div>
       </div>
 
-      <!-- 行2: 性别 + 年龄 + 身高 — 均为短值，用 big -->
       <div class="grid-3">
-        <div class="cell"><span class="label">性别<br><small>Gender</small></span><span class="value big">${displayBilingual(p.gender)}</span></div>
-        <div class="cell"><span class="label">年龄<br><small>Age</small></span><span class="value big">${v(p.age)}</span></div>
-        <div class="cell"><span class="label">身高<br><small>Height</small></span><span class="value big">${v(p.height)}</span></div>
+        <div class="cell"><span class="label">性别<br><small>Gender</small></span><span class="value">${displayBilingual(p.gender)}</span></div>
+        <div class="cell"><span class="label">年龄<br><small>Age</small></span><span class="value">${v(p.age)}</span></div>
+        <div class="cell"><span class="label">身高<br><small>Height</small></span><span class="value">${v(p.height)}</span></div>
       </div>
 
-      <!-- 行3: MBTI + 星座 — 提前，MBTI 极短用 big -->
-      <div class="grid-2">
-        <div class="cell"><span class="label">MBTI</span><span class="value big">${v(p.mbti)}</span></div>
-        <div class="cell"><span class="label">星座<br><small>Horoscope</small></span><span class="value">${displayBilingual(p.horoscope || getHoroscope(p.birth))}</span></div>
-      </div>
-
-      <!-- 行4: 性取向 + 婚育状况 -->
       <div class="grid-2">
         <div class="cell"><span class="label">性取向<br><small>Orientation</small></span><span class="value">${displayBilingual(p.orientation)}</span></div>
         <div class="cell"><span class="label">婚育状况<br><small>Status</small></span><span class="value">${displayBilingual(p.sterilized || rel.status)}</span></div>
       </div>
 
-      <!-- 行5: 领地 — 城市名较短，普通字号 -->
-      <div class="section">
-        <span class="label">领地 <small>Territory</small></span>
-        <span class="value">${v(p.hukou)}</span>
+      <div class="grid-2">
+        <div class="cell"><span class="label">MBTI</span><span class="value">${v(p.mbti)}</span></div>
+        <div class="cell"><span class="label">星座<br><small>Horoscope</small></span><span class="value">${displayBilingual(p.horoscope || getHoroscope(p.birth))}</span></div>
       </div>
 
-      <!-- 行6: 学历 + 职业 + 月收入 — 提前，背景信息归组 -->
+      <div class="row-2x">
+        <div class="section">
+          <span class="label">领地 <small>Territory</small></span>
+          <span class="value">${displayTerritory(p.hukou, p.house?.type || "")}</span>
+        </div>
+        <div class="section">
+          <span class="label">车辆 <small>Vehicles</small></span>
+          <span class="value">${displayBilingual([
+            p.vehicle?.types?.length ? p.vehicle.types.join(' ') : null,
+            p.vehicle?.model || null,
+            p.vehicle?.count || null,
+            p.vehicle?.price || null,
+          ].filter(Boolean).join(' ') || '—')}</span>
+        </div>
+      </div>
+
       <div class="grid-3">
         <div class="cell"><span class="label">学历<br><small>Education</small></span><span class="value">${displayBilingual(p.edu)}</span></div>
         <div class="cell"><span class="label">职业<br><small>Job</small></span><span class="value">${v(p.occupation)}</span></div>
         <div class="cell"><span class="label">月收入<br><small>Income</small></span><span class="value">${displayBilingual(p.income)}</span></div>
       </div>
 
-      <!-- 行7: 兴趣爱好 — 内容最长，section 给足空间，用 sm 避免溢出 -->
-      <div class="section">
-        <span class="label">兴趣爱好 <small>Hobbies</small></span>
-        <span class="value sm">${v(p.hobby)}</span>
-      </div>
-
-      <!-- 行8: 来这里的目的 + 期望关系 — 文字较长用 sm -->
       <div class="grid-2">
-        <div class="cell"><span class="label">来这里的目的<br><small>Here For</small></span><span class="value sm">${displayBilingual(rel.datingPurpose)}</span></div>
-        <div class="cell"><span class="label">期望关系<br><small>Looking For</small></span><span class="value sm">${displayBilingual(rel.relationshipGoal)}</span></div>
+        <div class="cell"><span class="label">来这里的目的<br><small>Here For</small></span><span class="value">${displayBilingual(rel.datingPurpose)}</span></div>
+        <div class="cell"><span class="label">期望关系<br><small>Looking For</small></span><span class="value">${displayBilingual(rel.relationshipGoal)}</span></div>
       </div>
 
-      <!-- 行9: 目前伴侣 + 伴侣数量 + 子女 — 数字/短值用 big -->
       <div class="grid-3">
         <div class="cell"><span class="label">目前伴侣<br><small>Partner</small></span><span class="value">${displayBilingual(rel.currentPartner)}</span></div>
-        <div class="cell"><span class="label">伴侣数量<br><small># Partners</small></span><span class="value big">${displayBilingual(rel.partnerCount)}</span></div>
-        <div class="cell"><span class="label">子女<br><small>Kids</small></span><span class="value big">${displayBilingual(rel.kids)}</span></div>
+        <div class="cell"><span class="label">伴侣数量<br><small># Partners</small></span><span class="value">${displayBilingual(rel.partnerCount)}</span></div>
+        <div class="cell"><span class="label">子女<br><small>Kids</small></span><span class="value">${displayBilingual(rel.kids)}</span></div>
       </div>
 
-      <!-- 行10: 暧昧对象 + 暗恋 + 秘密伴侣 -->
       <div class="grid-3">
-        <div class="cell"><span class="label">暧昧对象<br><small>Ambiguous</small></span><span class="value">${displayBilingual(rel.ambiguous)}</span></div>
         <div class="cell"><span class="label">暗恋<br><small>Crush</small></span><span class="value">${displayBilingual(rel.crush)}</span></div>
-        <div class="cell"><span class="label">秘密伴侣<br><small>Secret Partner</small></span><span class="value">${displayBilingual(rel.secretPartner)}</span></div>
+        <div class="cell"><span class="label">暧昧<br><small>Ambiguous</small></span><span class="value">${displayBilingual(rel.ambiguous)}</span></div>
+        <div class="cell"><span class="label">秘密伴侣<br><small>Secret</small></span><span class="value">${displayBilingual(rel.secretPartner)}</span></div>
       </div>
 
-      <!-- 行11: 境外伴侣 + 异地伴侣 + 谈过几次 -->
       <div class="grid-3">
-        <div class="cell"><span class="label">境外伴侣<br><small>Foreign Partner</small></span><span class="value">${displayBilingual(rel.foreignPartner)}</span></div>
-        <div class="cell"><span class="label">异地伴侣<br><small>Long Distance</small></span><span class="value">${displayBilingual(rel.otherCityPartner)}</span></div>
-        <div class="cell"><span class="label">谈过几次<br><small>Past Relationships</small></span><span class="value big">${displayBilingual(rel.pastRelCount)}</span></div>
+        <div class="cell"><span class="label">境外伴侣<br><small>Foreign</small></span><span class="value">${displayBilingual(rel.foreignPartner)}</span></div>
+        <div class="cell"><span class="label">异地伴侣<br><small>Long Dist</small></span><span class="value">${displayBilingual(rel.otherCityPartner)}</span></div>
+        <div class="cell"><span class="label">白月光<br><small>Moonlight</small></span><span class="value">${displayBilingual(rel.whiteMoonlight)}</span></div>
       </div>
 
-      <!-- 行12: 前任联系 + 还爱前任 + 白月光 -->
       <div class="grid-3">
+        <div class="cell"><span class="label">谈过<br><small>Past Rels</small></span><span class="value">${displayBilingual(rel.pastRelCount)}</span></div>
         <div class="cell"><span class="label">前任联系<br><small>Ex Contact</small></span><span class="value">${displayBilingual(rel.exContact)}</span></div>
         <div class="cell"><span class="label">还爱前任<br><small>Still Love Ex</small></span><span class="value">${displayBilingual(rel.stillLoveEx)}</span></div>
-        <div class="cell"><span class="label">白月光<br><small>White Moonlight</small></span><span class="value">${displayBilingual(rel.whiteMoonlight)}</span></div>
       </div>
 
-      <!-- 行13: 车辆 + 父母 — 内容中等长度 -->
-      <div class="grid-2">
-        <div class="cell"><span class="label">车辆<br><small>Vehicles</small></span><span class="value sm">${[
-          p.vehicle?.types?.length ? p.vehicle.types.join(' · ') : null,
-          p.vehicle?.model || null,
-          p.vehicle?.price || null,
-        ].filter(Boolean).join(' / ') || '—'}</span></div>
-        <div class="cell"><span class="label">父母<br><small>Parents</small></span><span class="value sm">${[
+      <div class="section">
+        <span class="label">兴趣爱好 <small>Hobbies</small></span>
+        <span class="value">${displayBilingual(v(p.hobby))}</span>
+      </div>
+
+      ${p.standards ? `<div class="section">
+        <span class="label">择偶标准 <small>Looking For</small></span>
+        <span class="value">${displayBilingual(p.standards)}</span>
+      </div>` : ""}
+
+      <div class="section">
+        <span class="label">父母 <small>Parents</small></span>
+        <span class="value">${displayBilingual([
           p.parents?.status || null,
-          p.parents?.fatherOrigin ? '父/' + p.parents.fatherOrigin : null,
-          p.parents?.motherOrigin ? '母/' + p.parents.motherOrigin : null,
-        ].filter(Boolean).join(' · ') || '—'}</span></div>
+          p.parents?.relationship || null,
+          p.parents?.fatherOrigin ? '父(Dad) ' + p.parents.fatherOrigin : null,
+          p.parents?.motherOrigin ? '母(Mom) ' + p.parents.motherOrigin : null,
+        ].filter(Boolean).join(' ') || '—')}</span>
       </div>
     </div>
   `;
@@ -294,25 +320,25 @@ const _LIKE_REASONS = [
   "无法解释 就是感觉对", "感觉对方很有品味", "档案写得很真实",
 ];
 const _COMMENT_TEMPLATES = [
-  (a, b, tag, adj) => `[评] 「${a}」评论了「${b}」的[${tag}]标签：有点${adj}`,
-  (a, b, tag, adj) => `[评] 「${a}」看了「${b}」的[${tag}]，觉得有点${adj}`,
-  (a, b, tag, adj) => `[评] 「${a}」对「${b}」的[${tag}]留下印象：${adj}`,
-  (a, b, tag, adj) => `[评] 「${a}」评价「${b}」的[${tag}]：确实有点${adj}`,
-  (a, b, tag, adj) => `[评] 「${a}」看到「${b}」写了[${tag}]，评价说：${adj}`,
+  (a, b, tag, adj) => `「${a}」评论了「${b}」的[${tag}]标签：有点${adj}`,
+  (a, b, tag, adj) => `「${a}」看了「${b}」的[${tag}]，觉得有点${adj}`,
+  (a, b, tag, adj) => `「${a}」对「${b}」的[${tag}]留下印象：${adj}`,
+  (a, b, tag, adj) => `「${a}」评价「${b}」的[${tag}]：确实有点${adj}`,
+  (a, b, tag, adj) => `「${a}」看到「${b}」写了[${tag}]，评价说：${adj}`,
 ];
 const _LIKE_TEMPLATES = [
-  (a, b, reason) => `[心] 「${a}」喜欢了「${b}」· ${reason}`,
-  (a, b, reason) => `[心] 「${a}」对「${b}」上头 · 原因：${reason}`,
-  (a, b, reason) => `[心] 「${a}」给「${b}」点了喜欢 · ${reason}`,
-  (a, b, reason) => `[心] 「${a}」→「${b}」✓ · ${reason}`,
+  (a, b, reason) => `「${a}」喜欢了「${b}」· ${reason}`,
+  (a, b, reason) => `「${a}」对「${b}」上头  原因：${reason}`,
+  (a, b, reason) => `「${a}」给「${b}」点了喜欢  ${reason}`,
+  (a, b, reason) => `「${a}」→「${b}」✓  ${reason}`,
   (a, b, reason) => `「${a}」[心]「${b}」· ${reason}`,
 ];
 const _SKIP_TEMPLATES = [
-  (a, b, reason) => `[过] 「${a}」跳过了「${b}」· ${reason}`,
-  (a, b, reason) => `[过] 「${a}」划走了「${b}」· ${reason}`,
-  (a, b, reason) => `[过] 「${a}」→「${b}」✗ · ${reason}`,
-  (a, b, reason) => `「${a}」[过]「${b}」· ${reason}`,
-  (a, b, reason) => `[过] 「${a}」没有选择「${b}」· ${reason}`,
+  (a, b, reason) => `「${a}」跳过了「${b}」· ${reason}`,
+  (a, b, reason) => `「${a}」划走了「${b}」· ${reason}`,
+  (a, b, reason) => `「${a}」→「${b}」✗  ${reason}`,
+  (a, b, reason) => `「${a}」跳过「${b}」· ${reason}`,
+  (a, b, reason) => `「${a}」没有选择「${b}」· ${reason}`,
 ];
 
 function _rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -424,7 +450,7 @@ function isNonStraight(orientation) {
 
 const _AD_SEEKING = [
   "灵魂伴侣 / a soulmate",
-  "真命天子/天女 / the one",
+  "真命天雄/天雌 / the one",
   "有缘人 / destiny's partner",
   "命中注定的TA / the destined one",
   "对的那个人 / the right one",
@@ -464,57 +490,57 @@ function generateTickerMessages(profiles) {
     const rel = p.relationship || {};
 
     msgs.push({
-      text: `>> ${cond}的「${name}」正在寻觅${seeking} · ${suffix}`,
-      type: "ad",
+      text: `>> ${cond}的「${name}」正在寻觅${seeking}  ${suffix}`,
+      type: "info",
     });
 
     if (p.hobby) {
       const hobbyTag = p.hobby.split(/[,，、\s]+/)[0];
       msgs.push({
-        text: `~ 热爱${hobbyTag}的「${name}」在线求偶中 · seeking connection`,
-        type: "ad",
+        text: `${hobbyTag}的「${name}」在线求偶中 seeking connection`,
+        type: "info",
       });
     }
     if (rel.datingPurpose) {
       msgs.push({
-        text: `[目的] 「${name}」来这里是为了：${rel.datingPurpose} · Here for: ${rel.datingPurpose.split("/").slice(1).join("/").trim() || rel.datingPurpose}`,
+        text: ` 「${name}」来这里是为了：${rel.datingPurpose} Here for: ${rel.datingPurpose.split("/").slice(1).join("/").trim() || rel.datingPurpose}`,
         type: "info",
       });
     }
     if (p.likes && p.likes.length >= 5) {
       msgs.push({
-        text: `[心] 「${name}」已收获 ${p.likes.length} 个心动 · ${p.likes.length} admirers and counting`,
+        text: `「${name}」已收获 ${p.likes.length} 个心动 ${p.likes.length} admirers and counting`,
         type: "like",
       });
     }
     if (score >= 80) {
       msgs.push({
-        text: `[TOP] 高分优质用户「${name}」评分 ${score}分 · Premium profile · Score: ${score}`,
+        text: `高分优质用户「${name}」评分 ${score}分 Premium profile Score: ${score}`,
         type: "alert",
       });
     }
     if (p.mixed && p.breed2) {
       msgs.push({
-        text: `[RARE] 混血珍稀品种「${name}」· ${p.breed} x ${p.breed2} · Mixed-heritage · Rare find!`,
-        type: "species",
+        text: `混血珍稀品种「${name}」${p.breed} x ${p.breed2} Mixed-heritage Rare find!`,
+        type: "info",
       });
     }
     if (isNonMammal(p.breed)) {
       msgs.push({
-        text: `[EXOTIC] 非哺乳类稀有物种「${name}」寻缘中 · Non-mammal rarity seeking their match`,
-        type: "species",
+        text: `非哺乳类稀有物种「${name}」寻缘中 Non-mammal rarity seeking their match`,
+        type: "info",
       });
     }
     if (isNonStraight(p.orientation)) {
       msgs.push({
-        text: `[LGBTQ] 「${name}」${p.orientation}，寻觅同频的你 · Seeking like-minded souls`,
-        type: "orientation",
+        text: `「${name}」${p.orientation}，寻觅同频的你 Seeking like-minded souls`,
+        type: "info",
       });
     }
   });
 
   if (msgs.length === 0) {
-    msgs.push({ text: "优质兽人正在加载中 · Loading quality anthros · Please stand by", type: "neutral" });
+    msgs.push({ text: "优质兽人正在加载中  Loading quality anthros  Please stand by", type: "neutral" });
   }
 
   return msgs.sort(() => Math.random() - 0.5);
@@ -529,11 +555,11 @@ function initTicker(profiles) {
   const full = [...msgs, ...msgs];
   track.innerHTML = full
     .map((m) => `<span class="ticker-item ticker-item-${m.type}">${m.text}</span>`)
-    .join('<span class="ticker-sep">·</span>');
+    .join('<span class="ticker-sep">  </span>');
 
   // Calculate scroll duration based on content length
   const totalChars = full.reduce((s, m) => s + m.text.length, 0);
-  const duration = Math.max(30, totalChars * 0.35);
+  const duration = Math.max(15, totalChars * 0.18);
   track.style.animationDuration = `${duration}s`;
 }
 
@@ -545,7 +571,7 @@ function pushTickerMessage(text, type = "alert") {
   span.textContent = text;
   const sep = document.createElement("span");
   sep.className = "ticker-sep";
-  sep.textContent = "·";
+  sep.textContent = "  ";
   track.prepend(sep);
   track.prepend(span);
 }
@@ -555,7 +581,7 @@ function pushTickerMessage(text, type = "alert") {
 socket.on("like-event", (data) => {
   const reasonPart =
     data.label && data.reason ? ` 因为[${data.label}]它觉得 thinks: ${data.reason}` : "";
-  spawnDanmaku(`[心] ${data.by} 对 ${data.name} 上头 fell for them${reasonPart}`, "like");
+  spawnDanmaku(`${data.by} 对 ${data.name} 上头 fell for them${reasonPart}`, "like");
 
   const profile = ranking.find((p) => p.name === data.name);
   if (profile && data.likesCount !== undefined) {
@@ -572,14 +598,14 @@ socket.on("like-event", (data) => {
   }
 
   if (data.likesCount && data.likesCount % 5 === 0) {
-    pushTickerMessage(`[心] 「${data.name}」累计 total ${data.likesCount} 个喜欢 likes`, "like");
+    pushTickerMessage(`「${data.name}」累计 total ${data.likesCount} 个喜欢 likes`, "like");
   }
 });
 
 socket.on("skip-event", (data) => {
   const reasonPart =
     data.label && data.reason ? ` 因为[${data.label}]它觉得 thinks: ${data.reason}` : "";
-  spawnDanmaku(`[过] ${data.by} 跳过 skipped ${data.name}${reasonPart}`, "skip");
+  spawnDanmaku(`${data.by} 跳过 skipped ${data.name}${reasonPart}`, "skip");
 });
 
 // ── 工具函数 ──────────────────────────────────────────
@@ -622,6 +648,11 @@ function renderGridAsAvatar(grid, gridText) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = `${cellSize}px monospace`;
+
+  ctx.shadowColor = "rgba(40,56,24,0.60)";
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+  ctx.shadowBlur = 0;
 
   for (let y = 0; y < 32; y++) {
     for (let x = 0; x < 32; x++) {
