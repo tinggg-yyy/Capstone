@@ -22,12 +22,20 @@
     <script src="socket.io/socket.io.js"></script>
   </head>
   <body>
+    <!-- Custom Alert Modal -->
+    <div id="custom-alert-overlay" class="custom-alert-overlay hidden">
+      <div class="custom-alert-box">
+        <p id="custom-alert-msg"></p>
+        <button class="nes-btn is-primary" onclick="closeCustomAlert()">OK</button>
+      </div>
+    </div>
+
     <!-- Launch Page -->
     <section id="launch" class="page active">
       <div class="phone">
         <h1 class="logo">PREDATE</h1>
         <p class="subtitle">
-          兽人世界的交友平台<br>Furry dating in the anthro world
+          寻找有缘的那个ta<br> Find your destined one
         </p>
         <button class="nes-btn" onclick="goTo('login')">开始 START</button>
       </div>
@@ -71,7 +79,7 @@
           />
         </div>
       </div>
-      <button class="nes-btn setup-next-btn" onclick="goTo('profile-breed')">
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-name','profile-breed')">
         ▶
       </button>
     </section>
@@ -181,7 +189,7 @@
           </div>
         </div>
       </div>
-      <button class="nes-btn setup-next-btn" onclick="goTo('profile-gender')">
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-breed','profile-gender')">
         ▶
       </button>
     </section>
@@ -238,7 +246,7 @@
 
         </div>
       </div>
-      <button class="nes-btn setup-next-btn" onclick="goTo('profile-housing')">▶</button>
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-gender','profile-housing')">▶</button>
     </section>
 
     <!-- Profile - Housing -->
@@ -316,61 +324,61 @@
               <option value="班加罗尔">班加罗尔 Bangalore</option>
             </optgroup>
             <optgroup label="欧洲 Europe">
-              <option value="伦敦">London</option>
-              <option value="巴黎">Paris</option>
-              <option value="柏林">Berlin</option>
-              <option value="马德里">Madrid</option>
-              <option value="罗马">Roma</option>
-              <option value="阿姆斯特丹">Amsterdam</option>
-              <option value="布鲁塞尔">Brussels</option>
-              <option value="维也纳">Wien / Vienna</option>
-              <option value="苏黎世">Zürich</option>
-              <option value="日内瓦">Genève / Geneva</option>
-              <option value="巴塞罗那">Barcelona</option>
-              <option value="慕尼黑">München / Munich</option>
-              <option value="法兰克福">Frankfurt</option>
-              <option value="米兰">Milano / Milan</option>
-              <option value="哥本哈根">København / Copenhagen</option>
-              <option value="斯德哥尔摩">Stockholm</option>
-              <option value="赫尔辛基">Helsinki</option>
-              <option value="奥斯陆">Oslo</option>
-              <option value="华沙">Warszawa / Warsaw</option>
-              <option value="布拉格">Praha / Prague</option>
-              <option value="布达佩斯">Budapest</option>
-              <option value="莫斯科">Москва / Moscow</option>
-              <option value="圣彼得堡">St. Petersburg</option>
+              <option value="伦敦">伦敦 London</option>
+              <option value="巴黎">巴黎 Paris</option>
+              <option value="柏林">柏林 Berlin</option>
+              <option value="马德里">马德里 Madrid</option>
+              <option value="罗马">罗马 Roma</option>
+              <option value="阿姆斯特丹">阿姆斯特丹 Amsterdam</option>
+              <option value="布鲁塞尔">布鲁塞尔 Brussels</option>
+              <option value="维也纳">维也纳 Wien / Vienna</option>
+              <option value="苏黎世">苏黎世 Zürich</option>
+              <option value="日内瓦">日内瓦 Genève / Geneva</option>
+              <option value="巴塞罗那">巴塞罗那 Barcelona</option>
+              <option value="慕尼黑">慕尼黑 München / Munich</option>
+              <option value="法兰克福">法兰克福 Frankfurt</option>
+              <option value="米兰">米兰 Milano / Milan</option>
+              <option value="哥本哈根">哥本哈根 København / Copenhagen</option>
+              <option value="斯德哥尔摩">斯德哥尔摩 Stockholm</option>
+              <option value="赫尔辛基">赫尔辛基 Helsinki</option>
+              <option value="奥斯陆">奥斯陆 Oslo</option>
+              <option value="华沙">华沙 Warszawa / Warsaw</option>
+              <option value="布拉格">布拉格 Praha / Prague</option>
+              <option value="布达佩斯">布达佩斯 Budapest</option>
+              <option value="莫斯科">莫斯科 Москва / Moscow</option>
+              <option value="圣彼得堡">圣彼得堡 St. Petersburg</option>
             </optgroup>
             <optgroup label="北美 North America">
-              <option value="纽约">New York</option>
-              <option value="洛杉矶">Los Angeles</option>
-              <option value="旧金山">San Francisco</option>
-              <option value="芝加哥">Chicago</option>
-              <option value="波士顿">Boston</option>
-              <option value="西雅图">Seattle</option>
-              <option value="迈阿密">Miami</option>
-              <option value="拉斯维加斯">Las Vegas</option>
-              <option value="华盛顿">Washington D.C.</option>
-              <option value="多伦多">Toronto</option>
-              <option value="温哥华">Vancouver</option>
-              <option value="蒙特利尔">Montréal</option>
+              <option value="纽约">纽约 New York</option>
+              <option value="洛杉矶">洛杉矶 Los Angeles</option>
+              <option value="旧金山">旧金山 San Francisco</option>
+              <option value="芝加哥">芝加哥 Chicago</option>
+              <option value="波士顿">波士顿 Boston</option>
+              <option value="西雅图">西雅图 Seattle</option>
+              <option value="迈阿密">迈阿密 Miami</option>
+              <option value="拉斯维加斯">拉斯维加斯 Las Vegas</option>
+              <option value="华盛顿">华盛顿 Washington D.C.</option>
+              <option value="多伦多">多伦多 Toronto</option>
+              <option value="温哥华">温哥华 Vancouver</option>
+              <option value="蒙特利尔">蒙特利尔 Montréal</option>
             </optgroup>
             <optgroup label="中南美 Latin America">
-              <option value="墨西哥城">Ciudad de México</option>
-              <option value="圣保罗">São Paulo</option>
-              <option value="里约热内卢">Rio de Janeiro</option>
-              <option value="布宜诺斯艾利斯">Buenos Aires</option>
+              <option value="墨西哥城">墨西哥城 Ciudad de México</option>
+              <option value="圣保罗">圣保罗 São Paulo</option>
+              <option value="里约热内卢">里约热内卢 Rio de Janeiro</option>
+              <option value="布宜诺斯艾利斯">布宜诺斯艾利斯 Buenos Aires</option>
             </optgroup>
             <optgroup label="大洋洲 Oceania">
-              <option value="悉尼">Sydney</option>
-              <option value="墨尔本">Melbourne</option>
-              <option value="布里斯班">Brisbane</option>
-              <option value="珀斯">Perth</option>
-              <option value="奥克兰">Auckland</option>
+              <option value="悉尼">悉尼 Sydney</option>
+              <option value="墨尔本">墨尔本 Melbourne</option>
+              <option value="布里斯班">布里斯班 Brisbane</option>
+              <option value="珀斯">珀斯 Perth</option>
+              <option value="奥克兰">奥克兰 Auckland</option>
             </optgroup>
             <optgroup label="非洲 Africa">
-              <option value="开罗">القاهرة Cairo</option>
-              <option value="约翰内斯堡">Johannesburg</option>
-              <option value="内罗毕">Nairobi</option>
+              <option value="开罗">开罗 Cairo</option>
+              <option value="约翰内斯堡">约翰内斯堡 Johannesburg</option>
+              <option value="内罗毕">内罗毕 Nairobi</option>
             </optgroup>
             <option value="自定义">自定义 Custom</option>
           </select>
@@ -378,22 +386,12 @@
         <input id="house-city-custom" class="nes-input hidden" type="text" placeholder="输入城市名 · Enter city name" />
 
         <label>区域 District</label>
-        <div class="nes-select">
-          <select id="house-district-select" onchange="onDistrictSelectChange('house')">
-            <option value="" disabled selected hidden>选择区域 Select District...</option>
-            <option value="市中心">市中心 City Center</option>
-            <option value="CBD">CBD</option>
-            <option value="老城区">老城区 Old Town</option>
-            <option value="新区">新区 New District</option>
-            <option value="滨水区">滨水区 Waterfront</option>
-            <option value="学区">学区 School District</option>
-            <option value="科技园区">科技园区 Tech Park</option>
-            <option value="豪华住宅区">豪华住宅区 Luxury Residential</option>
-            <option value="郊区">郊区 Suburbs</option>
-            <option value="自定义">自定义 Custom</option>
-          </select>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="house-district-dice-btn" data-rolls="0"
+            onclick="rollDistrictDice('house')"></button>
+          <div id="house-district-display" class="dice-result-input">—</div>
+          <input id="house-district" type="hidden" value="" />
         </div>
-        <input id="house-district-custom" class="nes-input hidden" type="text" placeholder="自定义区域 · Custom district..." />
 
         <label>房屋类型 Type</label>
         <div class="dice-field-row">
@@ -405,13 +403,11 @@
 
         <div id="house-villa-wrapper" class="hidden">
           <label>别墅共几层 Villa Floors</label>
-          <div class="nes-select">
-            <select id="house-villa-floors">
-              <option value="1层独栋">1层独栋 Single Story</option>
-              <option value="2层别墅">2层别墅 2-Floor Villa</option>
-              <option value="3层别墅">3层别墅 3-Floor Villa</option>
-              <option value="4层及以上">4层及以上 4+ Floors</option>
-            </select>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="house-villa-floors-dice-btn" data-rolls="0"
+              onclick="rollHousingFieldDice('villa-floors','house')"></button>
+            <div id="house-villa-floors-display" class="dice-result-input">—</div>
+            <input id="house-villa-floors" type="hidden" value="" />
           </div>
         </div>
 
@@ -433,14 +429,22 @@
           <input id="house-area" type="hidden" value="" />
         </div>
 
-        <div class="house-floor-row">
-          <div class="house-floor-cell">
-            <label>楼层 Floor</label>
-            <input id="house-floor" class="nes-input" type="number" placeholder="第几层 · Floor #" />
+        <div id="house-apt-floors-wrapper" class="hidden">
+          <label>住在第几层 Floor</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="house-apt-floor-dice-btn" data-rolls="0"
+              onclick="rollHousingFieldDice('apt-floor','house')"></button>
+            <div id="house-apt-floor-display" class="dice-result-input">—</div>
+            <input id="house-apt-floor" type="hidden" value="" />
           </div>
-          <div class="house-floor-cell">
-            <label>共几层 Total Floors</label>
-            <input id="house-total-floors" class="nes-input" type="number" placeholder="共几层 · Total Floors" />
+          <div id="house-apt-total-section" class="hidden">
+            <label>一共几层 Total Floors</label>
+            <div class="dice-field-row">
+              <button class="dice-roll-btn" id="house-apt-total-dice-btn" data-rolls="0"
+                onclick="rollHousingFieldDice('apt-total','house')"></button>
+              <div id="house-apt-total-display" class="dice-result-input">—</div>
+              <input id="house-apt-total" type="hidden" value="" />
+            </div>
           </div>
         </div>
 
@@ -480,96 +484,411 @@
           <input id="house-price" type="hidden" value="" />
         </div>
       </div>
-      <button class="nes-btn setup-next-btn" onclick="goTo('profile-sterilized')">▶</button>
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-housing','profile-vehicle')">▶</button>
+    </section>
+
+    <!-- Profile - Vehicle -->
+    <section id="profile-vehicle" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-housing')">◀</button>
+      <div class="phone setup-content">
+        <label>车辆类型 Vehicle Type</label>
+        <div class="dice-field-row" style="margin-bottom:6px;">
+          <button class="dice-roll-btn" id="vehicle-type-dice-btn" data-rolls="0"
+            onclick="rollVehicleTypeDice()"></button>
+          <div id="vehicle-types-display" class="dice-result-input" style="flex:1;">—</div>
+        </div>
+        <input id="vehicle-types-hidden" type="hidden" value="" />
+
+        <div id="vehicle-car-model-wrapper" class="hidden">
+          <label id="vehicle-model-label">车辆品牌 Car Brand</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="vehicle-model-dice-btn" data-rolls="0"
+              onclick="rollVehicleModelDice()"></button>
+            <div id="vehicle-model-display" class="dice-result-input" style="flex:1;">—</div>
+            <input id="vehicle-model" type="hidden" value="" />
+          </div>
+        </div>
+
+        <label>车辆数量 Count</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="vehicle-count-dice-btn" data-rolls="0"
+            onclick="rollVehicleFieldDice('count')"></button>
+          <div id="vehicle-count-display" class="dice-result-input">—</div>
+          <input id="vehicle-count" type="hidden" value="" />
+        </div>
+
+        <div id="vehicle-price-wrapper" class="hidden">
+          <label>车辆价值 Value</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="vehicle-price-dice-btn" data-rolls="0"
+              onclick="rollVehicleFieldDice('price')"></button>
+            <div id="vehicle-price-display" class="dice-result-input">—</div>
+            <input id="vehicle-price" type="hidden" value="" />
+          </div>
+        </div>
+      </div>
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-vehicle','profile-sterilized')">▶</button>
     </section>
 
     <!-- Profile - Sterilized -->
     <section id="profile-sterilized" class="page setup-page">
-      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-housing')">◀</button>
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-vehicle')">◀</button>
       <div class="phone setup-content">
-        <label>婚育状况 Mating Status</label>
+
+        <label>婚恋状况 Relationship Status</label>
         <div class="dice-field-row">
           <button class="dice-roll-btn" id="petSterilized-dice-btn" data-rolls="0"
             onclick="rollGenericTierDice('petSterilized-dice-btn','petSterilized-display','petSterilized',HOUSING_TIERS.marriage)"></button>
           <div id="petSterilized-display" class="dice-result-input">—</div>
           <input id="petSterilized" type="hidden" value="" />
         </div>
+
+        <label>谈过多少恋爱 Past Relationships</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="rel-pastCount-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('rel-pastCount-dice-btn','rel-pastCount-display','rel-pastCount',HOUSING_TIERS.pastRelCount,onPastRelRolled)"></button>
+          <div id="rel-pastCount-display" class="dice-result-input">—</div>
+          <input id="rel-pastCount" type="hidden" value="" />
+        </div>
+
+        <div id="rel-ex-group" class="hidden">
+          <label>和前任还有联系吗 Still in Touch w/ Ex?</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="rel-exContact-dice-btn" data-rolls="0"
+              onclick="rollGenericTierDice('rel-exContact-dice-btn','rel-exContact-display','rel-exContact',HOUSING_TIERS.exContact)"></button>
+            <div id="rel-exContact-display" class="dice-result-input">—</div>
+            <input id="rel-exContact" type="hidden" value="" />
+          </div>
+
+          <label>还爱前任吗 Still Love Ex?</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="rel-stillLoveEx-dice-btn" data-rolls="0"
+              onclick="rollGenericTierDice('rel-stillLoveEx-dice-btn','rel-stillLoveEx-display','rel-stillLoveEx',HOUSING_TIERS.stillLoveEx)"></button>
+            <div id="rel-stillLoveEx-display" class="dice-result-input">—</div>
+            <input id="rel-stillLoveEx" type="hidden" value="" />
+          </div>
+
+          <label>有白月光吗 Have a "One That Got Away"?</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="rel-whiteMoon-dice-btn" data-rolls="0"
+              onclick="rollGenericTierDice('rel-whiteMoon-dice-btn','rel-whiteMoon-display','rel-whiteMoon',HOUSING_TIERS.whiteMoonlight)"></button>
+            <div id="rel-whiteMoon-display" class="dice-result-input">—</div>
+            <input id="rel-whiteMoon" type="hidden" value="" />
+          </div>
+        </div>
+
+        <label>有孩子吗 Have Kids?</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="rel-kids-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('rel-kids-dice-btn','rel-kids-display','rel-kids',HOUSING_TIERS.hasKids)"></button>
+          <div id="rel-kids-display" class="dice-result-input">—</div>
+          <input id="rel-kids" type="hidden" value="" />
+        </div>
+
+        <label>现在有伴侣吗 Current Partner?</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="rel-partner-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('rel-partner-dice-btn','rel-partner-display','rel-partner',HOUSING_TIERS.currentPartner,onPartnerRolled)"></button>
+          <div id="rel-partner-display" class="dice-result-input">—</div>
+          <input id="rel-partner" type="hidden" value="" />
+        </div>
+
+        <div id="rel-partner-details" class="hidden">
+          <label>有几个伴侣 How Many Partners?</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="rel-partnerCount-dice-btn" data-rolls="0"
+              onclick="rollGenericTierDice('rel-partnerCount-dice-btn','rel-partnerCount-display','rel-partnerCount',HOUSING_TIERS.partnerCount)"></button>
+            <div id="rel-partnerCount-display" class="dice-result-input">—</div>
+            <input id="rel-partnerCount" type="hidden" value="" />
+          </div>
+
+          <label>有在国外的伴侣吗 Partner Abroad?</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="rel-foreignPartner-dice-btn" data-rolls="0"
+              onclick="rollGenericTierDice('rel-foreignPartner-dice-btn','rel-foreignPartner-display','rel-foreignPartner',HOUSING_TIERS.foreignPartner)"></button>
+            <div id="rel-foreignPartner-display" class="dice-result-input">—</div>
+            <input id="rel-foreignPartner" type="hidden" value="" />
+          </div>
+
+          <label>有在别的省/市的伴侣吗 Long-Distance?</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="rel-otherCity-dice-btn" data-rolls="0"
+              onclick="rollGenericTierDice('rel-otherCity-dice-btn','rel-otherCity-display','rel-otherCity',HOUSING_TIERS.otherCityPartner)"></button>
+            <div id="rel-otherCity-display" class="dice-result-input">—</div>
+            <input id="rel-otherCity" type="hidden" value="" />
+          </div>
+        </div>
+
+        <div id="rel-no-partner-details" class="hidden">
+          <label>有暧昧关系吗 Ambiguous Relationships?</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="rel-ambiguous-dice-btn" data-rolls="0"
+              onclick="rollGenericTierDice('rel-ambiguous-dice-btn','rel-ambiguous-display','rel-ambiguous',HOUSING_TIERS.ambiguousCount)"></button>
+            <div id="rel-ambiguous-display" class="dice-result-input">—</div>
+            <input id="rel-ambiguous" type="hidden" value="" />
+          </div>
+
+          <label>有 Secret 伴侣吗 Secret Partner?</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="rel-secret-dice-btn" data-rolls="0"
+              onclick="rollGenericTierDice('rel-secret-dice-btn','rel-secret-display','rel-secret',HOUSING_TIERS.secretPartner)"></button>
+            <div id="rel-secret-display" class="dice-result-input">—</div>
+            <input id="rel-secret" type="hidden" value="" />
+          </div>
+        </div>
+
+        <label>现在对谁有 Crush 吗 Currently Crushing?</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="rel-crush-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('rel-crush-dice-btn','rel-crush-display','rel-crush',HOUSING_TIERS.hasCrush)"></button>
+          <div id="rel-crush-display" class="dice-result-input">—</div>
+          <input id="rel-crush" type="hidden" value="" />
+        </div>
+
+        <label style="font-weight:bold;margin-top:14px;display:block;">交友意向 Dating Intentions</label>
+        <label style="font-size:11px;opacity:0.7;">来 App 的原因 Why You're Here</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="rel-purpose-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('rel-purpose-dice-btn','rel-purpose-display','rel-purpose',HOUSING_TIERS.datingPurpose)"></button>
+          <div id="rel-purpose-display" class="dice-result-input">—</div>
+          <input id="rel-purpose" type="hidden" value="" />
+        </div>
+
+        <label style="font-size:11px;opacity:0.7;">想发展的关系 Relationship Goal</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="rel-goal-dice-btn" data-rolls="0"
+            onclick="rollGenericTierDice('rel-goal-dice-btn','rel-goal-display','rel-goal',HOUSING_TIERS.relationshipGoal)"></button>
+          <div id="rel-goal-display" class="dice-result-input">—</div>
+          <input id="rel-goal" type="hidden" value="" />
+        </div>
+
       </div>
-      <button class="nes-btn setup-next-btn" onclick="goTo('profile-mbti')">▶</button>
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-sterilized','profile-parents')">▶</button>
+    </section>
+
+    <!-- Profile - Parents -->
+    <section id="profile-parents" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-sterilized')">◀</button>
+      <div class="phone setup-content">
+        <label>父母健在状况 Parents Status</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="parents-status-dice-btn" data-rolls="0"
+            onclick="rollParentsFieldDice('status')"></button>
+          <div id="parents-status-display" class="dice-result-input">—</div>
+          <input id="parents-status" type="hidden" value="" />
+        </div>
+
+        <div id="parents-father-wrapper" class="hidden">
+          <label>父亲来自 Father's Origin</label>
+          <div class="nes-select">
+            <select id="parents-father-city-select" onchange="onCitySelectChange('parents-father')">
+              <option value="" disabled selected hidden>选择城市 Select City...</option>
+              <optgroup label="中国内地 Mainland China">
+                <option value="上海">上海 Shanghai</option>
+                <option value="北京">北京 Beijing</option>
+                <option value="深圳">深圳 Shenzhen</option>
+                <option value="广州">广州 Guangzhou</option>
+                <option value="成都">成都 Chengdu</option>
+                <option value="杭州">杭州 Hangzhou</option>
+                <option value="南京">南京 Nanjing</option>
+                <option value="武汉">武汉 Wuhan</option>
+                <option value="重庆">重庆 Chongqing</option>
+                <option value="西安">西安 Xi'an</option>
+                <option value="苏州">苏州 Suzhou</option>
+                <option value="天津">天津 Tianjin</option>
+                <option value="长沙">长沙 Changsha</option>
+                <option value="郑州">郑州 Zhengzhou</option>
+                <option value="青岛">青岛 Qingdao</option>
+                <option value="大连">大连 Dalian</option>
+                <option value="厦门">厦门 Xiamen</option>
+                <option value="福州">福州 Fuzhou</option>
+                <option value="济南">济南 Jinan</option>
+                <option value="昆明">昆明 Kunming</option>
+                <option value="哈尔滨">哈尔滨 Harbin</option>
+                <option value="沈阳">沈阳 Shenyang</option>
+                <option value="合肥">合肥 Hefei</option>
+                <option value="宁波">宁波 Ningbo</option>
+                <option value="佛山">佛山 Foshan</option>
+                <option value="东莞">东莞 Dongguan</option>
+                <option value="无锡">无锡 Wuxi</option>
+                <option value="珠海">珠海 Zhuhai</option>
+                <option value="三亚">三亚 Sanya</option>
+                <option value="乌鲁木齐">乌鲁木齐 Ürümqi</option>
+              </optgroup>
+              <optgroup label="港澳台 HK · Macau · Taiwan">
+                <option value="香港">香港 Hong Kong</option>
+                <option value="澳门">澳门 Macau</option>
+                <option value="台北">台北 Taipei</option>
+              </optgroup>
+              <optgroup label="日韩 Japan · Korea">
+                <option value="东京">東京 Tokyo</option>
+                <option value="大阪">大阪 Osaka</option>
+                <option value="首尔">서울 Seoul</option>
+              </optgroup>
+              <optgroup label="欧洲 Europe">
+                <option value="伦敦">伦敦 London</option>
+                <option value="巴黎">巴黎 Paris</option>
+                <option value="柏林">柏林 Berlin</option>
+              </optgroup>
+              <optgroup label="北美 North America">
+                <option value="纽约">纽约 New York</option>
+                <option value="洛杉矶">洛杉矶 Los Angeles</option>
+                <option value="旧金山">旧金山 San Francisco</option>
+              </optgroup>
+              <optgroup label="大洋洲 Oceania">
+                <option value="悉尼">悉尼 Sydney</option>
+                <option value="墨尔本">墨尔本 Melbourne</option>
+              </optgroup>
+              <option value="自定义">自定义 Custom</option>
+            </select>
+          </div>
+          <input id="parents-father-city-custom" class="nes-input hidden" type="text" placeholder="输入城市名 · Enter city name" />
+        </div>
+
+        <div id="parents-mother-wrapper" class="hidden">
+          <label>母亲来自 Mother's Origin</label>
+          <div class="nes-select">
+            <select id="parents-mother-city-select" onchange="onCitySelectChange('parents-mother')">
+              <option value="" disabled selected hidden>选择城市 Select City...</option>
+              <optgroup label="中国内地 Mainland China">
+                <option value="上海">上海 Shanghai</option>
+                <option value="北京">北京 Beijing</option>
+                <option value="深圳">深圳 Shenzhen</option>
+                <option value="广州">广州 Guangzhou</option>
+                <option value="成都">成都 Chengdu</option>
+                <option value="杭州">杭州 Hangzhou</option>
+                <option value="南京">南京 Nanjing</option>
+                <option value="武汉">武汉 Wuhan</option>
+                <option value="重庆">重庆 Chongqing</option>
+                <option value="西安">西安 Xi'an</option>
+                <option value="苏州">苏州 Suzhou</option>
+                <option value="天津">天津 Tianjin</option>
+                <option value="长沙">长沙 Changsha</option>
+                <option value="郑州">郑州 Zhengzhou</option>
+                <option value="青岛">青岛 Qingdao</option>
+                <option value="大连">大连 Dalian</option>
+                <option value="厦门">厦门 Xiamen</option>
+                <option value="福州">福州 Fuzhou</option>
+                <option value="济南">济南 Jinan</option>
+                <option value="昆明">昆明 Kunming</option>
+                <option value="哈尔滨">哈尔滨 Harbin</option>
+                <option value="沈阳">沈阳 Shenyang</option>
+                <option value="合肥">合肥 Hefei</option>
+                <option value="宁波">宁波 Ningbo</option>
+                <option value="佛山">佛山 Foshan</option>
+                <option value="东莞">东莞 Dongguan</option>
+                <option value="无锡">无锡 Wuxi</option>
+                <option value="珠海">珠海 Zhuhai</option>
+                <option value="三亚">三亚 Sanya</option>
+                <option value="乌鲁木齐">乌鲁木齐 Ürümqi</option>
+              </optgroup>
+              <optgroup label="港澳台 HK · Macau · Taiwan">
+                <option value="香港">香港 Hong Kong</option>
+                <option value="澳门">澳门 Macau</option>
+                <option value="台北">台北 Taipei</option>
+              </optgroup>
+              <optgroup label="日韩 Japan · Korea">
+                <option value="东京">東京 Tokyo</option>
+                <option value="大阪">大阪 Osaka</option>
+                <option value="首尔">서울 Seoul</option>
+              </optgroup>
+              <optgroup label="欧洲 Europe">
+                <option value="伦敦">伦敦 London</option>
+                <option value="巴黎">巴黎 Paris</option>
+                <option value="柏林">柏林 Berlin</option>
+              </optgroup>
+              <optgroup label="北美 North America">
+                <option value="纽约">纽约 New York</option>
+                <option value="洛杉矶">洛杉矶 Los Angeles</option>
+                <option value="旧金山">旧金山 San Francisco</option>
+              </optgroup>
+              <optgroup label="大洋洲 Oceania">
+                <option value="悉尼">悉尼 Sydney</option>
+                <option value="墨尔本">墨尔本 Melbourne</option>
+              </optgroup>
+              <option value="自定义">自定义 Custom</option>
+            </select>
+          </div>
+          <input id="parents-mother-city-custom" class="nes-input hidden" type="text" placeholder="输入城市名 · Enter city name" />
+        </div>
+
+        <div id="parents-rel-wrapper" class="hidden">
+          <label>父母关系 Parents' Relationship</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="parents-relationship-dice-btn" data-rolls="0"
+              onclick="rollParentsFieldDice('relationship')"></button>
+            <div id="parents-relationship-display" class="dice-result-input">—</div>
+            <input id="parents-relationship" type="hidden" value="" />
+          </div>
+        </div>
+      </div>
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-parents','profile-mbti')">▶</button>
     </section>
 
     <!-- Profile - MBTI -->
     <section id="profile-mbti" class="page setup-page">
-      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-sterilized')">◀</button>
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-parents')">◀</button>
       <div class="phone setup-content">
         <label>MBTI类型 MBTI Type</label>
 
         <div class="mbti-slot-wrap">
-          <div class="dice-field-row">
-            <button class="dice-roll-btn" id="petMbti1-dice-btn" data-rolls="0"
-              onclick="rollGenericTierDice('petMbti1-dice-btn','petMbti1-display','petMbti1',HOUSING_TIERS.mbtiEI)"></button>
-            <div id="petMbti1-display" class="dice-result-input mbti-pickable" onclick="toggleMbtiPicker('petMbti1')">—</div>
-            <input id="petMbti1" type="hidden" value="" />
+          <div class="mbti-option-row">
+            <button class="mbti-opt-btn" id="petMbti1-E" onclick="selectMbtiChar('petMbti1','E')">E</button>
+            <span class="mbti-opt-label">外向 Extrovert</span>
+            <button class="mbti-opt-btn" id="petMbti1-I" onclick="selectMbtiChar('petMbti1','I')">I</button>
+            <span class="mbti-opt-label">内向 Introvert</span>
+            <button class="mbti-opt-btn mbti-custom-btn" onclick="toggleMbtiPicker('petMbti1')">自定义 ✎</button>
           </div>
+          <div id="petMbti1-display" class="dice-result-input">—</div>
+          <input id="petMbti1" type="hidden" value="" />
           <div id="petMbti1-picker" class="mbti-char-picker hidden"></div>
         </div>
-        <p>E (外向) / I (内向) / 点击字母自定义 Custom</p>
 
         <div class="mbti-slot-wrap">
-          <div class="dice-field-row">
-            <button class="dice-roll-btn" id="petMbti2-dice-btn" data-rolls="0"
-              onclick="rollGenericTierDice('petMbti2-dice-btn','petMbti2-display','petMbti2',HOUSING_TIERS.mbtiSN)"></button>
-            <div id="petMbti2-display" class="dice-result-input mbti-pickable" onclick="toggleMbtiPicker('petMbti2')">—</div>
-            <input id="petMbti2" type="hidden" value="" />
+          <div class="mbti-option-row">
+            <button class="mbti-opt-btn" id="petMbti2-S" onclick="selectMbtiChar('petMbti2','S')">S</button>
+            <span class="mbti-opt-label">感觉 Sensing</span>
+            <button class="mbti-opt-btn" id="petMbti2-N" onclick="selectMbtiChar('petMbti2','N')">N</button>
+            <span class="mbti-opt-label">直觉 iNtuition</span>
+            <button class="mbti-opt-btn mbti-custom-btn" onclick="toggleMbtiPicker('petMbti2')">自定义 ✎</button>
           </div>
+          <div id="petMbti2-display" class="dice-result-input">—</div>
+          <input id="petMbti2" type="hidden" value="" />
           <div id="petMbti2-picker" class="mbti-char-picker hidden"></div>
         </div>
-        <p>S (感觉) / N (直觉) / 点击字母自定义 Custom</p>
 
         <div class="mbti-slot-wrap">
-          <div class="dice-field-row">
-            <button class="dice-roll-btn" id="petMbti3-dice-btn" data-rolls="0"
-              onclick="rollGenericTierDice('petMbti3-dice-btn','petMbti3-display','petMbti3',HOUSING_TIERS.mbtiTF)"></button>
-            <div id="petMbti3-display" class="dice-result-input mbti-pickable" onclick="toggleMbtiPicker('petMbti3')">—</div>
-            <input id="petMbti3" type="hidden" value="" />
+          <div class="mbti-option-row">
+            <button class="mbti-opt-btn" id="petMbti3-T" onclick="selectMbtiChar('petMbti3','T')">T</button>
+            <span class="mbti-opt-label">思考 Thinking</span>
+            <button class="mbti-opt-btn" id="petMbti3-F" onclick="selectMbtiChar('petMbti3','F')">F</button>
+            <span class="mbti-opt-label">情感 Feeling</span>
+            <button class="mbti-opt-btn mbti-custom-btn" onclick="toggleMbtiPicker('petMbti3')">自定义 ✎</button>
           </div>
+          <div id="petMbti3-display" class="dice-result-input">—</div>
+          <input id="petMbti3" type="hidden" value="" />
           <div id="petMbti3-picker" class="mbti-char-picker hidden"></div>
         </div>
-        <p>T (思考) / F (情感) / 点击字母自定义 Custom</p>
 
         <div class="mbti-slot-wrap">
-          <div class="dice-field-row">
-            <button class="dice-roll-btn" id="petMbti4-dice-btn" data-rolls="0"
-              onclick="rollGenericTierDice('petMbti4-dice-btn','petMbti4-display','petMbti4',HOUSING_TIERS.mbtiJP)"></button>
-            <div id="petMbti4-display" class="dice-result-input mbti-pickable" onclick="toggleMbtiPicker('petMbti4')">—</div>
-            <input id="petMbti4" type="hidden" value="" />
+          <div class="mbti-option-row">
+            <button class="mbti-opt-btn" id="petMbti4-J" onclick="selectMbtiChar('petMbti4','J')">J</button>
+            <span class="mbti-opt-label">判断 Judging</span>
+            <button class="mbti-opt-btn" id="petMbti4-P" onclick="selectMbtiChar('petMbti4','P')">P</button>
+            <span class="mbti-opt-label">知觉 Perceiving</span>
+            <button class="mbti-opt-btn mbti-custom-btn" onclick="toggleMbtiPicker('petMbti4')">自定义 ✎</button>
           </div>
+          <div id="petMbti4-display" class="dice-result-input">—</div>
+          <input id="petMbti4" type="hidden" value="" />
           <div id="petMbti4-picker" class="mbti-char-picker hidden"></div>
         </div>
-        <p>J (判断) / P (知觉) / 点击字母自定义  Custom</p>
       </div>
-      <button class="nes-btn setup-next-btn" onclick="goTo('profile-hobbies')">▶</button>
-    </section>
-
-    <!-- Profile - Hobbies -->
-    <section id="profile-hobbies" class="page setup-page">
-      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-mbti')">◀</button>
-      <div class="phone setup-content">
-        <label>兴趣爱好 Hobbies</label>
-        <p class="hobby-hint">可多选 Pick any that fit</p>
-        <div class="hobby-tags-wrap" id="hobby-tags"></div>
-        <div class="hobby-custom-row">
-          <input id="hobby-custom-input" class="nes-input" type="text" placeholder="自定义爱好 · Custom..."
-            onkeydown="if(event.key==='Enter')addCustomHobbyTag('hobby-tags','hobby-custom-input')" />
-          <button class="nes-btn" onclick="addCustomHobbyTag('hobby-tags','hobby-custom-input')">+</button>
-        </div>
-      </div>
-      <button class="nes-btn setup-next-btn" onclick="goTo('profile-edu')">▶</button>
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-mbti','profile-edu')">▶</button>
     </section>
 
     <!-- Profile - Education & Occupation -->
     <section id="profile-edu" class="page setup-page">
-      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-hobbies')">◀</button>
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-mbti')">◀</button>
       <div class="phone setup-content">
         <label>学历 Education</label>
         <div class="dice-field-row">
@@ -593,12 +912,28 @@
           <input id="petIncome" type="hidden" value="" />
         </div>
       </div>
-      <button class="nes-btn setup-next-btn" onclick="goTo('profile-photo')">▶</button>
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-edu','profile-hobbies')">▶</button>
+    </section>
+
+    <!-- Profile - Hobbies -->
+    <section id="profile-hobbies" class="page setup-page">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-edu')">◀</button>
+      <div class="phone setup-content">
+        <label>兴趣爱好 Hobbies</label>
+        <p class="hobby-hint">可多选 Pick any that fit</p>
+        <div class="hobby-tags-wrap" id="hobby-tags"></div>
+        <div class="hobby-custom-row">
+          <input id="hobby-custom-input" class="nes-input" type="text" placeholder="自定义爱好 · Custom..."
+            onkeydown="if(event.key==='Enter')addCustomHobbyTag('hobby-tags','hobby-custom-input')" />
+          <button class="nes-btn" onclick="addCustomHobbyTag('hobby-tags','hobby-custom-input')">+</button>
+        </div>
+      </div>
+      <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-hobbies','profile-photo')">▶</button>
     </section>
 
     <!-- Profile - Fursona -->
     <section id="profile-photo" class="page setup-page">
-      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-edu')">
+      <button class="nes-btn setup-prev-btn" onclick="goTo('profile-hobbies')">
         ◀
       </button>
       <div class="phone setup-content">
@@ -610,8 +945,8 @@
               <!-- p5 canvas will be appended here. -->
             </div>
             <div id="tools">
-              <button class="nes-btn" onclick="setBrush()">画笔 Brush</button>
-              <button class="nes-btn is-error" onclick="setEraser()">
+              <button class="nes-btn tool-active" id="brush-btn" onclick="setBrush()">画笔 Brush</button>
+              <button class="nes-btn" id="eraser-btn" onclick="setEraser()">
                 橡皮擦 Eraser
               </button>
               <button class="nes-btn is-warning" onclick="setUndo()">
@@ -632,7 +967,7 @@
           </section>
         </div>
       </div>
-      <button class="nes-btn setup-next-btn" onclick="createCard()">
+      <button class="nes-btn setup-next-btn" onclick="validateAndCreateCard()">
         生成档案卡 Create Card ▶
       </button>
     </section>
@@ -640,8 +975,10 @@
     <!-- Profile Card -->
     <section id="card" class="page">
       <div class="phone">
-        <div id="petCard" class="card"></div>
-        <button class="nes-btn" onclick="createSwipeCard()">
+        <div class="scroll">
+          <div id="petCard" class="card"></div>
+        </div>
+        <button class="nes-btn" onclick="createSwipeCard()" style="flex-shrink:0;margin-top:10px;">
           进入配对 Start Matching!
         </button>
       </div>
@@ -673,35 +1010,9 @@
     <!-- My Profile Edit Overlay -->
     <div id="profile-edit" class="hidden">
       <div class="edit-overlay-inner">
-        <h2>我的档案 My Profile</h2>
-
-        <!-- Stats banner: avatar + like/dislike counts -->
-        <div id="my-self-stats">
-          <div id="my-self-avatar-wrap">
-            <div id="my-self-stamp"></div>
-            <div id="my-self-avatar"></div>
-          </div>
-          <div id="my-self-stats-right">
-            <div id="my-self-likes" class="pixel-hearts-box stats-side"></div>
-            <div id="my-self-dislikes" class="pixel-hearts-box stats-side"></div>
-          </div>
-        </div>
-
         <div class="scroll">
-          <div class="profile-view-row"><span class="profile-view-label">名字 Name</span><span id="view-name" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">年龄 Age</span><span id="view-age" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">物种 Species</span><span id="view-breed" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">性别 Gender</span><span id="view-gender" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">性取向 Orientation</span><span id="view-orientation" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">领地 Territory</span><span id="view-hukou" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">婚育状况 Status</span><span id="view-sterilized" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">MBTI</span><span id="view-mbti" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">学历 Education</span><span id="view-edu" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">职业 Occupation</span><span id="view-occupation" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">月收入 Income</span><span id="view-income" class="profile-view-value"></span></div>
-          <div class="profile-view-row"><span class="profile-view-label">爱好 Hobbies</span><span id="view-hobby" class="profile-view-value"></span></div>
+          <div id="my-profile-card-body"></div>
         </div>
-
         <button class="nes-btn" onclick="closeMyProfile()">返回 Back</button>
       </div>
     </div>
@@ -709,7 +1020,7 @@
     <!-- Risk Warning Overlay -->
     <div id="warning-overlay" class="hidden">
       <div class="warning-box">
-        <div id="warning-icon" class="warning-icon">⚠️</div>
+        <div id="warning-icon" class="warning-icon"></div>
         <div id="warning-messages-list"></div>
         <div class="warning-btn-row">
           <button class="nes-btn is-error" onclick="proceedDespiteWarning()">
@@ -759,7 +1070,7 @@
               id="convo-input"
               class="nes-input"
               type="text"
-              placeholder="回复 · Reply..."
+              placeholder="回复 Reply..."
             />
             <button class="nes-btn is-primary" onclick="sendConvoMessage()">
               发送 Send

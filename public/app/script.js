@@ -5,7 +5,8 @@ function handleLogin() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
 
-  if (!username) return alert("请输入用户名 / Please enter username");
+  if (!username) return showAlert("请输入用户名！\nPlease enter a username.");
+  if (!password) return showAlert("请输入密码！\nPlease enter a password.");
 
   // 从服务器拿所有 profiles，检查是否已存在
   fetch("/profiles")
@@ -40,10 +41,12 @@ const _setupPageOrder = [
   "profile-breed",
   "profile-gender",
   "profile-housing",
+  "profile-vehicle",
   "profile-sterilized",
+  "profile-parents",
   "profile-mbti",
-  "profile-hobbies",
   "profile-edu",
+  "profile-hobbies",
   "profile-photo",
 ];
 let _currentScore = 100;
@@ -79,6 +82,229 @@ function goTo(id) {
   }
 }
 
+// ── Custom alert (replaces native alert()) ───────────────────
+function showAlert(msg) {
+  document.getElementById("custom-alert-msg").textContent = msg;
+  document.getElementById("custom-alert-overlay").classList.remove("hidden");
+}
+function closeCustomAlert() {
+  document.getElementById("custom-alert-overlay").classList.add("hidden");
+}
+
+// ── Per-page validation ──────────────────────────────────────
+// Returns true if valid, calls showAlert and returns false if not.
+function validatePage(pageId) {
+  switch (pageId) {
+
+    case "profile-name": {
+      const name = (document.getElementById("petName")?.value || "").trim();
+      if (!name) { showAlert("请填写你的名字！\nPlease enter your name."); return false; }
+      return true;
+    }
+
+    case "profile-breed": {
+      if (!document.getElementById("petBreedClass")?.value) {
+        showAlert("请选择种族大类！\nPlease select a species class."); return false;
+      }
+      const specWrapper = document.getElementById("breedSpecificWrapper");
+      if (specWrapper && !specWrapper.classList.contains("hidden")) {
+        if (!document.getElementById("petBreed")?.value) {
+          showAlert("请选择具体物种！\nPlease select a species."); return false;
+        }
+      }
+      const isMixed = document.getElementById("isMixed")?.checked;
+      if (isMixed) {
+        if (!document.getElementById("petBreedClass2")?.value) {
+          showAlert("请选择第二族裔大类！\nPlease select the 2nd heritage class."); return false;
+        }
+        const spec2 = document.getElementById("breedSpecificWrapper2");
+        if (spec2 && !spec2.classList.contains("hidden")) {
+          if (!document.getElementById("petBreed2")?.value) {
+            showAlert("请选择第二族裔物种！\nPlease select the 2nd heritage species."); return false;
+          }
+        }
+      }
+      const heightWrapper = document.getElementById("heightWrapper");
+      if (heightWrapper && !heightWrapper.classList.contains("hidden")) {
+        if (!document.getElementById("petHeight")?.value) {
+          showAlert("请选择身高！\nPlease select your height."); return false;
+        }
+      }
+      return true;
+    }
+
+    case "profile-gender": {
+      if (!document.getElementById("petOrientation")?.value) {
+        showAlert("请选择性取向！\nPlease select your orientation."); return false;
+      }
+      const dp = document.getElementById("datePicker");
+      if (dp && !dp.classList.contains("hidden")) {
+        showAlert('请先点击"确定 OK"确认出生日期！\nPlease confirm your birth date first.'); return false;
+      }
+      if (!document.getElementById("birthDisplay")?.value) {
+        showAlert("请选择出生日期！\nPlease select your birth date."); return false;
+      }
+      return true;
+    }
+
+    case "profile-housing": {
+      const cityEl = document.getElementById("house-city-select");
+      const cityCustom = document.getElementById("house-city-custom");
+      const cityVal = (cityEl?.value || "").trim();
+      const cityCustomVal = (cityCustom && !cityCustom.classList.contains("hidden")) ? cityCustom.value.trim() : "";
+      if (!cityVal && !cityCustomVal) {
+        showAlert("请选择城市！\nPlease select a city."); return false;
+      }
+      if (cityVal === "自定义" && !cityCustomVal) {
+        showAlert("请填写城市名！\nPlease enter a city name."); return false;
+      }
+      if (!document.getElementById("house-district")?.value) {
+        showAlert("请摇骰子选择区域！\nPlease roll for district."); return false;
+      }
+      if (!document.getElementById("house-type")?.value) {
+        showAlert("请摇骰子选择住宅类型！\nPlease roll for house type."); return false;
+      }
+      if (!document.getElementById("house-area")?.value) {
+        showAlert("请摇骰子选择面积！\nPlease roll for area."); return false;
+      }
+      if (!document.getElementById("house-tenure")?.value) {
+        showAlert("请摇骰子选择租/买！\nPlease roll for rent or buy."); return false;
+      }
+      if (!document.getElementById("house-price")?.value) {
+        showAlert("请摇骰子选择房屋价格！\nPlease roll for house price."); return false;
+      }
+      return true;
+    }
+
+    case "profile-vehicle": {
+      if (!document.getElementById("vehicle-types-hidden")?.value) {
+        showAlert("请摇骰子选择车辆类型！\nPlease roll for vehicle type."); return false;
+      }
+      if (!document.getElementById("vehicle-price")?.value) {
+        showAlert("请摇骰子选择车辆价值！\nPlease roll for vehicle price."); return false;
+      }
+      return true;
+    }
+
+    case "profile-sterilized": {
+      if (!document.getElementById("petSterilized")?.value) {
+        showAlert("请摇骰子选择婚恋状况！\nPlease roll for relationship status."); return false;
+      }
+      if (!document.getElementById("rel-pastCount")?.value) {
+        showAlert("请摇骰子选择谈过几次恋爱！\nPlease roll for past relationships."); return false;
+      }
+      // Conditional: ex-group visible
+      const exGroup = document.getElementById("rel-ex-group");
+      if (exGroup && !exGroup.classList.contains("hidden")) {
+        if (!document.getElementById("rel-exContact")?.value)
+          { showAlert("请摇骰子选择前任联系情况！\nPlease roll for ex contact."); return false; }
+        if (!document.getElementById("rel-stillLoveEx")?.value)
+          { showAlert("请摇骰子选择是否还爱前任！\nPlease roll for still love ex."); return false; }
+        if (!document.getElementById("rel-whiteMoon")?.value)
+          { showAlert("请摇骰子选择是否有白月光！\nPlease roll for white moonlight."); return false; }
+      }
+      if (!document.getElementById("rel-kids")?.value) {
+        showAlert("请摇骰子选择是否有孩子！\nPlease roll for kids."); return false;
+      }
+      if (!document.getElementById("rel-partner")?.value) {
+        showAlert("请摇骰子选择是否有伴侣！\nPlease roll for current partner."); return false;
+      }
+      // Conditional: partner details
+      const partnerDetails = document.getElementById("rel-partner-details");
+      if (partnerDetails && !partnerDetails.classList.contains("hidden")) {
+        if (!document.getElementById("rel-partnerCount")?.value)
+          { showAlert("请摇骰子选择伴侣数量！\nPlease roll for partner count."); return false; }
+        if (!document.getElementById("rel-foreignPartner")?.value)
+          { showAlert("请摇骰子选择是否有境外伴侣！\nPlease roll for foreign partner."); return false; }
+        if (!document.getElementById("rel-otherCity")?.value)
+          { showAlert("请摇骰子选择是否有异地伴侣！\nPlease roll for long-distance partner."); return false; }
+      }
+      const noPartnerDetails = document.getElementById("rel-no-partner-details");
+      if (noPartnerDetails && !noPartnerDetails.classList.contains("hidden")) {
+        if (!document.getElementById("rel-ambiguous")?.value)
+          { showAlert("请摇骰子选择暧昧情况！\nPlease roll for ambiguous relationships."); return false; }
+        if (!document.getElementById("rel-secret")?.value)
+          { showAlert("请摇骰子选择是否有秘密伴侣！\nPlease roll for secret partner."); return false; }
+      }
+      if (!document.getElementById("rel-crush")?.value) {
+        showAlert("请摇骰子选择是否有暗恋对象！\nPlease roll for crush."); return false;
+      }
+      if (!document.getElementById("rel-purpose")?.value) {
+        showAlert("请摇骰子选择来这里的目的！\nPlease roll for dating purpose."); return false;
+      }
+      if (!document.getElementById("rel-goal")?.value) {
+        showAlert("请摇骰子选择期望关系！\nPlease roll for relationship goal."); return false;
+      }
+      return true;
+    }
+
+    case "profile-parents": {
+      const parentsStatus = document.getElementById("parents-status")?.value;
+      if (!parentsStatus) {
+        showAlert("请摇骰子选择父母状况！\nPlease roll for parents status."); return false;
+      }
+      const fatherAlive = parentsStatus === "都健在" || parentsStatus === "仅父亲健在";
+      const motherAlive = parentsStatus === "都健在" || parentsStatus === "仅母亲健在";
+      if (fatherAlive && !getHousingCityValue("parents-father")) {
+        showAlert("请选择父亲所在城市！\nPlease select your father's city."); return false;
+      }
+      if (motherAlive && !getHousingCityValue("parents-mother")) {
+        showAlert("请选择母亲所在城市！\nPlease select your mother's city."); return false;
+      }
+      return true;
+    }
+
+    case "profile-mbti": {
+      const m = ["petMbti1","petMbti2","petMbti3","petMbti4"].map(id => document.getElementById(id)?.value || "");
+      if (m.some(v => !v)) {
+        showAlert("请完整填写 MBTI 四位！\nPlease fill in all 4 MBTI characters."); return false;
+      }
+      return true;
+    }
+
+    case "profile-edu": {
+      if (!document.getElementById("petEdu")?.value) {
+        showAlert("请摇骰子选择学历！\nPlease roll for education."); return false;
+      }
+      if (!document.getElementById("petOccupation")?.value) {
+        showAlert("请摇骰子选择职业！\nPlease roll for occupation."); return false;
+      }
+      if (!document.getElementById("petIncome")?.value) {
+        showAlert("请摇骰子选择月收入！\nPlease roll for income."); return false;
+      }
+      return true;
+    }
+
+    case "profile-hobbies": {
+      const count = document.querySelectorAll("#hobby-tags .hobby-tag.selected").length;
+      if (count < 1) {
+        showAlert("请至少选择 1 个兴趣爱好！\nPlease select at least 1 hobby."); return false;
+      }
+      if (count > 5) {
+        showAlert("兴趣爱好最多选 5 个！\nMax 5 hobbies."); return false;
+      }
+      return true;
+    }
+
+    case "profile-photo": {
+      const word = (document.getElementById("text-input")?.value || "").trim();
+      if (!word) {
+        showAlert("给自己一个字/词形容一下自己！\nGive yourself one word that is you."); return false;
+      }
+      return true;
+    }
+  }
+  return true;
+}
+
+function validateAndGoTo(fromPage, toPage) {
+  if (validatePage(fromPage)) goTo(toPage);
+}
+
+function validateAndCreateCard() {
+  if (validatePage("profile-photo")) createCard();
+}
+
 function getTotalProfileScore() {
   let score = 100;
   const ids = [
@@ -95,6 +321,8 @@ function getTotalProfileScore() {
     "petSterilized",
     "petBreedClass",
     "petOrientation",
+    "vehicle-price",
+    "parents-status",
   ];
   ids.forEach((id) => {
     const el = document.getElementById(id);
@@ -105,6 +333,9 @@ function getTotalProfileScore() {
   });
   score += getHobbyScore();
   if (document.getElementById("isMixed")?.checked) score -= 10;
+  const mbti = ["petMbti1","petMbti2","petMbti3","petMbti4"]
+    .map(id => document.getElementById(id)?.value || "").join("");
+  if (mbti.length === 4 && MBTI_SCORES[mbti] !== undefined) score += MBTI_SCORES[mbti];
   return Math.max(0, score);
 }
 
@@ -144,27 +375,23 @@ function toggleMbtiPicker(id) {
   const picker = document.getElementById(id + "-picker");
   if (!picker) return;
 
-  if (picker.classList.contains("hidden")) {
-    if (!picker.children.length) {
-      const current = document.getElementById(id)?.value;
-      MBTI_CHARS.split("").forEach((ch) => {
-        const btn = document.createElement("button");
-        btn.className = "mbti-char-btn" + (ch === current ? " active" : "");
-        btn.textContent = ch;
-        btn.onclick = (e) => { e.stopPropagation(); selectMbtiChar(id, ch); };
-        picker.appendChild(btn);
-      });
-    } else {
-      // update active state
-      const current = document.getElementById(id)?.value;
-      picker.querySelectorAll(".mbti-char-btn").forEach((b) => {
-        b.classList.toggle("active", b.textContent === current);
-      });
-    }
-    picker.classList.remove("hidden");
+  if (!picker.children.length) {
+    const current = document.getElementById(id)?.value;
+    MBTI_CHARS.split("").forEach((ch) => {
+      const btn = document.createElement("button");
+      btn.className = "mbti-char-btn" + (ch === current ? " active" : "");
+      btn.textContent = ch;
+      btn.onclick = (e) => { e.stopPropagation(); selectMbtiChar(id, ch); };
+      picker.appendChild(btn);
+    });
   } else {
-    picker.classList.add("hidden");
+    // update active state
+    const current = document.getElementById(id)?.value;
+    picker.querySelectorAll(".mbti-char-btn").forEach((b) => {
+      b.classList.toggle("active", b.textContent === current);
+    });
   }
+  picker.classList.remove("hidden");
 }
 
 function selectMbtiChar(id, ch) {
@@ -173,6 +400,12 @@ function selectMbtiChar(id, ch) {
   if (input) input.value = ch;
   if (display) display.textContent = ch;
   document.getElementById(id + "-picker")?.classList.add("hidden");
+  // highlight the matching opt-btn, clear others in the same slot
+  document.querySelectorAll(`[id^="${id}-"]`).forEach((btn) => {
+    if (btn.classList.contains("mbti-opt-btn")) {
+      btn.classList.toggle("selected", btn.id === `${id}-${ch}`);
+    }
+  });
 }
 
 // close pickers when clicking outside
@@ -182,7 +415,7 @@ document.addEventListener("click", () => {
   });
 });
 
-function rollGenericTierDice(btnId, displayId, inputId, tierMap) {
+function rollGenericTierDice(btnId, displayId, inputId, tierMap, onRoll) {
   const btn = document.getElementById(btnId);
   const display = document.getElementById(displayId);
   if (!btn || !display) return;
@@ -205,8 +438,20 @@ function rollGenericTierDice(btnId, displayId, inputId, tierMap) {
       const value = tierMap[roll];
       if (inputId) document.getElementById(inputId).value = value;
       display.textContent = disp(value);
+      if (onRoll) onRoll(value);
     }
   }, 70);
+}
+
+function onPastRelRolled(value) {
+  const hasRel = value !== "0段/None";
+  document.getElementById("rel-ex-group")?.classList.toggle("hidden", !hasRel);
+}
+
+function onPartnerRolled(value) {
+  const hasPartner = value !== "无/None";
+  document.getElementById("rel-partner-details")?.classList.toggle("hidden", !hasPartner);
+  document.getElementById("rel-no-partner-details")?.classList.toggle("hidden", hasPartner);
 }
 
 // Date Picker Functions
@@ -312,12 +557,32 @@ function getPetAge() {
   const months = Math.abs(totalMonths % 12);
 
   if (years === 0) {
-    return `${months}个月 / ${months}mo`;
+    return `${months}`;
   } else if (months === 0) {
-    return `${years}岁 / ${years}yo`;
+    return `${years}`;
   } else {
-    return `${years}.${months}岁 / ${years}.${months}yo`;
+    return `${years}.${months}`;
   }
+}
+
+function getHoroscope(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d)) return "";
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  if ((m === 12 && day >= 22) || (m === 1 && day <= 19))  return "摩羯座 / Capricorn";
+  if ((m === 1 && day >= 20) || (m === 2 && day <= 18))   return "水瓶座 / Aquarius";
+  if ((m === 2 && day >= 19) || (m === 3 && day <= 20))   return "双鱼座 / Pisces";
+  if ((m === 3 && day >= 21) || (m === 4 && day <= 19))   return "白羊座 / Aries";
+  if ((m === 4 && day >= 20) || (m === 5 && day <= 20))   return "金牛座 / Taurus";
+  if ((m === 5 && day >= 21) || (m === 6 && day <= 21))   return "双子座 / Gemini";
+  if ((m === 6 && day >= 22) || (m === 7 && day <= 22))   return "巨蟹座 / Cancer";
+  if ((m === 7 && day >= 23) || (m === 8 && day <= 22))   return "狮子座 / Leo";
+  if ((m === 8 && day >= 23) || (m === 9 && day <= 22))   return "处女座 / Virgo";
+  if ((m === 9 && day >= 23) || (m === 10 && day <= 23))  return "天秤座 / Libra";
+  if ((m === 10 && day >= 24) || (m === 11 && day <= 21)) return "天蝎座 / Scorpio";
+  return "射手座 / Sagittarius";
 }
 
 // Mammal subgroups (up to 4-level selection for Mammals: class→subgroup→sub-subgroup→species)
@@ -499,8 +764,19 @@ const breedSubgroups = {
     ],
     "海洋哺乳类 / Marine Mammals": [
       "海豚 / Dolphin",
-      "鲸 / Whale",
+      "宽吻海豚 / Bottlenose Dolphin",
+      "虎鲸 / Orca",
+      "座头鲸 / Humpback Whale",
+      "蓝鲸 / Blue Whale",
+      "抹香鲸 / Sperm Whale",
+      "白鲸 / Beluga",
+      "独角鲸 / Narwhal",
       "斑海豹 / Spotted Seal",
+      "北象海豹 / Northern Elephant Seal",
+      "海狮 / Sea Lion",
+      "海象 / Walrus",
+      "儒艮 / Dugong",
+      "海牛 / Manatee",
     ],
     "有袋类 / Marsupials": ["袋鼠 / Kangaroo", "考拉 / Koala"],
     "翼手目 / Chiroptera": ["蝙蝠 / Bat", "果蝠 / Fruit Bat"],
@@ -515,6 +791,61 @@ const breedSubgroups = {
       "小熊猫 / Red Panda",
       "树懒 / Sloth",
       "小食蚁兽 / Anteater (Tamandua)",
+    ],
+  },
+  "鱼类 / Fish": {
+    "海鱼 / Saltwater Fish": [
+      "大白鲨 / Great White Shark",
+      "鲸鲨 / Whale Shark",
+      "锤头鲨 / Hammerhead Shark",
+      "虎鲨 / Tiger Shark",
+      "牛鲨 / Bull Shark",
+      "蓝鲨 / Blue Shark",
+      "柠檬鲨 / Lemon Shark",
+      "护士鲨 / Nurse Shark",
+      "魟 / Stingray",
+      "蝠鲼 / Manta Ray",
+      "电鳐 / Electric Ray",
+      "小丑鱼 / Clownfish",
+      "蓝倒吊 / Blue Tang",
+      "神仙鱼 / Angelfish",
+      "蝴蝶鱼 / Butterflyfish",
+      "狮子鱼 / Lionfish",
+      "石斑鱼 / Grouper",
+      "炮弹鱼 / Triggerfish",
+      "鹦嘴鱼 / Parrotfish",
+      "隆头鱼 / Wrasse",
+      "刺尾鱼 / Surgeonfish",
+      "鮟鱇鱼 / Anglerfish",
+      "皇带鱼 / Oarfish",
+      "蝰鱼 / Viperfish",
+      "灯笼鱼 / Lanternfish",
+      "桶眼鱼 / Barreleye",
+      "枪鱼 / Swordfish",
+      "旗鱼 / Marlin",
+      "金枪鱼 / Tuna",
+      "翻车鱼 / Ocean Sunfish",
+      "飞鱼 / Flying Fish",
+      "海马 / Seahorse",
+      "河豚 / Pufferfish",
+      "章鱼 / Octopus",
+      "乌贼 / Squid",
+      "墨鱼 / Cuttlefish",
+    ],
+    "淡水鱼 / Freshwater Fish": [
+      "锦鲤 / Koi",
+      "金鱼 / Goldfish",
+      "虹鳟 / Rainbow Trout",
+      "鲶鱼 / Catfish",
+      "斗鱼 / Betta Fish",
+      "孔雀鱼 / Guppy",
+      "草鱼 / Grass Carp",
+      "鲤鱼 / Carp",
+      "鲫鱼 / Crucian Carp",
+      "鲈鱼 / Bass",
+      "鳄雀鳝 / Alligator Gar",
+      "电鳗 / Electric Eel",
+      "食人鱼 / Piranha",
     ],
   },
 };
@@ -597,7 +928,6 @@ const breedData = {
     "蜘蛛 / Spider",
     "其他节肢动物 / Other Arthropod",
   ],
-  "鱼类 / Fish": ["鱼 / Fish", "鲨鱼 / Shark", "其他鱼类 / Other Fish"],
 };
 
 // ── Height ranges per breed [min, max] in cm, step 5 ─────────
@@ -815,6 +1145,63 @@ const breedHeight = {
   "犀牛 / Rhinoceros": [203, 275],
   "骆驼 / Camel": [203, 275],
   "长颈鹿 / Giraffe": [283, 400],
+  // ── Fish ──
+  // Tiny saltwater
+  "小丑鱼 / Clownfish": [50, 95],
+  "蓝倒吊 / Blue Tang": [55, 100],
+  "蝴蝶鱼 / Butterflyfish": [55, 100],
+  "海马 / Seahorse": [50, 95],
+  "灯笼鱼 / Lanternfish": [50, 95],
+  "桶眼鱼 / Barreleye": [50, 90],
+  "蝰鱼 / Viperfish": [55, 100],
+  // Small-medium saltwater
+  "神仙鱼 / Angelfish": [60, 110],
+  "狮子鱼 / Lionfish": [65, 115],
+  "河豚 / Pufferfish": [60, 110],
+  "鮟鱇鱼 / Anglerfish": [60, 110],
+  "炮弹鱼 / Triggerfish": [70, 120],
+  "刺尾鱼 / Surgeonfish": [65, 120],
+  "隆头鱼 / Wrasse": [70, 130],
+  "飞鱼 / Flying Fish": [75, 130],
+  // Medium saltwater
+  "鹦嘴鱼 / Parrotfish": [100, 160],
+  "墨鱼 / Cuttlefish": [95, 158],
+  "乌贼 / Squid": [100, 165],
+  "章鱼 / Octopus": [110, 170],
+  "电鳐 / Electric Ray": [130, 180],
+  "石斑鱼 / Grouper": [120, 175],
+  // Large saltwater
+  "护士鲨 / Nurse Shark": [150, 200],
+  "魟 / Stingray": [140, 190],
+  "柠檬鲨 / Lemon Shark": [155, 210],
+  "金枪鱼 / Tuna": [155, 220],
+  "蓝鲨 / Blue Shark": [160, 220],
+  "牛鲨 / Bull Shark": [165, 230],
+  "蝠鲼 / Manta Ray": [165, 230],
+  "翻车鱼 / Ocean Sunfish": [165, 230],
+  "虎鲨 / Tiger Shark": [170, 240],
+  "锤头鲨 / Hammerhead Shark": [170, 240],
+  "枪鱼 / Swordfish": [170, 240],
+  "大白鲨 / Great White Shark": [175, 250],
+  "旗鱼 / Marlin": [175, 250],
+  "鲸鲨 / Whale Shark": [185, 270],
+  "皇带鱼 / Oarfish": [183, 265],
+  // Tiny freshwater
+  "孔雀鱼 / Guppy": [45, 88],
+  "斗鱼 / Betta Fish": [50, 93],
+  "金鱼 / Goldfish": [55, 105],
+  // Small-medium freshwater
+  "食人鱼 / Piranha": [90, 148],
+  "锦鲤 / Koi": [100, 160],
+  "鲫鱼 / Crucian Carp": [100, 158],
+  "鲈鱼 / Bass": [110, 168],
+  "虹鳟 / Rainbow Trout": [120, 175],
+  "鲶鱼 / Catfish": [130, 185],
+  // Large freshwater
+  "鲤鱼 / Carp": [140, 198],
+  "草鱼 / Grass Carp": [150, 210],
+  "电鳗 / Electric Eel": [165, 230],
+  "鳄雀鳝 / Alligator Gar": [168, 238],
 };
 
 const breedHeightDefaults = {
@@ -843,7 +1230,7 @@ function updateHeightOptions() {
     '<option value="" disabled selected hidden>选择身高 / Select height...</option>';
   for (let h = min; h <= max; h += 5) {
     const opt = document.createElement("option");
-    opt.value = `${h}cm`;
+    opt.value = `${h}`;
     opt.textContent = `${h} cm`;
     select.appendChild(opt);
   }
@@ -872,11 +1259,209 @@ function onDistrictSelectChange(prefix) {
   customInput.classList.toggle("hidden", sel.value !== "自定义");
 }
 
+function rollDistrictDice(prefix) {
+  const btn = document.getElementById(`${prefix}-district-dice-btn`);
+  const display = document.getElementById(`${prefix}-district-display`);
+  const hidden = document.getElementById(`${prefix}-district`);
+  if (!btn || !display) return;
+  const rolls = parseInt(btn.dataset.rolls || "0", 10);
+  if (rolls >= MAX_HOUSING_ROLLS) return;
+  btn.dataset.rolls = rolls + 1;
+  btn.disabled = true;
+  let count = 0;
+  const iv = setInterval(() => {
+    btn.innerHTML = diceFaceImg(Math.floor(Math.random() * 6) + 1, 4);
+    count++;
+    if (count >= 16) {
+      clearInterval(iv);
+      const roll = Math.floor(Math.random() * 6) + 1;
+      btn.innerHTML = diceFaceImg(roll, 4);
+      const remaining = MAX_HOUSING_ROLLS - parseInt(btn.dataset.rolls, 10);
+      btn.disabled = remaining <= 0;
+      if (remaining <= 0) btn.classList.add("dice-exhausted");
+      else btn.title = `还可摇 ${remaining} 次 / ${remaining} rolls left`;
+      const tier = HOUSING_TIERS.districtTiers[roll];
+      const picked = tier[Math.floor(Math.random() * tier.length)];
+      if (hidden) hidden.value = picked;
+      display.textContent = picked;
+    }
+  }, 70);
+}
+
+function rollVehicleTypeDice() {
+  const btn = document.getElementById("vehicle-type-dice-btn");
+  if (!btn) return;
+  const rolls = parseInt(btn.dataset.rolls || "0", 10);
+  if (rolls >= MAX_HOUSING_ROLLS) return;
+  btn.dataset.rolls = rolls + 1;
+  btn.disabled = true;
+  let count = 0;
+  const iv = setInterval(() => {
+    btn.innerHTML = diceFaceImg(Math.floor(Math.random() * 6) + 1, 4);
+    count++;
+    if (count >= 16) {
+      clearInterval(iv);
+      const roll = Math.floor(Math.random() * 6) + 1;
+      btn.innerHTML = diceFaceImg(roll, 4);
+      const remaining = MAX_HOUSING_ROLLS - parseInt(btn.dataset.rolls, 10);
+      btn.disabled = remaining <= 0;
+      if (remaining <= 0) btn.classList.add("dice-exhausted");
+      else btn.title = `还可摇 ${remaining} 次 / ${remaining} rolls left`;
+      const tier = HOUSING_TIERS.vehicleTypes[roll];
+      // pick one from the tier randomly
+      const picked = tier[Math.floor(Math.random() * tier.length)];
+      const hidden = document.getElementById("vehicle-types-hidden");
+      if (hidden) hidden.value = picked;
+      const display = document.getElementById("vehicle-types-display");
+      if (display) display.textContent = picked;
+      // show car model dice only for 普通车 or 豪车
+      const needsModel = picked.startsWith("普通车") || picked.startsWith("豪车");
+      const modelWrapper = document.getElementById("vehicle-car-model-wrapper");
+      if (modelWrapper) {
+        modelWrapper.classList.toggle("hidden", !needsModel);
+        if (!needsModel) {
+          const mBtn = document.getElementById("vehicle-model-dice-btn");
+          const mDisp = document.getElementById("vehicle-model-display");
+          const mInp = document.getElementById("vehicle-model");
+          if (mBtn) { mBtn.dataset.rolls = "0"; mBtn.disabled = false; mBtn.classList.remove("dice-exhausted"); mBtn.innerHTML = diceFaceImg(6, 4); }
+          if (mDisp) mDisp.textContent = "—";
+          if (mInp) mInp.value = "";
+        }
+        const modelLabel = document.getElementById("vehicle-model-label");
+        if (modelLabel) modelLabel.textContent = picked.startsWith("豪车") ? "豪车品牌 Luxury Brand" : "车辆品牌 Car Brand";
+      }
+      // determine price tier category from vehicle type
+      let priceTierKey = "regularCar";
+      if (picked.includes("自行车") || picked.includes("单轮车") || picked.includes("三轮车")) priceTierKey = "bicycle";
+      else if (picked.includes("电瓶车")) priceTierKey = "ebike";
+      else if (picked.includes("摩托车")) priceTierKey = "motorcycle";
+      else if (picked.includes("豪车")) priceTierKey = "luxuryCar";
+      // store category and reset price dice
+      const priceWrapper = document.getElementById("vehicle-price-wrapper");
+      if (priceWrapper) {
+        priceWrapper.classList.remove("hidden");
+        priceWrapper.dataset.priceTier = priceTierKey;
+      }
+      const pBtn = document.getElementById("vehicle-price-dice-btn");
+      const pDisp = document.getElementById("vehicle-price-display");
+      const pInp = document.getElementById("vehicle-price");
+      if (pBtn) { pBtn.dataset.rolls = "0"; pBtn.disabled = false; pBtn.classList.remove("dice-exhausted"); pBtn.innerHTML = diceFaceImg(6, 4); }
+      if (pDisp) pDisp.textContent = "—";
+      if (pInp) pInp.value = "";
+    }
+  }, 70);
+}
+
+function rollVehicleModelDice() {
+  const btn = document.getElementById("vehicle-model-dice-btn");
+  const display = document.getElementById("vehicle-model-display");
+  const hidden = document.getElementById("vehicle-model");
+  const typesHidden = document.getElementById("vehicle-types-hidden");
+  if (!btn || !display) return;
+  const rolls = parseInt(btn.dataset.rolls || "0", 10);
+  if (rolls >= MAX_HOUSING_ROLLS) return;
+  btn.dataset.rolls = rolls + 1;
+  btn.disabled = true;
+  const isLuxury = (typesHidden?.value || "").startsWith("豪车");
+  let count = 0;
+  const iv = setInterval(() => {
+    btn.innerHTML = diceFaceImg(Math.floor(Math.random() * 6) + 1, 4);
+    count++;
+    if (count >= 16) {
+      clearInterval(iv);
+      const roll = Math.floor(Math.random() * 6) + 1;
+      btn.innerHTML = diceFaceImg(roll, 4);
+      const remaining = MAX_HOUSING_ROLLS - parseInt(btn.dataset.rolls, 10);
+      btn.disabled = remaining <= 0;
+      if (remaining <= 0) btn.classList.add("dice-exhausted");
+      else btn.title = `还可摇 ${remaining} 次 / ${remaining} rolls left`;
+      const tier = (isLuxury ? HOUSING_TIERS.carModelsLuxury : HOUSING_TIERS.carModelsRegular)[roll];
+      const picked = tier[Math.floor(Math.random() * tier.length)];
+      if (hidden) hidden.value = picked;
+      display.textContent = picked;
+    }
+  }, 70);
+}
+
+function rollVehicleFieldDice(field) {
+  const btn = document.getElementById(`vehicle-${field}-dice-btn`);
+  const display = document.getElementById(`vehicle-${field}-display`);
+  if (!btn || !display) return;
+  const rolls = parseInt(btn.dataset.rolls || "0", 10);
+  if (rolls >= MAX_HOUSING_ROLLS) return;
+  btn.dataset.rolls = rolls + 1;
+  btn.disabled = true;
+  let count = 0;
+  const iv = setInterval(() => {
+    btn.innerHTML = diceFaceImg(Math.floor(Math.random() * 6) + 1, 4);
+    count++;
+    if (count >= 16) {
+      clearInterval(iv);
+      const roll = Math.floor(Math.random() * 6) + 1;
+      btn.innerHTML = diceFaceImg(roll, 4);
+      const remaining = MAX_HOUSING_ROLLS - parseInt(btn.dataset.rolls, 10);
+      btn.disabled = remaining <= 0;
+      if (remaining <= 0) btn.classList.add("dice-exhausted");
+      else btn.title = `还可摇 ${remaining} 次 / ${remaining} rolls left`;
+      let tierMap;
+      if (field === "count") {
+        tierMap = HOUSING_TIERS.vehicleCount;
+      } else {
+        const priceTierKey = document.getElementById("vehicle-price-wrapper")?.dataset.priceTier || "regularCar";
+        tierMap = HOUSING_TIERS.vehiclePriceByType[priceTierKey] || HOUSING_TIERS.vehiclePrice;
+      }
+      const value = tierMap[roll];
+      document.getElementById(`vehicle-${field}`).value = value;
+      display.textContent = disp(value);
+    }
+  }, 70);
+}
+
+function rollParentsFieldDice(field) {
+  const btn = document.getElementById(`parents-${field}-dice-btn`);
+  const display = document.getElementById(`parents-${field}-display`);
+  if (!btn || !display) return;
+  const rolls = parseInt(btn.dataset.rolls || "0", 10);
+  if (rolls >= MAX_HOUSING_ROLLS) return;
+  btn.dataset.rolls = rolls + 1;
+  btn.disabled = true;
+  let count = 0;
+  const iv = setInterval(() => {
+    btn.innerHTML = diceFaceImg(Math.floor(Math.random() * 6) + 1, 4);
+    count++;
+    if (count >= 16) {
+      clearInterval(iv);
+      const roll = Math.floor(Math.random() * 6) + 1;
+      btn.innerHTML = diceFaceImg(roll, 4);
+      const remaining = MAX_HOUSING_ROLLS - parseInt(btn.dataset.rolls, 10);
+      btn.disabled = remaining <= 0;
+      if (remaining <= 0) btn.classList.add("dice-exhausted");
+      else btn.title = `还可摇 ${remaining} 次 / ${remaining} rolls left`;
+      const tierMap = field === "status" ? HOUSING_TIERS.parentsStatus : HOUSING_TIERS.parentsRelationship;
+      const value = tierMap[roll];
+      document.getElementById(`parents-${field}`).value = value;
+      display.textContent = disp(value);
+      if (field === "status") {
+        const bothAlive = value === "都健在";
+        const fatherAlive = bothAlive || value === "仅父亲健在";
+        const motherAlive = bothAlive || value === "仅母亲健在";
+        document.getElementById("parents-father-wrapper")?.classList.toggle("hidden", !fatherAlive);
+        document.getElementById("parents-mother-wrapper")?.classList.toggle("hidden", !motherAlive);
+        document.getElementById("parents-rel-wrapper")?.classList.toggle("hidden", !bothAlive);
+      }
+    }
+  }, 70);
+}
+
 function getHousingDistrictValue(prefix) {
+  // setup form uses a hidden input set by dice
+  const hidden = document.getElementById(`${prefix}-district`);
+  if (hidden) return hidden.value || "";
+  // edit form fallback: select dropdown
   const sel = document.getElementById(`${prefix}-district-select`);
   if (!sel) return "";
   if (sel.value === "自定义") {
-    return document.getElementById(`${prefix}-district-custom`).value.trim();
+    return document.getElementById(`${prefix}-district-custom`)?.value.trim() || "";
   }
   return sel.value || "";
 }
@@ -972,6 +1557,15 @@ function addOptionIfMissing(sel, value, text) {
 
 // ── Housing & income tier data ─────────────────────────────────
 const HOUSING_TIERS = {
+  // District: 9 options grouped into 6 dice tiers (low→high prestige)
+  districtTiers: {
+    1: ["郊区"],
+    2: ["老城区", "新区"],
+    3: ["学区", "科技园区"],
+    4: ["市中心", "滨水区"],
+    5: ["CBD"],
+    6: ["豪华住宅区"],
+  },
   type: {
     1: "下水管道",
     2: "地下室",
@@ -1047,10 +1641,122 @@ const HOUSING_TIERS = {
   marriage: {
     1: "单身/Single",
     2: "单身/Single",
-    3: "单身/Single",
+    3: "离异/Divorced",
     4: "已配对/Mated",
     5: "已配对/Mated",
-    6: "开放关系/Open",
+    6: "开放关系/Open Relationship",
+  },
+  pastRelCount: {
+    1: "0段/None",
+    2: "1-2段/1-2",
+    3: "3-4段/3-4",
+    4: "5-6段/5-6",
+    5: "7-10段/7-10",
+    6: "10+段/10+",
+  },
+  exContact: {
+    1: "完全断联/No Contact",
+    2: "完全断联/No Contact",
+    3: "偶尔联系/Occasional",
+    4: "还是朋友/Still Friends",
+    5: "暧昧未清/Unresolved",
+    6: "藕断丝连/On & Off",
+  },
+  stillLoveEx: {
+    1: "完全放下/Moved On",
+    2: "完全放下/Moved On",
+    3: "不确定/Not Sure",
+    4: "有一点/A Little",
+    5: "还爱/Still Love",
+    6: "深爱/Still Deeply",
+  },
+  whiteMoonlight: {
+    1: "没有/None",
+    2: "没有/None",
+    3: "没有/None",
+    4: "可能有/Maybe",
+    5: "有/Yes",
+    6: "一直有/Always",
+  },
+  hasKids: {
+    1: "无/No Kids",
+    2: "无/No Kids",
+    3: "无/No Kids",
+    4: "1个/1 Kid",
+    5: "2个/2 Kids",
+    6: "3+个/3+ Kids",
+  },
+  currentPartner: {
+    1: "无/None",
+    2: "无/None",
+    3: "无/None",
+    4: "男友/Boyfriend",
+    5: "女友/Girlfriend",
+    6: "伴侣/Partner",
+  },
+  ambiguousCount: {
+    1: "无/None",
+    2: "无/None",
+    3: "1个/1",
+    4: "2个/2",
+    5: "3个/3",
+    6: "很多/Many",
+  },
+  foreignPartner: {
+    1: "否/No",
+    2: "否/No",
+    3: "否/No",
+    4: "否/No",
+    5: "是/Yes",
+    6: "是/Yes",
+  },
+  otherCityPartner: {
+    1: "否/No",
+    2: "否/No",
+    3: "同省/Same Province",
+    4: "异省/Diff Province",
+    5: "异省/Diff Province",
+    6: "多个/Multiple",
+  },
+  partnerCount: {
+    1: "1个/1",
+    2: "1个/1",
+    3: "2个/2",
+    4: "2个/2",
+    5: "3个/3",
+    6: "3+个/3+",
+  },
+  secretPartner: {
+    1: "否/No",
+    2: "否/No",
+    3: "否/No",
+    4: "否/No",
+    5: "是/Yes",
+    6: "是/Yes",
+  },
+  hasCrush: {
+    1: "没有/None",
+    2: "没有/None",
+    3: "可能/Maybe",
+    4: "有/Yes",
+    5: "暗恋中/Secretly",
+    6: "强烈迷恋/Intensely",
+  },
+  datingPurpose: {
+    1: "孤独/Lonely",
+    2: "炮友/FWB",
+    3: "一夜情/ONS",
+    4: "好玩/Just for Fun",
+    5: "三人行/Threesome",
+    6: "和伴侣吵架了/Fight w/ Partner",
+  },
+  relationshipGoal: {
+    1: "结交朋友/Make Friends",
+    2: "长期炮友/Long-term FWB",
+    3: "搭子/Buddy",
+    4: "男女朋友/Dating",
+    5: "结婚对象/Marriage",
+    6: "随缘/Whatever",
   },
   education: {
     1: "小学",
@@ -1072,82 +1778,178 @@ const HOUSING_TIERS = {
   mbtiSN: { 1: "N", 2: "N", 3: "N", 4: "S", 5: "S", 6: "S" },
   mbtiTF: { 1: "F", 2: "F", 3: "F", 4: "T", 5: "T", 6: "T" },
   mbtiJP: { 1: "P", 2: "P", 3: "P", 4: "J", 5: "J", 6: "J" },
+  villaFloors: { 1: "1层独栋", 2: "2层别墅", 3: "2层别墅", 4: "3层别墅", 5: "3层别墅", 6: "4层及以上" },
+  aptFloor:    { 1: "1-5层", 2: "6-10层", 3: "11-20层", 4: "21-30层", 5: "31-40层", 6: "40层以上" },
+  aptTotal:    { 1: "6层以下", 2: "10层", 3: "18层", 4: "28层", 5: "35层", 6: "50层以上" },
+  vehicleCount: { 1: "1辆", 2: "1辆", 3: "2辆", 4: "2辆", 5: "3辆", 6: "4辆+" },
+  vehiclePrice: { 1: "5w以下", 2: "5w-15w", 3: "15w-30w", 4: "30w-80w", 5: "80w-300w", 6: "300w+" },
+  vehiclePriceByType: {
+    bicycle:    { 1: "500元以下", 2: "500-2000元", 3: "2000元-1w", 4: "1w-5w", 5: "5w-30w", 6: "30w+" },
+    ebike:      { 1: "2000元以下", 2: "2000-5000元", 3: "5000元-1w", 4: "1w-2w", 5: "2w-5w", 6: "5w+" },
+    motorcycle: { 1: "5000元以下", 2: "5000元-2w", 3: "2w-5w", 4: "5w-15w", 5: "15w-50w", 6: "50w+" },
+    regularCar: { 1: "3w以下", 2: "3w-8w", 3: "8w-15w", 4: "15w-25w", 5: "25w-40w", 6: "40w-80w" },
+    luxuryCar:  { 1: "30w-60w", 2: "60w-100w", 3: "100w-200w", 4: "200w-500w", 5: "500w-1000w", 6: "1000w+" },
+  },
+  vehicleTypes: {
+    1: ["自行车 / Bicycle"],
+    2: ["单轮车 / Unicycle", "三轮车 / Tricycle"],
+    3: ["电瓶车 / E-Bike"],
+    4: ["摩托车 / Motorcycle"],
+    5: ["普通车 / Regular Car"],
+    6: ["豪车 / Luxury Car"],
+  },
+  // Tiered car models — each tier has multiple options, one picked randomly
+  carModelsRegular: {
+    1: ["Toyota Corolla 丰田卡罗拉", "Nissan Sylphy 日产轩逸"],
+    2: ["Honda Civic 本田思域", "Volkswagen Polo 大众Polo"],
+    3: ["Volkswagen Golf 大众高尔夫", "Mazda 3 马自达3"],
+    4: ["Toyota Camry 丰田凯美瑞", "Honda Accord 本田雅阁"],
+    5: ["Nissan Teana 日产天籁", "Mazda 6 马自达6"],
+    6: ["BMW 3 Series 宝马3系(入门)", "Mercedes C-Class 奔驰C级(入门)"],
+  },
+  carModelsLuxury: {
+    1: ["BMW 5 Series 宝马5系", "Mercedes E-Class 奔驰E级"],
+    2: ["Audi A6 奥迪A6", "Volvo XC90 沃尔沃XC90"],
+    3: ["BMW 7 Series 宝马7系", "Mercedes S-Class 奔驰S级"],
+    4: ["Porsche Cayenne 保时捷卡宴", "Range Rover 路虎揽胜"],
+    5: ["Ferrari Roma 法拉利Roma", "Porsche 911 保时捷911", "Lamborghini Huracán 兰博基尼"],
+    6: ["Rolls-Royce Ghost 劳斯莱斯幻影", "Bentley Bentayga 宾利添越", "Bugatti Chiron 布加迪"],
+  },
+  parentsStatus: {
+    1: "均已故",
+    2: "仅父亲健在",
+    3: "仅母亲健在",
+    4: "都健在",
+    5: "都健在",
+    6: "都健在",
+  },
+  parentsRelationship: {
+    1: "离婚/Divorced",
+    2: "冷战/Cold War",
+    3: "普通/Ordinary",
+    4: "和睦/Harmonious",
+    5: "恩爱/Loving",
+    6: "神仙眷侣/Perfect Couple ✨",
+  },
+  // City/region-specific housing type tiers (arrays = random pick from options)
+  cityTypes: {
+    "北京":    { 1:"下水管道", 2:"地下室", 3:"普通住宅", 4:"公寓", 5:"大平层", 6:["别墅","四合院"] },
+    "上海":    { 1:"下水管道", 2:"地下室", 3:"普通住宅", 4:"公寓", 5:["大平层","石库门"], 6:["别墅","老洋房"] },
+    "西南":    { 1:"下水管道", 2:"地下室", 3:"普通住宅", 4:"公寓", 5:["大平层","吊脚楼"], 6:"别墅" },
+    "内蒙古":  { 1:"下水管道", 2:"地下室", 3:["普通住宅","蒙古包"], 4:"公寓", 5:"大平层", 6:"别墅" },
+    "江南":    { 1:"下水管道", 2:"地下室", 3:"普通住宅", 4:"公寓", 5:["大平层","水乡民居"], 6:"别墅" },
+    "黄土高原":{ 1:"下水管道", 2:"地下室", 3:["普通住宅","窑洞"], 4:"公寓", 5:"大平层", 6:"别墅" },
+    "西北":    { 1:"下水管道", 2:"地下室", 3:["普通住宅","平顶房"], 4:"公寓", 5:"大平层", 6:"别墅" },
+    "福建":    { 1:"下水管道", 2:"地下室", 3:"普通住宅", 4:"公寓", 5:["大平层","土楼"], 6:"别墅" },
+    "藏区":    { 1:"下水管道", 2:"地下室", 3:"普通住宅", 4:["公寓","碉房"], 5:"大平层", 6:"别墅" },
+    "东北":    { 1:"下水管道", 2:"地下室", 3:["普通住宅","东北民居"], 4:"公寓", 5:"大平层", 6:"别墅" },
+  },
 };
 
 const SCORE_DEDUCTIONS = {
-  // 房屋类型 / House type
-  下水管道: -18,
-  地下室: -12,
-  普通住宅: -4,
-  公寓: +2,
-  大平层: +6,
-  别墅: +12,
-  // 院子 / Garden
+  // 房屋类型 / House type — only top tier gets bonus
+  下水管道: -20,
+  地下室: -15,
+  普通住宅: -8,
+  公寓: -3,
+  大平层: 0,
+  别墅: +15,
+  // regional special types
+  四合院: +15,
+  老洋房: +15,
+  石库门: -3,
+  吊脚楼: 0,
+  蒙古包: -8,
+  水乡民居: 0,
+  窑洞: -8,
+  平顶房: -8,
+  土楼: 0,
+  碉房: -3,
+  东北民居: -8,
+  // 院子 / Garden — only 有院子 gets bonus
   无院子: 0,
-  有院子: +4,
-  // 面积 / Area
-  "20-40": -6,
-  "50-80": -3,
-  "80-120": 0,
-  "120-200": +3,
-  "200-400": +5,
-  "500+": +8,
-  // 租/买 / Tenure
-  租住中: -4,
-  购买: +4,
-  // 产权 / Ownership
-  父母名下: -3,
-  自己名下: +6,
-  // 房贷 / Mortgage
-  有房贷: -3,
-  无房贷: +4,
-  // 月租价格 / Rent price
-  月租500元: -8,
-  月租1000元: -5,
-  月租3000元: -2,
-  月租5000元: +1,
-  月租1w元: +3,
-  "月租3w+": +6,
-  // 买房价格 / Buy price
-  "50w": -8,
-  "100w": -4,
-  "300w": -1,
-  "500w": +2,
-  "1000w": +5,
-  "3000w+": +10,
-  // 月收入 / Income
-  "3k以下": -8,
-  "3k-8k": -4,
-  "8k-15k": 0,
-  "15k-30k": +4,
-  "3w-10w/月": +8,
-  "10w+/月": +12,
-  // 学历 / Education
-  小学: -7,
-  初中: -4,
-  高中: -1,
-  大专: +1,
-  本科: +3,
-  "硕士+": +6,
-  // 职业 / Occupation
-  无业: -7,
-  体力劳动: -3,
-  服务业: -1,
-  办公室职员: +1,
-  专业人士: +4,
-  企业高管: +8,
-  // 婚育状况 / Mating status
-  "单身/Single": +2,
-  "已配对/Mated": -3,
-  "开放关系/Open": -6,
-  // 种族大类歧视链 / Species hierarchy
+  有院子: +5,
+  // 面积 / Area — only 500+ gets bonus
+  "20-40": -8,
+  "50-80": -5,
+  "80-120": -2,
+  "120-200": 0,
+  "200-400": 0,
+  "500+": +10,
+  // 租/买 / Tenure — only 购买 gets bonus
+  租住中: -5,
+  购买: +5,
+  // 产权 / Ownership — only 自己名下 gets bonus
+  父母名下: -5,
+  自己名下: +8,
+  // 房贷 / Mortgage — only 无房贷 gets bonus
+  有房贷: -4,
+  无房贷: +6,
+  // 月租价格 / Rent price — only 月租3w+ gets bonus
+  月租500元: -10,
+  月租1000元: -6,
+  月租3000元: -3,
+  月租5000元: -1,
+  月租1w元: 0,
+  "月租3w+": +8,
+  // 买房价格 / Buy price — only 3000w+ gets bonus
+  "50w": -10,
+  "100w": -6,
+  "300w": -3,
+  "500w": -1,
+  "1000w": 0,
+  "3000w+": +12,
+  // 月收入 / Income — only 10w+/月 gets bonus
+  "3k以下": -12,
+  "3k-8k": -7,
+  "8k-15k": -3,
+  "15k-30k": 0,
+  "3w-10w/月": 0,
+  "10w+/月": +15,
+  // 学历 / Education — only 硕士+ gets bonus
+  小学: -10,
+  初中: -6,
+  高中: -3,
+  大专: -1,
+  本科: 0,
+  "硕士+": +8,
+  // 职业 / Occupation — only 企业高管 gets bonus
+  无业: -10,
+  体力劳动: -5,
+  服务业: -2,
+  办公室职员: 0,
+  专业人士: 0,
+  企业高管: +12,
+  // 婚恋状况 / Relationship status — only 单身 gets bonus
+  "单身/Single": +5,
+  "离异/Divorced": -3,
+  "已配对/Mated": -5,
+  "开放关系/Open Relationship": -8,
+  // 车辆价值 / Vehicle value — real price tiers
+  "5w以下": -8, "5w-15w": -3, "15w-30w": 0, "30w-80w": +3, "80w-300w": +8, "300w+": +15,
+  // bicycle
+  "500元以下": -8, "500-2000元": -6, "2000元-1w": -4, "1w-5w": -2, "5w-30w": 0, "30w+": +2,
+  // ebike
+  "2000元以下": -8, "2000-5000元": -6, "5000元-1w": -4, "1w-2w": -2, "2w-5w": 0, "5w+": +1,
+  // motorcycle
+  "5000元以下": -6, "5000元-2w": -3, "2w-5w": 0, "5w-15w": +2, "15w-50w": +5, "50w+": +8,
+  // regularCar
+  "3w以下": -5, "3w-8w": -2, "8w-15w": 0, "15w-25w": +2, "25w-40w": +4, "40w-80w": +6,
+  // luxuryCar
+  "30w-60w": +5, "60w-100w": +8, "100w-200w": +10, "200w-500w": +12, "500w-1000w": +14, "1000w+": +18,
+  // 父母状况 / Parents status — only 都健在 gets bonus
+  "都健在": +5,
+  "仅父亲健在": -2,
+  "仅母亲健在": -2,
+  "均已故": -5,
+  // 种族大类歧视链 / Species hierarchy — only 哺乳类 gets bonus
   "哺乳类 / Mammals": +5,
   "鸟类 / Birds": 0,
   "爬行类 / Reptiles": -3,
   "两栖类 / Amphibians": -6,
   "节肢动物 / Arthropods": -12,
   "鱼类 / Fish": -5,
-  // 性取向歧视链 / Orientation hierarchy
+  // 性取向歧视链 / Orientation hierarchy — only 异性恋 gets bonus
   "异性恋/Straight": +3,
   "同性恋/Gay·Lesbian": -2,
   "双性恋/Bisexual": -2,
@@ -1157,17 +1959,37 @@ const SCORE_DEDUCTIONS = {
   "自定义/Custom": -2,
 };
 
+// MBTI type scoring — everyone claiming INTJ/INFJ/INFP loses points
+const MBTI_SCORES = {
+  INTJ: -3, INFJ: -3, INFP: -3,
+  ENFP: -2, INTP: -2, ENTP: -2,
+  ENTJ: -1, ENFJ: -1, ISTJ: -2, ESTJ: -2, ESFJ: -1, ISFJ: -1,
+  ESTP: +2, ESFP: +2, ISTP: +1, ISFP: +1,
+};
+
 const MAX_HOUSING_ROLLS = 3;
 
 // Bilingual display map for Chinese-only tier values
 const DISP = {
-  // house type
+  // house type (base)
   下水管道: "下水管道 / Pipe Shack",
   地下室: "地下室 / Basement",
   普通住宅: "普通住宅 / Regular",
   公寓: "公寓 / Apt",
   大平层: "大平层 / Open Plan",
   别墅: "别墅 / Villa",
+  // city/region special types
+  四合院: "四合院 / Courtyard House ✨",
+  老洋房: "老洋房 / Heritage Villa ✨",
+  石库门: "石库门 / Shikumen",
+  吊脚楼: "吊脚楼 / Stilt House",
+  蒙古包: "蒙古包 / Yurt",
+  水乡民居: "水乡民居 / Waterside Home",
+  窑洞: "窑洞 / Cave Dwelling",
+  平顶房: "平顶房 / Flat-roof House",
+  土楼: "土楼 / Earthen Tower",
+  碉房: "碉房 / Stone Tower House",
+  东北民居: "东北民居 / NE Homestead",
   // garden
   无院子: "无院子 / No Garden",
   有院子: "有院子 / Garden ✨",
@@ -1201,9 +2023,43 @@ const DISP = {
   "15k-30k": "15k-30k / ¥15k-30k",
   "3w-10w/月": "3w-10w/月 / ¥30k-100k",
   "10w+/月": "10w+/月 / ¥100k+",
+  // vehicle price
+  "5w以下": "5w以下 / <¥50k",
+  "5w-15w": "5w-15w / ¥50k-150k",
+  "15w-30w": "15w-30w / ¥150k-300k",
+  "30w-80w": "30w-80w / ¥300k-800k",
+  "80w-300w": "80w-300w / ¥800k-3M",
+  "300w+": "300w+ / ¥3M+",
+  // parents status
+  "都健在": "都健在 / Both Alive ✨",
+  "仅父亲健在": "仅父亲健在 / Father Alive",
+  "仅母亲健在": "仅母亲健在 / Mother Alive",
+  "均已故": "均已故 / Both Passed",
 };
 function disp(v) {
   return DISP[v] || v;
+}
+
+function getHouseTypeTier(city) {
+  if (!city) return HOUSING_TIERS.type;
+  if (city === "北京") return HOUSING_TIERS.cityTypes["北京"];
+  if (city === "上海") return HOUSING_TIERS.cityTypes["上海"];
+  const southwest = ["重庆", "成都", "昆明", "贵阳"];
+  if (southwest.includes(city)) return HOUSING_TIERS.cityTypes["西南"];
+  const jiangnan = ["苏州", "杭州", "南京", "宁波", "无锡"];
+  if (jiangnan.includes(city)) return HOUSING_TIERS.cityTypes["江南"];
+  if (city === "西安") return HOUSING_TIERS.cityTypes["黄土高原"];
+  if (city === "乌鲁木齐") return HOUSING_TIERS.cityTypes["西北"];
+  const fujian = ["厦门", "福州"];
+  if (fujian.includes(city)) return HOUSING_TIERS.cityTypes["福建"];
+  const northeast = ["哈尔滨", "沈阳", "大连"];
+  if (northeast.includes(city)) return HOUSING_TIERS.cityTypes["东北"];
+  // custom city keyword matches
+  if (["内蒙古","呼和浩特","包头","鄂尔多斯"].some(k => city.includes(k)))
+    return HOUSING_TIERS.cityTypes["内蒙古"];
+  if (["西藏","拉萨","青海","西宁","甘孜","阿坝","川西","林芝"].some(k => city.includes(k)))
+    return HOUSING_TIERS.cityTypes["藏区"];
+  return HOUSING_TIERS.type;
 }
 
 function rollHousingFieldDice(field, prefix) {
@@ -1239,16 +2095,23 @@ function rollHousingFieldDice(field, prefix) {
       let text = "";
 
       if (field === "type") {
-        value = HOUSING_TIERS.type[roll];
+        const city = document.getElementById(`${prefix}-city-select`)?.value || "";
+        const typeTier = getHouseTypeTier(city);
+        const rawValue = typeTier[roll];
+        value = Array.isArray(rawValue) ? rawValue[Math.floor(Math.random() * rawValue.length)] : rawValue;
         text = disp(value);
         document.getElementById(`${prefix}-type`).value = value;
-        const isVilla = value === "别墅";
+        const isVilla = value === "别墅" || value === "四合院" || value === "老洋房";
+        const isApt = value === "公寓" || value === "大平层" || value === "普通住宅" || value === "石库门";
         document
           .getElementById(`${prefix}-villa-wrapper`)
           .classList.toggle("hidden", !isVilla);
         document
           .getElementById(`${prefix}-garden-section`)
           .classList.toggle("hidden", !isVilla);
+        document
+          .getElementById(`${prefix}-apt-floors-wrapper`)
+          ?.classList.toggle("hidden", !isApt);
         if (!isVilla) {
           document.getElementById(`${prefix}-garden`).value = "";
           document.getElementById(`${prefix}-garden-display`).textContent = "—";
@@ -1261,6 +2124,18 @@ function rollHousingFieldDice(field, prefix) {
             gardenBtn.classList.remove("dice-exhausted");
             gardenBtn.innerHTML = diceFaceImg(1, 4);
           }
+        }
+        if (!isApt) {
+          ["apt-floor", "apt-total"].forEach((f) => {
+            const inp = document.getElementById(`${prefix}-${f}`);
+            const disp2 = document.getElementById(`${prefix}-${f}-display`);
+            const b = document.getElementById(`${prefix}-${f}-dice-btn`);
+            if (inp) inp.value = "";
+            if (disp2) disp2.textContent = "—";
+            if (b) { b.dataset.rolls = "0"; b.disabled = false; b.classList.remove("dice-exhausted"); b.innerHTML = diceFaceImg(1, 4); }
+          });
+          const totalSec = document.getElementById(`${prefix}-apt-total-section`);
+          if (totalSec) totalSec.classList.add("hidden");
         }
       } else if (field === "garden") {
         value = HOUSING_TIERS.garden[roll];
@@ -1315,6 +2190,32 @@ function rollHousingFieldDice(field, prefix) {
         ];
         text = disp(value);
         document.getElementById(`${prefix}-price`).value = value;
+      } else if (field === "villa-floors") {
+        value = HOUSING_TIERS.villaFloors[roll];
+        text = value;
+        document.getElementById(`${prefix}-villa-floors`).value = value;
+      } else if (field === "apt-floor") {
+        value = HOUSING_TIERS.aptFloor[roll];
+        text = value;
+        document.getElementById(`${prefix}-apt-floor`).value = value;
+        // Show total-floors section and reset it
+        const totalSec = document.getElementById(`${prefix}-apt-total-section`);
+        if (totalSec) {
+          totalSec.classList.remove("hidden");
+          document.getElementById(`${prefix}-apt-total`).value = "";
+          document.getElementById(`${prefix}-apt-total-display`).textContent = "—";
+          const tb = document.getElementById(`${prefix}-apt-total-dice-btn`);
+          if (tb) { tb.dataset.rolls = "0"; tb.disabled = false; tb.classList.remove("dice-exhausted"); tb.innerHTML = diceFaceImg(1, 4); }
+        }
+      } else if (field === "apt-total") {
+        // Constrain total >= floor tier
+        const floorVal = document.getElementById(`${prefix}-apt-floor`)?.value;
+        const floorTierMap = {"1-5层":1,"6-10层":2,"11-20层":3,"21-30层":4,"31-40层":5,"40层以上":6};
+        const minTier = floorTierMap[floorVal] || 1;
+        const constrainedRoll = Math.max(roll, minTier);
+        value = HOUSING_TIERS.aptTotal[constrainedRoll];
+        text = value;
+        document.getElementById(`${prefix}-apt-total`).value = value;
       }
 
       display.textContent = text;
@@ -1383,6 +2284,8 @@ function onHouseTypeChange() {
   const type = el.value;
   const villaWrapper = document.getElementById("house-villa-wrapper");
   if (villaWrapper) villaWrapper.classList.toggle("hidden", type !== "别墅");
+  const aptWrapper = document.getElementById("house-apt-floors-wrapper");
+  if (aptWrapper) aptWrapper.classList.toggle("hidden", type !== "公寓" && type !== "大平层");
   const customInput = document.getElementById("house-type-custom");
   if (customInput) customInput.classList.toggle("hidden", type !== "自定义");
 }
@@ -1416,11 +2319,11 @@ function getEditHousingDescription() {
   const city = getHousingCityValue("edit-house");
   const district = getHousingDistrictValue("edit-house");
   const type = getHouseTypeValue("edit-house");
-  const villaFloors = document.getElementById("edit-house-villa-floors").value;
+  const villaFloors = document.getElementById("edit-house-villa-floors")?.value || "";
   const garden = document.getElementById("edit-house-garden").value;
   const area = document.getElementById("edit-house-area").value.trim();
-  const floor = document.getElementById("edit-house-floor").value.trim();
-  const total = document.getElementById("edit-house-total-floors").value.trim();
+  const aptFloor = document.getElementById("edit-house-apt-floor")?.value.trim() || document.getElementById("edit-house-floor")?.value.trim() || "";
+  const aptTotal = document.getElementById("edit-house-apt-total")?.value.trim() || document.getElementById("edit-house-total-floors")?.value.trim() || "";
   const price = document.getElementById("edit-house-price").value.trim();
   const ownership = document.getElementById("edit-house-ownership").value;
   const mortgageWrapper = document.getElementById(
@@ -1437,9 +2340,9 @@ function getEditHousingDescription() {
   if (type)
     parts.push(type === "别墅" ? `${disp(type)}(${villaFloors})` : disp(type));
   if (garden === "有院子") parts.push("有院子 / Garden ✨");
-  if (floor && total)
-    parts.push(`${floor}层/共${total}层 / fl.${floor}/${total}`);
-  else if (floor) parts.push(`${floor}层 / fl.${floor}`);
+  if (aptFloor && aptTotal)
+    parts.push(`${aptFloor}/共${aptTotal} fl.`);
+  else if (aptFloor) parts.push(`${aptFloor}`);
   if (price) parts.push(disp(price));
   if (ownership) parts.push(disp(ownership));
   if (mortgage) parts.push(disp(mortgage));
@@ -1453,8 +2356,8 @@ function getHousingDescription() {
   const villaFloors = document.getElementById("house-villa-floors").value;
   const garden = document.getElementById("house-garden").value;
   const area = document.getElementById("house-area").value.trim();
-  const floor = document.getElementById("house-floor").value.trim();
-  const total = document.getElementById("house-total-floors").value.trim();
+  const aptFloor = document.getElementById("house-apt-floor")?.value.trim() || "";
+  const aptTotal = document.getElementById("house-apt-total")?.value.trim() || "";
   const price = document.getElementById("house-price").value.trim();
   const ownership = document.getElementById("house-ownership").value;
   const mortgageWrapper = document.getElementById("house-mortgage-wrapper");
@@ -1469,9 +2372,9 @@ function getHousingDescription() {
   if (type)
     parts.push(type === "别墅" ? `${disp(type)}(${villaFloors})` : disp(type));
   if (garden === "有院子") parts.push("有院子 / Garden ✨");
-  if (floor && total)
-    parts.push(`${floor}层/共${total}层 / fl.${floor}/${total}`);
-  else if (floor) parts.push(`${floor}层 / fl.${floor}`);
+  if (aptFloor && aptTotal)
+    parts.push(`${aptFloor}/共${aptTotal} fl.`);
+  else if (aptFloor) parts.push(`${aptFloor}`);
   if (price) parts.push(disp(price));
   if (ownership) parts.push(disp(ownership));
   if (mortgage) parts.push(disp(mortgage));
@@ -1715,8 +2618,9 @@ function createCard() {
     villaFloors: document.getElementById("house-villa-floors").value,
     garden: document.getElementById("house-garden").value,
     area: document.getElementById("house-area").value.trim(),
-    floor: document.getElementById("house-floor").value.trim(),
-    totalFloors: document.getElementById("house-total-floors").value.trim(),
+    villaFloors: document.getElementById("house-villa-floors").value,
+    aptFloor: document.getElementById("house-apt-floor")?.value.trim() || "",
+    aptTotal: document.getElementById("house-apt-total")?.value.trim() || "",
     price: document.getElementById("house-price").value.trim(),
     ownership: document.getElementById("house-ownership").value,
     mortgage: document
@@ -1724,6 +2628,39 @@ function createCard() {
       .classList.contains("hidden")
       ? ""
       : document.getElementById("house-mortgage").value,
+  };
+
+  const vehicleTypes = (document.getElementById("vehicle-types-hidden")?.value || "").split(",").filter(Boolean);
+  const vehicleData = {
+    types: vehicleTypes,
+    model: document.getElementById("vehicle-model")?.value || "",
+    count: document.getElementById("vehicle-count")?.value || "",
+    price: document.getElementById("vehicle-price")?.value || "",
+  };
+
+  const parentsData = {
+    status: document.getElementById("parents-status")?.value || "",
+    fatherOrigin: getHousingCityValue("parents-father"),
+    motherOrigin: getHousingCityValue("parents-mother"),
+  };
+
+  const g = (id) => document.getElementById(id)?.value || "";
+  const relationshipData = {
+    status: g("petSterilized"),
+    pastRelCount: g("rel-pastCount"),
+    exContact: g("rel-exContact"),
+    stillLoveEx: g("rel-stillLoveEx"),
+    whiteMoonlight: g("rel-whiteMoon"),
+    kids: g("rel-kids"),
+    currentPartner: g("rel-partner"),
+    partnerCount: g("rel-partnerCount"),
+    ambiguous: g("rel-ambiguous"),
+    foreignPartner: g("rel-foreignPartner"),
+    otherCityPartner: g("rel-otherCity"),
+    secretPartner: g("rel-secret"),
+    crush: g("rel-crush"),
+    datingPurpose: g("rel-purpose"),
+    relationshipGoal: g("rel-goal"),
   };
 
   let profile = {
@@ -1737,8 +2674,13 @@ function createCard() {
     gender: gender,
     orientation: orientation,
     age: age,
+    birth: document.getElementById("birthDisplay")?.value || "",
+    horoscope: getHoroscope(document.getElementById("birthDisplay")?.value),
     hukou: hukou,
     house: houseData,
+    vehicle: vehicleData,
+    parents: parentsData,
+    relationship: relationshipData,
     sterilized: sterilized,
     mbti: mbti,
     hobby: hobby,
@@ -1765,20 +2707,99 @@ function createCard() {
       startMessagePolling();
     });
 
-  // create the card content
-  const scoreBar = `<div style="display:inline-block;background:#212529;color:rgb(57,255,20);font-size:13px;padding:2px 8px;border:2px solid rgb(57,255,20);margin-top:6px;letter-spacing:1px;">💯 ${finalScore} / 100</div>`;
-  const card = `
-  <img src="${renderGridAsAvatar(grid, currentText)}" alt="Fursona" style="width:150px; height:250px; border:none;" />
-    <h3>${name || "无名兽人 / Unnamed Anthro"}</h3>
-    <p>物种 / Species: ${breed}${isMixed && breed2 ? ` <span style="color:#ff6b6b">× ${breed2}（混血/Mixed）</span>` : ""}</p>
-    <p style="opacity:0.6; font-size:14px;">
-      ${gender} · ${age} · 领地/Territory: ${hukou} · ${sterilized} · MBTI: ${mbti} <br />
-      爱好 / Hobbies: ${hobby}
-    </p>
-    ${scoreBar}
-  `;
+  // render the card exactly like the swipe view
+  const _sd = new Date();
+  const stampDate = `${_sd.getFullYear()}.${String(_sd.getMonth()+1).padStart(2,"0")}.${String(_sd.getDate()).padStart(2,"0")}`;
+  const stampColorClass = finalScore < 60 ? "stamp-red" : "";
+  const avatarSrc = renderGridAsAvatar(grid, currentText);
+  const horoscope = getHoroscope(document.getElementById("birthDisplay")?.value);
+  const vehicleStr = fmt([
+    vehicleData.types?.length ? vehicleData.types.join(" ") : null,
+    vehicleData.model || null,
+    vehicleData.count || null,
+    vehicleData.price ? disp(vehicleData.price) : null,
+  ].filter(Boolean).join(" ") || "—");
+  const parentsStr = fmt([
+    parentsData.status ? disp(parentsData.status) : null,
+    parentsData.fatherOrigin ? `父 ${parentsData.fatherOrigin}` : null,
+    parentsData.motherOrigin ? `母 ${parentsData.motherOrigin}` : null,
+  ].filter(Boolean).join(" ") || "—");
+  const rel = relationshipData;
 
-  document.getElementById("petCard").innerHTML = card;
+  document.getElementById("petCard").innerHTML = `
+<div class="profile-score-stamp ${stampColorClass}">
+  <span class="stamp-date">${stampDate}</span>
+  <span class="stamp-num">${finalScore}</span>
+  <span class="stamp-lines"><span></span><span></span></span>
+</div>
+<div class="avatar-box"><img src="${avatarSrc}" class="avatar"></div>
+<div class="section">
+  <span class="label">名字 <small>Name</small></span>
+  <span class="value big">${fmt(name || "无名兽人 Unnamed Anthro")}</span>
+</div>
+<div class="section">
+  <span class="label">物种 <small>Species</small></span>
+  <span class="value territory">${fmt(breed + (isMixed && breed2 ? ` × ${breed2}（混血 Mixed）` : ""))}</span>
+</div>
+<div class="grid-3">
+  <div class="cell"><span class="label">性别 <small>Gender</small></span><span class="value">${fmt(gender || "—")}</span></div>
+  <div class="cell"><span class="label">年龄 <small>Age</small></span><span class="value">${fmt(age || "—")}</span></div>
+  <div class="cell"><span class="label">身高 <small>Height</small></span><span class="value">${fmt(height || "—")}</span></div>
+</div>
+<div class="grid-2">
+  <div class="cell"><span class="label">性取向 <small>Orientation</small></span><span class="value">${fmt(orientation || "—")}</span></div>
+  <div class="cell"><span class="label">婚恋 <small>Status</small></span><span class="value">${fmt(sterilized || "—")}</span></div>
+</div>
+<div class="section">
+  <span class="label">领地 <small>Territory</small></span>
+  <span class="value territory">${fmt(hukou || "—")}</span>
+</div>
+<div class="grid-2">
+  <div class="cell"><span class="label">来这里的目的 <small>Here For</small></span><span class="value">${fmt(rel.datingPurpose || "—")}</span></div>
+  <div class="cell"><span class="label">期望关系 <small>Looking For</small></span><span class="value">${fmt(rel.relationshipGoal || "—")}</span></div>
+</div>
+<div class="grid-3">
+  <div class="cell"><span class="label">目前伴侣 <small>Partner</small></span><span class="value">${fmt(rel.currentPartner || "—")}</span></div>
+  <div class="cell"><span class="label">伴侣数量 <small># Partners</small></span><span class="value">${fmt(rel.partnerCount || "—")}</span></div>
+  <div class="cell"><span class="label">子女 <small>Kids</small></span><span class="value">${fmt(rel.kids || "—")}</span></div>
+</div>
+<div class="grid-3">
+  <div class="cell"><span class="label">暗恋 <small>Crush</small></span><span class="value">${fmt(rel.crush || "—")}</span></div>
+  <div class="cell"><span class="label">暧昧 <small>Ambiguous</small></span><span class="value">${fmt(rel.ambiguous || "—")}</span></div>
+  <div class="cell"><span class="label">秘密伴侣 <small>Secret</small></span><span class="value">${fmt(rel.secretPartner || "—")}</span></div>
+</div>
+<div class="grid-3">
+  <div class="cell"><span class="label">境外伴侣 <small>Foreign</small></span><span class="value">${fmt(rel.foreignPartner || "—")}</span></div>
+  <div class="cell"><span class="label">异地伴侣 <small>Long Dist</small></span><span class="value">${fmt(rel.otherCityPartner || "—")}</span></div>
+  <div class="cell"><span class="label">白月光 <small>Moonlight</small></span><span class="value">${fmt(rel.whiteMoonlight || "—")}</span></div>
+</div>
+<div class="grid-3">
+  <div class="cell"><span class="label">谈过 <small>Past Rels</small></span><span class="value">${fmt(rel.pastRelCount || "—")}</span></div>
+  <div class="cell"><span class="label">前任联系 <small>Ex Contact</small></span><span class="value">${fmt(rel.exContact || "—")}</span></div>
+  <div class="cell"><span class="label">还爱前任 <small>Still Love Ex</small></span><span class="value">${fmt(rel.stillLoveEx || "—")}</span></div>
+</div>
+<div class="grid-2">
+  <div class="cell"><span class="label">MBTI</span><span class="value big">${mbti || "—"}</span></div>
+  <div class="cell"><span class="label">星座 <small>Horoscope</small></span><span class="value">${fmt(horoscope || "—")}</span></div>
+</div>
+<div class="grid-3">
+  <div class="cell"><span class="label">学历 <small>Education</small></span><span class="value">${fmt(edu || "—")}</span></div>
+  <div class="cell"><span class="label">职业 <small>Job</small></span><span class="value">${fmt(occupation || "—")}</span></div>
+  <div class="cell"><span class="label">月收入 <small>Income</small></span><span class="value">${fmt(income || "—")}</span></div>
+</div>
+<div class="section">
+  <span class="label">兴趣爱好 <small>Hobbies</small></span>
+  <span class="value">${fmt(hobby || "—")}</span>
+</div>
+<div class="section">
+  <span class="label">车辆 <small>Vehicles</small></span>
+  <span class="value">${vehicleStr}</span>
+</div>
+<div class="section">
+  <span class="label">父母 <small>Parents</small></span>
+  <span class="value">${parentsStr}</span>
+</div>
+`;
 
   document.getElementById("score-running-badge").style.display = "none";
   animateSettlement(finalScore);
@@ -1824,6 +2845,12 @@ function createSwipeCard() {
       // Filter by orientation
       profiles = profiles.filter((p) => matchesOrientation(currentUser, p));
 
+      // Shuffle so order is different every session
+      for (let i = profiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [profiles[i], profiles[j]] = [profiles[j], profiles[i]];
+      }
+
       currentIndex = 0;
       showProfile();
       goTo("swipe-page");
@@ -1832,7 +2859,7 @@ function createSwipeCard() {
 }
 
 // ── Hobby tags ────────────────────────────────────────────────
-// tier: 0=堕落(-2/tag) 1=普通(0) 2=积极(+1/tag) 3=优质(+2/tag)
+// tier: 0=堕落(+3) 1=兽人特色/有意思(+2) 2=运动(+2) 3=科技/科学(+1) 4=健康养生(0) 5=艺术/文学/音乐/知识(-1,装)
 // badges are never shown to users — scoring is silent
 const HOBBY_CATEGORIES = [
   {
@@ -1909,7 +2936,7 @@ const HOBBY_CATEGORIES = [
   {
     zh: "艺术与手工",
     en: "Arts & Crafts",
-    tier: 2,
+    tier: 5,
     tags: [
       { zh: "素描", en: "Sketching" },
       { zh: "速写", en: "Gesture Drawing" },
@@ -1970,7 +2997,7 @@ const HOBBY_CATEGORIES = [
   {
     zh: "音乐与表演",
     en: "Music & Performance",
-    tier: 2,
+    tier: 5,
     tags: [
       { zh: "声乐", en: "Singing" },
       { zh: "钢琴", en: "Piano" },
@@ -2006,7 +3033,7 @@ const HOBBY_CATEGORIES = [
   {
     zh: "文学与创作",
     en: "Literature & Writing",
-    tier: 3,
+    tier: 5,
     tags: [
       { zh: "阅读小说", en: "Reading Novels" },
       { zh: "文学创作", en: "Creative Writing" },
@@ -2112,7 +3139,7 @@ const HOBBY_CATEGORIES = [
   {
     zh: "健康与养生",
     en: "Health & Wellness",
-    tier: 1,
+    tier: 4,
     tags: [
       { zh: "定向越野", en: "Orienteering" },
       { zh: "拓展训练", en: "Outdoor Training" },
@@ -2146,7 +3173,7 @@ const HOBBY_CATEGORIES = [
   {
     zh: "知识与学习",
     en: "Knowledge & Learning",
-    tier: 3,
+    tier: 5,
     tags: [
       { zh: "数学", en: "Mathematics" },
       { zh: "物理学", en: "Physics" },
@@ -2181,7 +3208,7 @@ const HOBBY_CATEGORIES = [
   {
     zh: "科技与数字",
     en: "Tech & Digital",
-    tier: 3,
+    tier: 3,  // interesting nerd +1
     tags: [
       { zh: "Python编程", en: "Python" },
       { zh: "算法研究", en: "Algorithms" },
@@ -2207,7 +3234,7 @@ const HOBBY_CATEGORIES = [
   {
     zh: "科学与探索",
     en: "Science & Exploration",
-    tier: 3,
+    tier: 3,  // interesting +1
     tags: [
       { zh: "望远镜观测", en: "Telescope Gazing" },
       { zh: "气象观测", en: "Weather Watching" },
@@ -2451,16 +3478,29 @@ function getHobbyScore() {
   const tags = document.querySelectorAll("#hobby-tags .hobby-tag.selected");
   let total = 0;
   tags.forEach((el) => {
-    const tier = parseInt(el.dataset.tier || "1", 10);
-    if (tier === 0) total -= 2;
-    else if (tier === 2) total += 1;
-    else if (tier === 3) total += 2;
+    const tier = parseInt(el.dataset.tier || "4", 10);
+    if (tier === 0) total += 3;       // 堕落放松 → relatable/authentic
+    else if (tier === 1) total += 2;  // 兽人特色 → unique/interesting
+    else if (tier === 2) total += 2;  // 运动与竞技 → athletic
+    else if (tier === 3) total += 1;  // 科技/科学 → cool nerd
+    else if (tier === 4) total += 0;  // 健康养生 → neutral
+    else if (tier === 5) total -= 1;  // 艺术/文学/音乐/知识 → 装
   });
-  return Math.max(-10, Math.min(15, total));
+  return Math.max(-15, Math.min(25, total));
 }
 
 function toggleHobbyTag(el) {
-  el.classList.toggle("selected");
+  if (el.classList.contains("selected")) {
+    el.classList.remove("selected");
+  } else {
+    const selected = document.querySelectorAll("#hobby-tags .hobby-tag.selected");
+    if (selected.length >= 5) {
+      el.classList.add("hobby-tag-limit-flash");
+      setTimeout(() => el.classList.remove("hobby-tag-limit-flash"), 600);
+      return;
+    }
+    el.classList.add("selected");
+  }
 }
 
 function getSelectedHobbyTags(containerId) {
@@ -2847,7 +3887,7 @@ function _makeIcon(pattern, px) {
   c.width = pattern[0].length * px;
   c.height = pattern.length * px;
   const ctx = c.getContext("2d");
-  ctx.fillStyle = "rgb(57,255,20)";
+  ctx.fillStyle = "rgb(40,48,35)";
   pattern.forEach((row, ry) =>
     row.forEach((v, rx) => {
       if (v) ctx.fillRect(rx * px, ry * px, px, px);
@@ -2876,23 +3916,26 @@ const _iconPatterns = {
     [0, 0, 0, 1, 1, 0, 0, 0, 0],
     [0, 0, 0, 0, 1, 0, 0, 0, 0],
   ],
+  // upright pencil: eraser cap top, hollow shaft, tapered tip bottom
   pencil: [
-    [0, 0, 0, 0, 1, 1, 1],
-    [0, 0, 0, 1, 1, 1, 0],
-    [0, 0, 1, 1, 1, 0, 0],
-    [0, 1, 1, 1, 0, 0, 0],
-    [1, 1, 1, 0, 0, 0, 0],
-    [1, 1, 0, 0, 0, 0, 0],
-    [1, 0, 0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0],
+    [0, 1, 1, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 1, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 0, 1, 0, 0],
   ],
+  // thick 2-px X
   xmark: [
-    [1, 0, 0, 0, 0, 0, 1],
-    [0, 1, 0, 0, 0, 1, 0],
-    [0, 0, 1, 0, 1, 0, 0],
-    [0, 0, 0, 1, 0, 0, 0],
-    [0, 0, 1, 0, 1, 0, 0],
-    [0, 1, 0, 0, 0, 1, 0],
-    [1, 0, 0, 0, 0, 0, 1],
+    [1, 1, 0, 0, 0, 1, 1],
+    [1, 1, 1, 0, 1, 1, 1],
+    [0, 1, 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 1, 1, 1, 0],
+    [1, 1, 1, 0, 1, 1, 1],
+    [1, 1, 0, 0, 0, 1, 1],
   ],
   paw: [
     [0, 1, 1, 0, 1, 1, 0, 1, 1],
@@ -2912,6 +3955,41 @@ const _iconPatterns = {
     [1, 0, 1, 0, 0, 0, 1, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1],
+  ],
+  // pixel exclamation mark (! in a box)
+  warn: [
+    [1, 1, 1, 1, 1],
+    [1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1],
+    [1, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1],
+  ],
+  // pixel eye
+  eye: [
+    [0, 1, 1, 1, 1, 1, 0],
+    [1, 0, 1, 1, 1, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 1, 1, 1, 0, 1],
+    [0, 1, 1, 1, 1, 1, 0],
+  ],
+  // pixel clock
+  clock: [
+    [0, 1, 1, 1, 1, 0],
+    [1, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 1],
+    [0, 1, 1, 1, 1, 0],
+  ],
+  // pixel question mark
+  question: [
+    [0, 1, 1, 1, 0],
+    [1, 0, 0, 0, 1],
+    [0, 0, 0, 1, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0],
   ],
 };
 
@@ -2970,7 +4048,7 @@ function getDiceFaceUrl(n, px = 3) {
   c.width = 9 * px;
   c.height = 9 * px;
   const ctx = c.getContext("2d");
-  ctx.fillStyle = "rgb(57,255,20)";
+  ctx.fillStyle = "rgb(40,48,35)";
   for (let r = 0; r < 9; r++) {
     for (let col = 0; col < 9; col++) {
       if (
@@ -3019,6 +4097,9 @@ function initPixelButtons() {
       btn.innerHTML = (label ? label + " " : "") + iconImg("envelope", 3);
     }
   });
+  // replace ⚠️ warning icon div
+  const warnEl = document.getElementById("warning-icon");
+  if (warnEl) warnEl.innerHTML = iconImg("warn", 4);
 }
 
 // Register heart_sm pattern at module level so it's always available
@@ -3035,6 +4116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.querySelectorAll(".dice-btn").forEach((btn) => {
     btn.innerHTML = diceFaceImg(6, 3);
   });
+  initPixelButtons();
   await loadCustomHobbyTags();
   buildHobbyTags("hobby-tags");
 });
@@ -3054,7 +4136,7 @@ function getPixelHeartUrl() {
   c.width = 7 * px;
   c.height = 6 * px;
   const ctx = c.getContext("2d");
-  ctx.fillStyle = "rgb(57,255,20)";
+  ctx.fillStyle = "rgb(40,48,35)";
   pattern.forEach((row, ry) =>
     row.forEach((v, rx) => {
       if (v) ctx.fillRect(rx * px, ry * px, px, px);
@@ -3082,7 +4164,7 @@ function getPixelVomitUrl() {
   c.width = 7 * px;
   c.height = 9 * px;
   const ctx = c.getContext("2d");
-  ctx.fillStyle = "rgb(57,255,20)";
+  ctx.fillStyle = "rgb(40,48,35)";
   pattern.forEach((row, ry) =>
     row.forEach((v, rx) => {
       if (v) ctx.fillRect(rx * px, ry * px, px, px);
@@ -3148,32 +4230,22 @@ function rollIncomeDice(selectId, displayId, btnId) {
   }, 70);
 }
 
+function fmt(v) {
+  if (!v || v === "—") return v || "—";
+  return v.replace(/\s*[·×\/]\s*/g, " ").replace(/\s{2,}/g, " ").trim() || "—";
+}
+
 function renderValue(profile, field, valueText, extraClass = "") {
   const raw = profile.interpretations && profile.interpretations[field];
   const interps = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const display = fmt(valueText);
   if (interps.length > 0) {
-    return `<span class="value ${extraClass} has-interpretations" data-field="${field}">${valueText}</span>`;
+    return `<span class="value ${extraClass} has-interpretations" data-field="${field}">${display}</span>`;
   }
-  return `<span class="value ${extraClass}" data-field="${field}">${valueText}</span>`;
+  return `<span class="value ${extraClass}" data-field="${field}">${display}</span>`;
 }
 
-function showProfile() {
-  const container = document.getElementById("swipe-container");
-  container.innerHTML = "";
-
-  if (currentIndex >= profiles.length) {
-    container.innerHTML = `<h1>没有更多兽人了 / No more profiles ${iconImg("paw", 3)}</h1>`;
-    _profileShownAt = 0;
-    _currentSwipeProfileName = "";
-    return;
-  }
-
-  const profile = profiles[currentIndex];
-  _profileShownAt = Date.now();
-  _currentSwipeProfileName = profile.name || profile.username || "";
-  _currentSwipeProfile = profile;
-  currentProfileInterpretations = profile.interpretations || {};
-
+function renderCardHTML(profile) {
   const baseScore = profile.score ?? 60;
   const skipCount = profile.skips ? profile.skips.length : 0;
   const displayScore = Math.max(0, baseScore - skipCount);
@@ -3182,8 +4254,7 @@ function showProfile() {
     ? `${_sd.getFullYear()}.${String(_sd.getMonth() + 1).padStart(2, "0")}.${String(_sd.getDate()).padStart(2, "0")}`
     : "";
   const stampColorClass = displayScore < 60 ? "stamp-red" : "";
-
-  container.innerHTML = `
+  return `
 <div class="card">
 
   <div class="profile-score-stamp ${stampColorClass}">
@@ -3203,21 +4274,32 @@ function showProfile() {
 
   <div class="section">
     <span class="label">物种 <small>Species</small></span>
-    ${renderValue(profile, "breed", profile.mixed && profile.breed2 ? `${profile.breed || "—"} × ${profile.breed2}（混血/Mixed）` : profile.breed || "—", "territory")}
+    ${renderValue(profile, "breed", profile.mixed && profile.breed2 ? `${profile.breed || "—"} ${profile.breed2}（混血 Mixed）` : profile.breed || "—", "territory")}
   </div>
 
   <div class="grid-3">
     <div class="cell">
       <span class="label">性别 <small>Gender</small></span>
-      ${renderValue(profile, "gender", profile.gender)}
+      ${renderValue(profile, "gender", profile.gender || "—")}
     </div>
     <div class="cell">
       <span class="label">年龄 <small>Age</small></span>
-      ${renderValue(profile, "age", profile.age)}
+      ${renderValue(profile, "age", profile.age || "—")}
     </div>
     <div class="cell">
       <span class="label">身高 <small>Height</small></span>
       ${renderValue(profile, "height", profile.height || "—")}
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="cell">
+      <span class="label">性取向 <small>Orientation</small></span>
+      ${renderValue(profile, "orientation", profile.orientation || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">婚恋 <small>Status</small></span>
+      ${renderValue(profile, "sterilized", profile.sterilized || profile.relationship?.status || "—")}
     </div>
   </div>
 
@@ -3228,18 +4310,84 @@ function showProfile() {
 
   <div class="grid-2">
     <div class="cell">
-      <span class="label">性取向 <small>Orientation</small></span>
-      ${renderValue(profile, "orientation", profile.orientation || "—")}
+      <span class="label">来这里的目的 <small>Here For</small></span>
+      ${renderValue(profile, "datingPurpose", profile.relationship?.datingPurpose || "—")}
     </div>
     <div class="cell">
-      <span class="label">婚育 <small>Status</small></span>
-      ${renderValue(profile, "sterilized", profile.sterilized)}
+      <span class="label">期望关系 <small>Looking For</small></span>
+      ${renderValue(profile, "relationshipGoal", profile.relationship?.relationshipGoal || "—")}
     </div>
   </div>
 
-  <div class="section">
-    <span class="label">MBTI</span>
-    ${renderValue(profile, "mbti", profile.mbti, "big")}
+  <div class="grid-3">
+    <div class="cell">
+      <span class="label">目前伴侣 <small>Partner</small></span>
+      ${renderValue(profile, "currentPartner", profile.relationship?.currentPartner || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">伴侣数量 <small># Partners</small></span>
+      ${renderValue(profile, "partnerCount", profile.relationship?.partnerCount || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">子女 <small>Kids</small></span>
+      ${renderValue(profile, "kids", profile.relationship?.kids || "—")}
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="cell">
+      <span class="label">暗恋 <small>Crush</small></span>
+      ${renderValue(profile, "crush", profile.relationship?.crush || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">暧昧 <small>Ambiguous</small></span>
+      ${renderValue(profile, "ambiguous", profile.relationship?.ambiguous || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">秘密伴侣 <small>Secret</small></span>
+      ${renderValue(profile, "secretPartner", profile.relationship?.secretPartner || "—")}
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="cell">
+      <span class="label">境外伴侣 <small>Foreign</small></span>
+      ${renderValue(profile, "foreignPartner", profile.relationship?.foreignPartner || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">异地伴侣 <small>Long Dist</small></span>
+      ${renderValue(profile, "otherCityPartner", profile.relationship?.otherCityPartner || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">白月光 <small>Moonlight</small></span>
+      ${renderValue(profile, "whiteMoonlight", profile.relationship?.whiteMoonlight || "—")}
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="cell">
+      <span class="label">谈过 <small>Past Rels</small></span>
+      ${renderValue(profile, "pastRelCount", profile.relationship?.pastRelCount || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">前任联系 <small>Ex Contact</small></span>
+      ${renderValue(profile, "exContact", profile.relationship?.exContact || "—")}
+    </div>
+    <div class="cell">
+      <span class="label">还爱前任 <small>Still Love Ex</small></span>
+      ${renderValue(profile, "stillLoveEx", profile.relationship?.stillLoveEx || "—")}
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="cell">
+      <span class="label">MBTI</span>
+      ${renderValue(profile, "mbti", profile.mbti || "—", "big")}
+    </div>
+    <div class="cell">
+      <span class="label">星座 <small>Horoscope</small></span>
+      ${renderValue(profile, "horoscope", profile.horoscope || getHoroscope(profile.birth) || "—")}
+    </div>
   </div>
 
   <div class="grid-3">
@@ -3259,7 +4407,26 @@ function showProfile() {
 
   <div class="section">
     <span class="label">兴趣爱好 <small>Hobbies</small></span>
-    ${renderValue(profile, "hobby", profile.hobby)}
+    ${renderValue(profile, "hobby", profile.hobby || "—")}
+  </div>
+
+  <div class="section">
+    <span class="label">车辆 <small>Vehicles</small></span>
+    ${renderValue(profile, "vehicle", fmt([
+      profile.vehicle?.types?.length ? profile.vehicle.types.join(" ") : null,
+      profile.vehicle?.model || null,
+      profile.vehicle?.count || null,
+      profile.vehicle?.price ? disp(profile.vehicle.price) : null,
+    ].filter(Boolean).join(" ") || "—"))}
+  </div>
+
+  <div class="section">
+    <span class="label">父母 <small>Parents</small></span>
+    ${renderValue(profile, "parents", fmt([
+      profile.parents?.status ? disp(profile.parents.status) : null,
+      profile.parents?.fatherOrigin ? `父 ${profile.parents.fatherOrigin}` : null,
+      profile.parents?.motherOrigin ? `母 ${profile.parents.motherOrigin}` : null,
+    ].filter(Boolean).join(" ") || "—"))}
   </div>
 
   <div class="section">
@@ -3268,10 +4435,7 @@ function showProfile() {
       const n = Math.min(profile.likes ? profile.likes.length : 0, 48);
       if (n === 0) return '<span class="value" style="opacity:0.4">—</span>';
       const h = getPixelHeartUrl();
-      return Array(n)
-        .fill(0)
-        .map(() => `<img src="${h}" class="pixel-heart">`)
-        .join("");
+      return Array(n).fill(0).map(() => `<img src="${h}" class="pixel-heart">`).join("");
     })()}</div>
   </div>
 
@@ -3281,16 +4445,32 @@ function showProfile() {
       const n = Math.min(profile.skips ? profile.skips.length : 0, 48);
       if (n === 0) return '<span class="value" style="opacity:0.4">—</span>';
       const v = getPixelVomitUrl();
-      return Array(n)
-        .fill(0)
-        .map(() => `<img src="${v}" class="pixel-heart pixel-vomit">`)
-        .join("");
+      return Array(n).fill(0).map(() => `<img src="${v}" class="pixel-heart pixel-vomit">`).join("");
     })()}</div>
   </div>
 
 </div>
   `;
+}
 
+function showProfile() {
+  const container = document.getElementById("swipe-container");
+  container.innerHTML = "";
+
+  if (currentIndex >= profiles.length) {
+    container.innerHTML = `<h1>没有更多兽人了 / No more profiles ${iconImg("paw", 3)}</h1>`;
+    _profileShownAt = 0;
+    _currentSwipeProfileName = "";
+    return;
+  }
+
+  const profile = profiles[currentIndex];
+  _profileShownAt = Date.now();
+  _currentSwipeProfileName = profile.name || profile.username || "";
+  _currentSwipeProfile = profile;
+  currentProfileInterpretations = profile.interpretations || {};
+
+  container.innerHTML = renderCardHTML(profile);
   attachLabelHandlers(profile.username);
   attachSectionDragScroll(container);
   console.log("Showing profile:", profile);
@@ -4052,9 +5232,7 @@ function buildWarnings(me, target) {
 
 function showLikeWarning(warnings) {
   const hasCritical = warnings.some((w) => w.level === "critical");
-  document.getElementById("warning-icon").textContent = hasCritical
-    ? "⚠️"
-    : "⚠️";
+  document.getElementById("warning-icon").innerHTML = iconImg("warn", 4);
   document.getElementById("warning-icon").className = hasCritical
     ? "warning-icon critical"
     : "warning-icon";
@@ -4375,7 +5553,7 @@ function showNextPopup() {
   const box = document.querySelector(".msg-popup-box");
   if (box) box.classList.toggle("msg-alert", !!msg.alertStyle);
 
-  const fromIcon = msg.alertStyle ? "⚠️" : iconImg("envelope", 2);
+  const fromIcon = msg.alertStyle ? iconImg("warn", 3) : iconImg("envelope", 2);
   document.getElementById("msg-popup-from").innerHTML =
     `${fromIcon} ${msg.alertStyle ? "" : "来自 "}${msg.fromName || msg.from}`;
   document.getElementById("msg-popup-content").textContent = msg.content;
@@ -4797,16 +5975,16 @@ function showSwipeInterrupt() {
 
   // Fake messages — always available
   const fake = [
-    () => `「${_pickInterruptName()}」查看了你的档案 ${_randInt(2, 18)} 次`,
-    () => `最近 ${_randInt(2, 7)} 只兽人拒绝了你`,
-    () => `「${_pickInterruptName()}」刚刚跳过了你`,
-    () => `「${_pickInterruptName()}」${_randInt(1, 8)} 分钟前看过你`,
-    () => `有 ${_randInt(1, 5)} 只兽人在等你回复`,
-    () => `「${_pickInterruptName()}」正在查看你的档案`,
-    () => `你和「${_pickInterruptName()}」已错过 ${_randInt(2, 9)} 次`,
-    () => `「${_pickInterruptName()}」对你感到好奇`,
-    () => `系统提示：你的魅力值正在下降`,
-    () => `${_randInt(3, 20)} 只兽人今天跳过了你`,
+    () => `「${_pickInterruptName()}」查看了你的档案 ${_randInt(2, 18)} 次 / viewed your profile ${_randInt(2, 18)} times`,
+    () => `最近 ${_randInt(2, 7)} 只兽人拒绝了你 / ${_randInt(2, 7)} fursonas rejected you recently`,
+    () => `「${_pickInterruptName()}」刚刚跳过了你 / just skipped you`,
+    () => `「${_pickInterruptName()}」${_randInt(1, 8)} 分钟前看过你 / viewed you ${_randInt(1, 8)} min ago`,
+    () => `有 ${_randInt(1, 5)} 只兽人在等你回复 / ${_randInt(1, 5)} fursonas are waiting for your reply`,
+    () => `「${_pickInterruptName()}」正在查看你的档案 / is viewing your profile`,
+    () => `你和「${_pickInterruptName()}」已错过 ${_randInt(2, 9)} 次 / you've missed each other ${_randInt(2, 9)} times`,
+    () => `「${_pickInterruptName()}」对你感到好奇 / is curious about you`,
+    () => `系统提示：你的魅力值正在下降 / System: your charm rating is dropping`,
+    () => `${_randInt(3, 20)} 只兽人今天跳过了你 / ${_randInt(3, 20)} fursonas skipped you today`,
   ];
 
   const pool = [...real, ...fake];
@@ -5722,6 +6900,61 @@ function _pickBreedMessage() {
 
 let _floodTimers = [];
 
+// ── Single-user intrusive questions ───────────────────────────
+
+const _SINGLE_QUESTION_POOL = [
+  "你有秘密伴侣吗？/ Do you have a secret partner?",
+  "你有在国外的伴侣吗？/ Do you have a partner abroad?",
+  "你有在其他国家的伴侣吗？/ Do you have a partner in other countries?",
+  "你有网恋对象吗？/ Do you have an online partner?",
+  '你有在暧昧关系中吗？/ Are you "in a situationship" single?',
+  '你还爱着前任吗？/ Are you "still in love with your ex" single?',
+  '你是开放关系吗？/ Are you "in an open relationship" single?',
+  '你找fwb/ons吗？/ Are you "in a friends with benefits" single?',
+  '你有在暗恋谁吗？/ Are you "I have a crush on someone" single?',
+  "你是因为孤独所以想找伴侣吗？/ Are you \"I want a partner because I'm lonely\" single?",
+  "你结过婚吗？/ Have you been married?",
+  "你有孩子吗？/ Do you have kids?",
+  '你有「那个错过的人」吗？/ Do you have a "one that got away"?',
+];
+
+function _startSingleQuestions() {
+  const burstDelays = [6000, 18000, 35000, 55000, 80000];
+  burstDelays.forEach((delay) => {
+    const t = setTimeout(() => {
+      if (!document.getElementById("swipe-page")?.classList.contains("active"))
+        return;
+      _showSingleQuestion();
+    }, delay);
+    _floodTimers.push(t);
+  });
+
+  function scheduleNext() {
+    const t = setTimeout(
+      () => {
+        if (!document.getElementById("swipe-page")?.classList.contains("active"))
+          return;
+        _showSingleQuestion();
+        scheduleNext();
+      },
+      _randInt(40000, 90000),
+    );
+    _floodTimers.push(t);
+  }
+  scheduleNext();
+}
+
+function _showSingleQuestion() {
+  const text = _SINGLE_QUESTION_POOL[_randInt(0, _SINGLE_QUESTION_POOL.length - 1)];
+  const el = document.createElement("div");
+  el.className = "swipe-interrupt";
+  el.style.top = _randInt(8, 65) + "vh";
+  el.style.left = _randInt(4, 52) + "vw";
+  el.innerHTML = `${iconImg("question",2)} ${text}<button class="interrupt-close" onclick="this.parentElement.remove()">✕</button>`;
+  document.body.appendChild(el);
+  setTimeout(() => el?.remove(), 10000);
+}
+
 function startGenderedNotifications() {
   if (!currentUser) return;
   const g = (currentUser.gender || "").split("/")[0];
@@ -5730,6 +6963,8 @@ function startGenderedNotifications() {
   _startProfileViewNotifs();
   _startUnrepliedReminders();
   if (currentUser.mixed) _startMixedBloodNotifs();
+  const sterilized = (currentUser.sterilized || "").toLowerCase();
+  if (sterilized.includes("单身") || sterilized.includes("single")) _startSingleQuestions();
 }
 
 function _startMixedBloodNotifs() {
@@ -5967,7 +7202,7 @@ function _showSkipNotif(name) {
   el.className = "swipe-interrupt skip-notif";
   el.style.top = _randInt(8, 72) + "vh";
   el.style.left = _randInt(3, 55) + "vw";
-  el.innerHTML = `「${name}」跳过了你 ❌<button class="interrupt-close" onclick="this.parentElement.remove()">✕</button>`;
+  el.innerHTML = `「${name}」跳过了你 ${iconImg("xmark",2)} / skipped you<button class="interrupt-close" onclick="this.parentElement.remove()">✕</button>`;
   document.body.appendChild(el);
   setTimeout(() => el?.remove(), 7000);
 }
@@ -6009,7 +7244,7 @@ function _showProfileViewNotif() {
   el.className = "swipe-interrupt";
   el.style.top = _randInt(8, 72) + "vh";
   el.style.left = _randInt(3, 55) + "vw";
-  el.innerHTML = `👁 「${name}」查看了你的档案，停留了 ${secs} 秒<button class="interrupt-close" onclick="this.parentElement.remove()">✕</button>`;
+  el.innerHTML = `${iconImg("eye",2)} 「${name}」查看了你的档案，停留了 ${secs} 秒 / viewed your profile for ${secs}s<button class="interrupt-close" onclick="this.parentElement.remove()">✕</button>`;
   document.body.appendChild(el);
   setTimeout(() => el?.remove(), 8000);
 }
@@ -6059,10 +7294,10 @@ function _showUnrepliedReminder() {
   const name = _pickViewerName();
   const timeStr = _TIME_PHRASES[_randInt(0, _TIME_PHRASES.length - 1)];
   const texts = [
-    `💬 你已经 ${timeStr} 没有回复「${name}」了 / You haven't replied to 「${name}」in ${timeStr}`,
-    `⏰ 你还没有回复「${name}」，对方可能在等你 / 「${name}」might be waiting`,
-    `📩 「${name}」发来的消息你还没有回复哦 / You left 「${name}」on read`,
-    `💬 你已经忘记回复「${name}」了吗？/ Did you forget to reply to 「${name}」?`,
+    `${iconImg("bubble",2)} 你已经 ${timeStr} 没有回复「${name}」了 / You haven't replied to 「${name}」in ${timeStr}`,
+    `${iconImg("clock",2)} 你还没有回复「${name}」，对方可能在等你 / 「${name}」might be waiting`,
+    `${iconImg("envelope",2)} 「${name}」发来的消息你还没有回复哦 / You left 「${name}」on read`,
+    `${iconImg("bubble",2)} 你已经忘记回复「${name}」了吗？/ Did you forget to reply to 「${name}」?`,
   ];
   const el = document.createElement("div");
   el.className = "swipe-interrupt";
@@ -6301,72 +7536,11 @@ function goToMyProfile() {
 }
 
 function _openMyProfileEdit(u) {
-  // Score stamp
-  const stampEl = document.getElementById("my-self-stamp");
-  if (stampEl) {
-    const bs = u.score ?? 60;
-    const sc = u.skips ? u.skips.length : 0;
-    const ds = Math.max(0, bs - sc);
-    const sd = u.date ? new Date(u.date) : null;
-    const sDate = sd
-      ? `${sd.getFullYear()}.${String(sd.getMonth() + 1).padStart(2, "0")}.${String(sd.getDate()).padStart(2, "0")}`
-      : "";
-    const sColor = ds < 60 ? "stamp-red" : "";
-    stampEl.className = `profile-score-stamp ${sColor}`;
-    stampEl.innerHTML = `
-      <span class="stamp-date">${sDate}</span>
-      <span class="stamp-num">${ds}</span>
-      <span class="stamp-lines"><span></span><span></span></span>
-    `;
+  const container = document.getElementById("my-profile-card-body");
+  if (container) {
+    container.innerHTML = renderCardHTML(u);
+    attachSectionDragScroll(container);
   }
-
-  // Avatar
-  const avatarEl = document.getElementById("my-self-avatar");
-  if (u.grid) {
-    const url = renderGridAsAvatar(u.grid, u.gridText);
-    avatarEl.innerHTML = `<img src="${url}" style="width:160px;height:160px;image-rendering:pixelated;">`;
-  } else {
-    avatarEl.innerHTML = "";
-  }
-
-  // Likes
-  const likesEl = document.getElementById("my-self-likes");
-  const likesN = Math.min(u.likes ? u.likes.length : 0, 30);
-  if (likesN === 0) {
-    likesEl.innerHTML = '<span class="value" style="opacity:0.4">—</span>';
-  } else {
-    const h = getPixelHeartUrl();
-    likesEl.innerHTML = Array(likesN).fill(0).map(() => `<img src="${h}" class="pixel-heart">`).join("");
-  }
-
-  // Dislikes
-  const dislikesEl = document.getElementById("my-self-dislikes");
-  const dislikesN = Math.min(u.skips ? u.skips.length : 0, 30);
-  if (dislikesN === 0) {
-    dislikesEl.innerHTML = '<span class="value" style="opacity:0.4">—</span>';
-  } else {
-    const v = getPixelVomitUrl();
-    dislikesEl.innerHTML = Array(dislikesN).fill(0).map(() => `<img src="${v}" class="pixel-heart pixel-vomit">`).join("");
-  }
-
-  // Read-only fields
-  const set = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val || "—";
-  };
-  set("view-name", u.name);
-  set("view-age", u.age);
-  set("view-breed", u.breed);
-  set("view-gender", u.gender);
-  set("view-orientation", u.orientation);
-  set("view-hukou", u.hukou);
-  set("view-sterilized", u.sterilized);
-  set("view-mbti", u.mbti);
-  set("view-edu", u.edu);
-  set("view-occupation", u.occupation);
-  set("view-income", u.income);
-  set("view-hobby", u.hobby);
-
   document.getElementById("profile-edit").classList.remove("hidden");
 }
 
@@ -6518,57 +7692,61 @@ function submitSwipeSendMsg() {
 // Avatar Rendering Function
 function renderGridAsAvatar(grid, gridText) {
   const canvas = document.createElement("canvas");
-  const size = 300;
+  // 1024×1024 = 32px per cell — Zpix pixel font renders cleanest at multiples of its base size
+  const size = 1024;
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
 
-  const cellSize = size / 32;
+  const BG   = "#a9b0a2";
+  const DEAD = "#a2a99b"; // subtle inactive-cell tint for the grid
+  const INK  = "rgb(40,56,24)";
+
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, size, size);
+
+  const cellSize = size / 32; // 32px per cell (pixel art grid)
+  const gap = 2;
+
+  // Finer background texture: 64×64 cells at 1px gap
+  const bgGrid = 64;
+  const bgCell = size / bgGrid;
+  const bgGap = 1;
+  ctx.fillStyle = DEAD;
+  for (let y = 0; y < bgGrid; y++) {
+    for (let x = 0; x < bgGrid; x++) {
+      ctx.fillRect(x * bgCell + bgGap, y * bgCell + bgGap, bgCell - bgGap * 2, bgCell - bgGap * 2);
+    }
+  }
+
+  // Font: Zpix at 26px is at its native pixel size on this canvas
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = `${cellSize}px monospace`;
+  ctx.font = `26px "Zpix", monospace`;
 
   const pixelAlpha = { 1: 0.25, 2: 0.49, 3: 0.75, 4: 1 };
-  const textAlpha = { "#1": 0.25, "#2": 0.49, "#3": 0.75, "#4": 1 };
+  const textAlpha  = { "#1": 0.25, "#2": 0.49, "#3": 0.75, "#4": 1 };
+
+  const drawPixel = (x, y, alpha) => {
+    ctx.fillStyle = alpha >= 1 ? INK : `rgba(40,56,24,${alpha})`;
+    ctx.fillRect(x * cellSize + gap, y * cellSize + gap, cellSize - gap * 2, cellSize - gap * 2);
+  };
+
+  const drawChar = (x, y, ch, alpha) => {
+    ctx.fillStyle = alpha >= 1 ? INK : `rgba(40,56,24,${alpha})`;
+    ctx.fillText(ch, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+  };
 
   for (let y = 0; y < 32; y++) {
     for (let x = 0; x < 32; x++) {
       const cell = grid[y][x];
-      if (cell === "pixel" || cell === 4) {
-        ctx.fillStyle = "rgb(57, 255, 20)";
-        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-      } else if (pixelAlpha[cell] !== undefined) {
-        ctx.fillStyle = `rgba(57, 255, 20, ${pixelAlpha[cell]})`;
-        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-      } else if (cell === "text" || cell === "#" || cell === "#4") {
-        ctx.fillStyle = "rgb(57, 255, 20)";
-        ctx.fillText(
-          gridText,
-          x * cellSize + cellSize / 2,
-          y * cellSize + cellSize / 2,
-        );
-      } else if (textAlpha[cell] !== undefined) {
-        ctx.fillStyle = `rgba(57, 255, 20, ${textAlpha[cell]})`;
-        ctx.fillText(
-          gridText,
-          x * cellSize + cellSize / 2,
-          y * cellSize + cellSize / 2,
-        );
-      } else if (Array.isArray(cell)) {
-        ctx.fillStyle = `rgba(57, 255, 20, ${cell[1]})`;
-        ctx.fillText(
-          cell[0],
-          x * cellSize + cellSize / 2,
-          y * cellSize + cellSize / 2,
-        );
-      } else if (cell !== null && cell !== "/") {
-        ctx.fillStyle = "rgb(57, 255, 20)";
-        ctx.fillText(
-          cell,
-          x * cellSize + cellSize / 2,
-          y * cellSize + cellSize / 2,
-        );
-      }
+      if (cell === "pixel" || cell === 4)            drawPixel(x, y, 1);
+      else if (pixelAlpha[cell] !== undefined)       drawPixel(x, y, pixelAlpha[cell]);
+      else if (cell === "text" || cell === "#" || cell === "#4") drawChar(x, y, gridText, 1);
+      else if (textAlpha[cell] !== undefined)        drawChar(x, y, gridText, textAlpha[cell]);
+      else if (Array.isArray(cell))                  drawChar(x, y, cell[0], cell[1]);
+      else if (cell !== null && cell !== "/")        drawChar(x, y, cell, 1);
     }
   }
 
@@ -6589,28 +7767,9 @@ function viewConvoProfile() {
 }
 
 function showProfileView(p) {
-  const avatarHtml = p.grid
-    ? `<img src="${renderGridAsAvatar(p.grid, p.gridText)}" alt="avatar" class="profile-view-avatar" />`
-    : "";
-
-  document.getElementById("profile-view-content").innerHTML = `
-    ${avatarHtml}
-    <h3 class="profile-view-name">${escapeHtml(p.name || "")}</h3>
-    <p class="profile-view-species">${escapeHtml(p.breed || "")}</p>
-    <div class="profile-view-tags">
-      ${p.gender ? `<span class="pv-tag">${escapeHtml(p.gender)}</span>` : ""}
-      ${p.age ? `<span class="pv-tag">${escapeHtml(String(p.age))}</span>` : ""}
-      ${p.height ? `<span class="pv-tag">${escapeHtml(p.height)}</span>` : ""}
-      ${p.orientation ? `<span class="pv-tag">${escapeHtml(p.orientation)}</span>` : ""}
-      ${p.sterilized ? `<span class="pv-tag">${escapeHtml(p.sterilized)}</span>` : ""}
-      ${p.mbti ? `<span class="pv-tag">${escapeHtml(p.mbti)}</span>` : ""}
-    </div>
-    ${p.hukou ? `<p class="pv-row"><span class="pv-label">领地 / Territory</span>${escapeHtml(p.hukou)}</p>` : ""}
-    ${p.edu ? `<p class="pv-row"><span class="pv-label">学历 / Education</span>${escapeHtml(p.edu)}</p>` : ""}
-    ${p.occupation ? `<p class="pv-row"><span class="pv-label">职业 / Occupation</span>${escapeHtml(p.occupation)}</p>` : ""}
-    ${p.income ? `<p class="pv-row"><span class="pv-label">收入 / Income</span>${escapeHtml(p.income)}</p>` : ""}
-    ${p.hobby ? `<p class="pv-row"><span class="pv-label">爱好 / Hobbies</span>${escapeHtml(p.hobby)}</p>` : ""}
-  `;
+  const container = document.getElementById("profile-view-content");
+  container.innerHTML = renderCardHTML(p);
+  attachSectionDragScroll(container);
   document.getElementById("profile-view-overlay").classList.remove("hidden");
 }
 

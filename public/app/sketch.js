@@ -11,8 +11,7 @@ let strokeCells = new Set(); // 当前笔中已记录的格子，避免重复记
 function setup() {
   let canvas = createCanvas((windowWidth * 4) / 5, (windowWidth * 4) / 5);
   canvas.parent("p5-canvas-container");
-  //  background(176, 206, 173);
-  background(0);
+  clear();
   petCanvas = createGraphics(32, 32);
   petCanvas.clear();
 
@@ -29,7 +28,7 @@ function setup() {
 }
 
 function draw() {
-  background(0);
+  clear();
 
   let cellSize = width / 32;
   const pixelAlpha = { 1: 65, 2: 125, 3: 190, 4: 255 };
@@ -54,34 +53,49 @@ function draw() {
       let cell = grid[y][x];
 
       if (cell === "pixel" || cell === 4) {
-        fill(57, 255, 20, 255); noStroke();
+        fill(40, 48, 35, 255); noStroke();
+        drawingContext.shadowColor = "rgba(0,0,0,0.35)";
+        drawingContext.shadowOffsetX = 2; drawingContext.shadowOffsetY = 2; drawingContext.shadowBlur = 0;
         rect(x * cellSize, y * cellSize, cellSize, cellSize);
+        drawingContext.shadowColor = "rgba(0,0,0,0)";
       } else if (pixelAlpha[cell] !== undefined) {
-        fill(57, 255, 20, pixelAlpha[cell]); noStroke();
+        fill(40, 48, 35, pixelAlpha[cell]); noStroke();
+        drawingContext.shadowColor = "rgba(0,0,0,0.35)";
+        drawingContext.shadowOffsetX = 2; drawingContext.shadowOffsetY = 2; drawingContext.shadowBlur = 0;
         rect(x * cellSize, y * cellSize, cellSize, cellSize);
+        drawingContext.shadowColor = "rgba(0,0,0,0)";
       } else if (cell === "text" || cell === "#" || cell === "#4") {
         const ch = currentText.length > 1
           ? currentText[(textCellIdx[`${x},${y}`] ?? 0) % currentText.length]
           : currentText;
-        fill(57, 255, 20, 255);
+        fill(40, 48, 35, 255);
         textAlign(CENTER, CENTER); textSize(cellSize);
+        drawingContext.shadowColor = "rgba(0,0,0,0.35)";
+        drawingContext.shadowOffsetX = 2; drawingContext.shadowOffsetY = 2; drawingContext.shadowBlur = 0;
         text(ch, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+        drawingContext.shadowColor = "rgba(0,0,0,0)";
       } else if (textAlpha[cell] !== undefined) {
         const ch = currentText.length > 1
           ? currentText[(textCellIdx[`${x},${y}`] ?? 0) % currentText.length]
           : currentText;
-        fill(57, 255, 20, textAlpha[cell]);
+        fill(40, 48, 35, textAlpha[cell]);
         textAlign(CENTER, CENTER); textSize(cellSize);
+        drawingContext.shadowColor = "rgba(0,0,0,0.35)";
+        drawingContext.shadowOffsetX = 2; drawingContext.shadowOffsetY = 2; drawingContext.shadowBlur = 0;
         text(ch, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+        drawingContext.shadowColor = "rgba(0,0,0,0)";
       } else if (cell !== null && cell !== "/") {
-        fill(57, 255, 20, 255);
+        fill(40, 48, 35, 255);
         textAlign(CENTER, CENTER); textSize(cellSize);
+        drawingContext.shadowColor = "rgba(0,0,0,0.35)";
+        drawingContext.shadowOffsetX = 2; drawingContext.shadowOffsetY = 2; drawingContext.shadowBlur = 0;
         text(cell, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+        drawingContext.shadowColor = "rgba(0,0,0,0)";
       }
     }
   }
-  // 网格线（可选，增加LCD感）
-  stroke(57, 255, 20, 20);
+  // 网格线（增加拓麻歌子 LCD 质感）
+  stroke(40, 48, 35, 22);
   strokeWeight(0.5);
   for (let i = 0; i <= 32; i++) {
     line(i * cellSize, 0, i * cellSize, height);
@@ -94,10 +108,14 @@ function draw() {
 
 function setBrush() {
   tool = "brush";
+  document.getElementById("brush-btn")?.classList.add("tool-active");
+  document.getElementById("eraser-btn")?.classList.remove("tool-active");
 }
 
 function setEraser() {
   tool = "eraser";
+  document.getElementById("eraser-btn")?.classList.add("tool-active");
+  document.getElementById("brush-btn")?.classList.remove("tool-active");
 }
 
 function setClear() {
