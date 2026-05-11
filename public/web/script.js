@@ -365,6 +365,40 @@ function startCycle() {
   }, 45000);
 }
 
+// Re-rank and refresh every 20s: picks up new high-score profiles, score
+// changes, and any interpretations missed by socket events.
+setInterval(async () => {
+  try {
+    const res = await fetch("/profiles");
+    const data = await res.json();
+
+    const calcScore = (p) => Math.max(0, (p.score ?? 60) - (p.skips?.length || 0));
+    const newRanking = data
+      .filter((p) => p.name)
+      .sort((a, b) => calcScore(b) - calcScore(a))
+      .slice(0, 10);
+
+    // Merge fresh data into existing ranking entries to preserve in-memory state
+    newRanking.forEach(fresh => {
+      const existing = ranking.find(p => p.username === fresh.username);
+      if (existing) {
+        Object.assign(existing, fresh);
+      }
+    });
+
+    // Find if the currently displayed profile is still in the new ranking
+    const currentUsername = ranking[currentIdx]?.username;
+    const newIdx = newRanking.findIndex(p => p.username === currentUsername);
+
+    // Rebuild ranking array in-place
+    ranking.length = 0;
+    newRanking.forEach(p => ranking.push(p));
+
+    // Keep currentIdx pointing at the same profile if it survived; else clamp
+    currentIdx = newIdx >= 0 ? newIdx : Math.min(currentIdx, ranking.length - 1);
+  } catch (_) {}
+}, 20000);
+
 function resetProgress() {
   const bar = document.getElementById("progressBar");
   bar.classList.remove("running");
