@@ -104,12 +104,20 @@ function showSpotlight(idx) {
 
   const v = (val) => val || "—";
 
+  // Chinese-only: strip everything after the first " / " or "/"
+  const zh = (val) => {
+    if (!val || val === "—") return val || "—";
+    if (val.includes(" / ")) return val.split(" / ")[0].trim();
+    if (val.includes("/")) return val.split("/")[0].trim();
+    return val;
+  };
+
   function displayTerritory(hukou) {
     if (!hukou) return "—";
     if (!hukou.includes(" · ")) return displayBilingual(hukou);
     const parts = hukou.split(" · ");
     const zh = parts.map(p => p.split(" / ")[0].trim()).join("  ");
-    const en = parts.map(p => { const s = p.split(" / "); return s.length > 1 ? s.slice(1).join(" / ").trim() : ""; }).filter(Boolean).join("  ");
+    const en = parts.map(p => { const s = p.split(" / "); return s.length > 1 ? s[1].trim() : ""; }).filter(Boolean).join("  ");
     return en ? `${zh}<br><small>${en}</small>` : zh;
   }
 
@@ -195,27 +203,27 @@ function showSpotlight(idx) {
 
     <div class="card">
       <div class="grid-3">
-        <div class="cell"><span class="label">性别<br><small>Gender</small></span><span class="value">${displayBilingual(p.gender)}</span></div>
-        <div class="cell"><span class="label">年龄<br><small>Age</small></span><span class="value">${v(p.age)}</span></div>
-        <div class="cell"><span class="label">身高<br><small>Height</small></span><span class="value">${v(p.height)}</span></div>
+        <div class="cell" data-field="gender"><span class="label">性别<br><small>Gender</small></span><span class="value">${displayBilingual(p.gender)}</span></div>
+        <div class="cell" data-field="age"><span class="label">年龄<br><small>Age</small></span><span class="value">${v(p.age)}</span></div>
+        <div class="cell" data-field="height"><span class="label">身高<br><small>Height</small></span><span class="value">${v(p.height)}</span></div>
       </div>
 
       <div class="grid-2">
-        <div class="cell"><span class="label">性取向<br><small>Orientation</small></span><span class="value">${displayBilingual(p.orientation)}</span></div>
-        <div class="cell"><span class="label">婚育状况<br><small>Status</small></span><span class="value">${displayBilingual(p.sterilized || rel.status)}</span></div>
+        <div class="cell" data-field="orientation"><span class="label">性取向<br><small>Orientation</small></span><span class="value">${displayBilingual(p.orientation)}</span></div>
+        <div class="cell" data-field="sterilized"><span class="label">婚育状况<br><small>Status</small></span><span class="value">${displayBilingual(p.sterilized || rel.status)}</span></div>
       </div>
 
       <div class="grid-2">
-        <div class="cell"><span class="label">MBTI</span><span class="value">${v(p.mbti)}</span></div>
-        <div class="cell"><span class="label">星座<br><small>Horoscope</small></span><span class="value">${displayBilingual(p.horoscope || getHoroscope(p.birth))}</span></div>
+        <div class="cell" data-field="mbti"><span class="label">MBTI</span><span class="value">${v(p.mbti)}</span></div>
+        <div class="cell" data-field="horoscope"><span class="label">星座<br><small>Horoscope</small></span><span class="value">${displayBilingual(p.horoscope || getHoroscope(p.birth))}</span></div>
       </div>
 
       <div class="row-2x">
-        <div class="section">
+        <div class="section" data-field="hukou">
           <span class="label">领地 <small>Territory</small></span>
           <span class="value">${displayTerritory(p.hukou)}</span>
         </div>
-        <div class="section">
+        <div class="section" data-field="vehicle">
           <span class="label">车辆 <small>Vehicles</small></span>
           <span class="value">${displayBilingual([
             p.vehicle?.types?.length ? p.vehicle.types.join(' ') : null,
@@ -227,46 +235,46 @@ function showSpotlight(idx) {
       </div>
 
       <div class="grid-3">
-        <div class="cell"><span class="label">学历<br><small>Education</small></span><span class="value">${displayBilingual(p.edu)}</span></div>
-        <div class="cell"><span class="label">职业<br><small>Job</small></span><span class="value">${v(p.occupation)}</span></div>
-        <div class="cell"><span class="label">月收入<br><small>Income</small></span><span class="value">${displayBilingual(p.income)}</span></div>
+        <div class="cell cell-sm" data-field="edu"><span class="label">学历<br><small>Education</small></span><span class="value">${displayBilingual(p.edu)}</span></div>
+        <div class="cell cell-sm" data-field="occupation"><span class="label">职业<br><small>Job</small></span><span class="value">${displayBilingual(p.occupation)}</span></div>
+        <div class="cell cell-sm" data-field="income"><span class="label">月收入<br><small>Income</small></span><span class="value">${displayBilingual(p.income)}</span></div>
       </div>
 
       <div class="grid-2">
-        <div class="cell"><span class="label">来这里的目的<br><small>Here For</small></span><span class="value">${displayBilingual(rel.datingPurpose)}</span></div>
-        <div class="cell"><span class="label">期望关系<br><small>Looking For</small></span><span class="value">${displayBilingual(rel.relationshipGoal)}</span></div>
+        <div class="cell cell-sm" data-field="datingPurpose"><span class="label">来这里的目的<br><small>Here For</small></span><span class="value">${displayBilingual(rel.datingPurpose)}</span></div>
+        <div class="cell cell-sm" data-field="relationshipGoal"><span class="label">期望关系<br><small>Looking For</small></span><span class="value">${displayBilingual(rel.relationshipGoal)}</span></div>
       </div>
 
       <div class="grid-3">
-        <div class="cell"><span class="label">目前伴侣<br><small>Partner</small></span><span class="value">${displayBilingual(rel.currentPartner)}</span></div>
-        <div class="cell"><span class="label">伴侣数量<br><small># Partners</small></span><span class="value">${displayBilingual(rel.partnerCount)}</span></div>
-        <div class="cell"><span class="label">子女<br><small>Kids</small></span><span class="value">${displayBilingual(rel.kids)}</span></div>
+        <div class="cell cell-sm" data-field="currentPartner"><span class="label">目前伴侣<br><small>Partner</small></span><span class="value">${displayBilingual(rel.currentPartner)}</span></div>
+        <div class="cell cell-sm" data-field="partnerCount"><span class="label">伴侣数量<br><small># Partners</small></span><span class="value">${displayBilingual(rel.partnerCount)}</span></div>
+        <div class="cell cell-sm" data-field="kids"><span class="label">子女<br><small>Kids</small></span><span class="value">${displayBilingual(rel.kids)}</span></div>
       </div>
 
       <div class="grid-3">
-        <div class="cell"><span class="label">暗恋<br><small>Crush</small></span><span class="value">${displayBilingual(rel.crush)}</span></div>
-        <div class="cell"><span class="label">暧昧<br><small>Ambiguous</small></span><span class="value">${displayBilingual(rel.ambiguous)}</span></div>
-        <div class="cell"><span class="label">秘密伴侣<br><small>Secret</small></span><span class="value">${displayBilingual(rel.secretPartner)}</span></div>
+        <div class="cell cell-sm" data-field="crush"><span class="label">暗恋<br><small>Crush</small></span><span class="value">${displayBilingual(rel.crush)}</span></div>
+        <div class="cell cell-sm" data-field="ambiguous"><span class="label">暧昧<br><small>Ambiguous</small></span><span class="value">${displayBilingual(rel.ambiguous)}</span></div>
+        <div class="cell cell-sm" data-field="secretPartner"><span class="label">秘密伴侣<br><small>Secret</small></span><span class="value">${displayBilingual(rel.secretPartner)}</span></div>
       </div>
 
       <div class="grid-3">
-        <div class="cell"><span class="label">境外伴侣<br><small>Foreign</small></span><span class="value">${displayBilingual(rel.foreignPartner)}</span></div>
-        <div class="cell"><span class="label">异地伴侣<br><small>Long Dist</small></span><span class="value">${displayBilingual(rel.otherCityPartner)}</span></div>
-        <div class="cell"><span class="label">白月光<br><small>Moonlight</small></span><span class="value">${displayBilingual(rel.whiteMoonlight)}</span></div>
+        <div class="cell cell-sm" data-field="foreignPartner"><span class="label">境外伴侣<br><small>Foreign</small></span><span class="value">${displayBilingual(rel.foreignPartner)}</span></div>
+        <div class="cell cell-sm" data-field="otherCityPartner"><span class="label">异地伴侣<br><small>Long Dist</small></span><span class="value">${displayBilingual(rel.otherCityPartner)}</span></div>
+        <div class="cell cell-sm" data-field="whiteMoonlight"><span class="label">白月光<br><small>Moonlight</small></span><span class="value">${displayBilingual(rel.whiteMoonlight)}</span></div>
       </div>
 
       <div class="grid-3">
-        <div class="cell"><span class="label">谈过<br><small>Past Rels</small></span><span class="value">${displayBilingual(rel.pastRelCount)}</span></div>
-        <div class="cell"><span class="label">前任联系<br><small>Ex Contact</small></span><span class="value">${displayBilingual(rel.exContact)}</span></div>
-        <div class="cell"><span class="label">还爱前任<br><small>Still Love Ex</small></span><span class="value">${displayBilingual(rel.stillLoveEx)}</span></div>
+        <div class="cell cell-sm" data-field="pastRelCount"><span class="label">谈过<br><small>Past Rels</small></span><span class="value">${displayBilingual(rel.pastRelCount)}</span></div>
+        <div class="cell cell-sm" data-field="exContact"><span class="label">前任联系<br><small>Ex Contact</small></span><span class="value">${displayBilingual(rel.exContact)}</span></div>
+        <div class="cell cell-sm" data-field="stillLoveEx"><span class="label">还爱前任<br><small>Still Love Ex</small></span><span class="value">${displayBilingual(rel.stillLoveEx)}</span></div>
       </div>
 
-      <div class="section">
+      <div class="section" data-field="hobby">
         <span class="label">兴趣爱好 <small>Hobbies</small></span>
         <span class="value">${displayBilingual(v(p.hobby))}</span>
       </div>
 
-      <div class="section">
+      <div class="section" data-field="parents">
         <span class="label">家庭状况 <small>Family</small></span>
         <span class="value">${displayBilingual([
           p.parents?.status || null,
@@ -286,38 +294,46 @@ function showSpotlight(idx) {
         ].filter(Boolean).join(' · ') || '—')}</span>
       </div>
 
-      ${p.standards ? `<div class="section">
+      ${p.standards ? `<div class="section" data-field="standards">
         <span class="label">择偶标准 <small>Looking For</small></span>
         <span class="value">${displayBilingual(p.standards)}</span>
       </div>` : ""}
     </div>
   `;
 
-  // ── Real interpretation comments (floating red tags) ──────────
-  const spotlight = document.getElementById("spotlight");
+  // ── Inject interpretation bubbles into their specific cells ──────────
   const interps = p.interpretations || {};
-  const allComments = [];
-  Object.entries(interps).forEach(([field, val]) => {
-    const entries = Array.isArray(val) ? val : [val];
-    entries.forEach(e => {
-      if (e && e.text) allComments.push({ text: e.text, by: e.addedBy || "?" });
+  document.querySelectorAll('#spotlight [data-field]').forEach(el => {
+    const field = el.dataset.field;
+    const raw = interps[field];
+    if (!raw) return;
+    const list = Array.isArray(raw) ? raw : [raw];
+    el.classList.add('has-web-bubbles');
+    list.forEach((interp, i) => {
+      if (!interp || !interp.text) return;
+      const b = document.createElement('span');
+      b.className = 'web-interp-bubble';
+      b.textContent = interp.text;
+      const n = list.length;
+      const angle = (i / Math.max(n, 1)) * 2 * Math.PI;
+      const ringR = Math.max(140, n * 70);
+      const sx = Math.cos(angle) * ringR * 0.6 + (Math.random() - 0.5) * 20;
+      const sy = Math.sin(angle) * ringR * 0.35 + (Math.random() - 0.5) * 12;
+      const fAngle = angle + 0.25 * (Math.random() - 0.5);
+      const fDist = Math.max(110, n * 55);
+      const fx = Math.cos(fAngle) * fDist * 0.7;
+      const fy = Math.sin(fAngle) * fDist * 0.38;
+      const dx = (Math.random() - 0.5) * 28;
+      const dy = (Math.random() - 0.5) * 18;
+      b.style.setProperty('--sx', sx + 'px');
+      b.style.setProperty('--sy', sy + 'px');
+      b.style.setProperty('--fx', fx + 'px');
+      b.style.setProperty('--fy', fy + 'px');
+      b.style.setProperty('--dx', dx + 'px');
+      b.style.setProperty('--dy', dy + 'px');
+      b.style.animationDelay = `${i * 80}ms, ${900 + i * 80}ms`;
+      el.appendChild(b);
     });
-  });
-
-  // scatter positions (top%, left%, rotation)
-  const positions = [
-    [8,  62, -6], [14, 58, 4],  [22, 64, -3], [30, 60, 5],
-    [38, 62, -5], [46, 58, 3],  [54, 64, -4], [62, 60, 6],
-    [70, 62, -3], [78, 58, 5],  [20, 55, 4],  [50, 55, -6],
-  ];
-
-  allComments.slice(0, positions.length).forEach((c, i) => {
-    const [top, left, rot] = positions[i];
-    const tag = document.createElement("div");
-    tag.className = "interp-float";
-    tag.style.cssText = `top:${top}%;left:${left}%;--r:${rot}deg;`;
-    tag.innerHTML = `<span class="interp-by">${c.by}</span><span class="interp-text">${c.text}</span>`;
-    spotlight.appendChild(tag);
   });
 
   resetProgress();
