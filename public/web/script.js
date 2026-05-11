@@ -327,7 +327,9 @@ function showSpotlight(idx) {
       if (!interp || !interp.text) return;
       const b = document.createElement('span');
       b.className = 'web-interp-bubble';
+      b.dataset.interpIndex = i;
       b.textContent = interp.text;
+      if (interp.agrees > 0) b.style.fontSize = 44 + interp.agrees * 10 + 'px';
       const n = list.length;
       const angle = (i / Math.max(n, 1)) * 2 * Math.PI;
       const ringR = Math.max(140, n * 70);
@@ -472,27 +474,54 @@ const _LIKE_REASONS = [
   "无法解释 就是感觉对 / can't explain, just feels right",
   "感觉对方很有品味 / they seem to have taste", "档案写得很真实 / profile felt genuine",
 ];
-const _COMMENT_TEMPLATES = [
-  (a, b, tag, adj) => `「${a}」评论了「${b}」的[${tag}]标签：有点${adj}  "${a}" on "${b}"'s [${tag}]: kinda ${adj}`,
-  (a, b, tag, adj) => `「${a}」看了「${b}」的[${tag}]，觉得有点${adj}  "${a}" saw [${tag}], thought: ${adj}`,
-  (a, b, tag, adj) => `「${a}」对「${b}」的[${tag}]留下印象：${adj}  "${a}" was struck by "${b}"'s [${tag}]: ${adj}`,
-  (a, b, tag, adj) => `「${a}」评价「${b}」的[${tag}]：确实有点${adj}  "${a}" rates "${b}"'s [${tag}]: genuinely ${adj}`,
-  (a, b, tag, adj) => `「${a}」看到「${b}」写了[${tag}]，评价说：${adj}  "${a}" read [${tag}] on "${b}"'s profile: ${adj}`,
+const _COMMENT_TEMPLATES_ZH = [
+  (a, b, tag, adj) => `「${a}」评论了「${b}」的[${tag}]标签：有点${adj}`,
+  (a, b, tag, adj) => `「${a}」看了「${b}」的[${tag}]，觉得有点${adj}`,
+  (a, b, tag, adj) => `「${a}」对「${b}」的[${tag}]留下印象：${adj}`,
+  (a, b, tag, adj) => `「${a}」评价「${b}」的[${tag}]：确实有点${adj}`,
+  (a, b, tag, adj) => `「${a}」看到「${b}」写了[${tag}]，评价说：${adj}`,
 ];
-const _LIKE_TEMPLATES = [
-  (a, b, reason) => `「${a}」喜欢了「${b}」· ${reason}`,
-  (a, b, reason) => `「${a}」对「${b}」上头  "${a}" fell for "${b}"  ${reason}`,
-  (a, b, reason) => `「${a}」给「${b}」点了喜欢  "${a}" liked "${b}"  ${reason}`,
-  (a, b, reason) => `「${a}」→「${b}」✓  "${a}" chose "${b}"  ${reason}`,
-  (a, b, reason) => `「${a}」[心]「${b}」· "${a}" hearts "${b}"  ${reason}`,
+const _COMMENT_TEMPLATES_EN = [
+  (a, b, tag, adj) => `"${a}" on "${b}"'s [${tag}]: kinda ${adj}`,
+  (a, b, tag, adj) => `"${a}" saw [${tag}], thought: ${adj}`,
+  (a, b, tag, adj) => `"${a}" was struck by "${b}"'s [${tag}]: ${adj}`,
+  (a, b, tag, adj) => `"${a}" rates "${b}"'s [${tag}]: genuinely ${adj}`,
+  (a, b, tag, adj) => `"${a}" read [${tag}] on "${b}"'s profile: ${adj}`,
 ];
-const _SKIP_TEMPLATES = [
-  (a, b, reason) => `「${a}」跳过了「${b}」· ${reason}`,
-  (a, b, reason) => `「${a}」划走了「${b}」· "${a}" swiped past "${b}"  ${reason}`,
-  (a, b, reason) => `「${a}」→「${b}」✗  "${a}" passed on "${b}"  ${reason}`,
-  (a, b, reason) => `「${a}」跳过「${b}」· "${a}" skipped "${b}"  ${reason}`,
-  (a, b, reason) => `「${a}」没有选择「${b}」· "${a}" didn't pick "${b}"  ${reason}`,
+const _LIKE_TEMPLATES_ZH = [
+  (a, b, r) => `「${a}」喜欢了「${b}」  ${r}`,
+  (a, b, r) => `「${a}」对「${b}」上头`,
+  (a, b, r) => `「${a}」给「${b}」点了喜欢  ${r}`,
+  (a, b, r) => `「${a}」→「${b}」✓  ${r}`,
+  (a, b, r) => `「${a}」[心]「${b}」  ${r}`,
 ];
+const _LIKE_TEMPLATES_EN = [
+  (a, b, r) => `"${a}" liked "${b}"  ${r}`,
+  (a, b, r) => `"${a}" fell for "${b}"`,
+  (a, b, r) => `"${a}" liked "${b}"  ${r}`,
+  (a, b, r) => `"${a}" chose "${b}"  ${r}`,
+  (a, b, r) => `"${a}" hearts "${b}"  ${r}`,
+];
+const _SKIP_TEMPLATES_ZH = [
+  (a, b, r) => `「${a}」跳过了「${b}」  ${r}`,
+  (a, b, r) => `「${a}」划走了「${b}」  ${r}`,
+  (a, b, r) => `「${a}」→「${b}」✗  ${r}`,
+  (a, b, r) => `「${a}」跳过「${b}」  ${r}`,
+  (a, b, r) => `「${a}」没有选择「${b}」  ${r}`,
+];
+const _SKIP_TEMPLATES_EN = [
+  (a, b, r) => `"${a}" skipped "${b}"  ${r}`,
+  (a, b, r) => `"${a}" swiped past "${b}"  ${r}`,
+  (a, b, r) => `"${a}" passed on "${b}"  ${r}`,
+  (a, b, r) => `"${a}" skipped "${b}"  ${r}`,
+  (a, b, r) => `"${a}" didn't pick "${b}"  ${r}`,
+];
+
+function _bi(s) {
+  const idx = s.indexOf(' / ');
+  if (idx === -1) return { zh: s, en: s };
+  return { zh: s.slice(0, idx).trim(), en: s.slice(idx + 3).trim() };
+}
 
 function _rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -524,25 +553,26 @@ function buildFakeDanmakuPool(profiles) {
     picks.forEach((b) => {
       const bName = b.name || b.username;
 
-      // like
-      pool.push({
-        text: _rnd(_LIKE_TEMPLATES)(aName, bName, _rnd(_LIKE_REASONS)),
-        type: "like",
-      });
+      // like — one zh, one en
+      const likeReason = _bi(_rnd(_LIKE_REASONS));
+      const likeIdx = Math.floor(Math.random() * _LIKE_TEMPLATES_ZH.length);
+      pool.push({ text: _LIKE_TEMPLATES_ZH[likeIdx](aName, bName, likeReason.zh), type: "like" });
+      pool.push({ text: _LIKE_TEMPLATES_EN[likeIdx](aName, bName, likeReason.en), type: "like" });
 
-      // skip
-      pool.push({
-        text: _rnd(_SKIP_TEMPLATES)(aName, bName, _rnd(_SKIP_REASONS)),
-        type: "skip",
-      });
+      // skip — one zh, one en
+      const skipReason = _bi(_rnd(_SKIP_REASONS));
+      const skipIdx = Math.floor(Math.random() * _SKIP_TEMPLATES_ZH.length);
+      pool.push({ text: _SKIP_TEMPLATES_ZH[skipIdx](aName, bName, skipReason.zh), type: "skip" });
+      pool.push({ text: _SKIP_TEMPLATES_EN[skipIdx](aName, bName, skipReason.en), type: "skip" });
 
-      // comment on a tag
+      // comment — one zh, one en
       const tags = _extractTags(b);
       if (tags.length > 0) {
         const tag = _rnd(tags);
-        const adj = _rnd(_ADJ);
-        const tpl = _rnd(_COMMENT_TEMPLATES);
-        pool.push({ text: tpl(aName, bName, tag, adj), type: "comment" });
+        const adj = _bi(_rnd(_ADJ));
+        const tplIdx = Math.floor(Math.random() * _COMMENT_TEMPLATES_ZH.length);
+        pool.push({ text: _COMMENT_TEMPLATES_ZH[tplIdx](aName, bName, tag, adj.zh), type: "comment" });
+        pool.push({ text: _COMMENT_TEMPLATES_EN[tplIdx](aName, bName, tag, adj.en), type: "comment" });
       }
     });
   }
@@ -732,9 +762,10 @@ function pushTickerMessage(text, type = "alert") {
 // ── Socket.io 实时事件 ─────────────────────────────────
 
 socket.on("like-event", (data) => {
-  const reasonPart =
-    data.label && data.reason ? `  因为[${data.label}]它觉得 / thinks: ${data.reason}` : "";
-  spawnDanmaku(`${data.by} 对 ${data.name} 上头了  "${data.by}" fell for "${data.name}"${reasonPart}`, "like");
+  const zhReason = data.label && data.reason ? `  因为[${data.label}]觉得：${data.reason}` : "";
+  const enReason = data.label && data.reason ? `  because [${data.label}]: ${data.reason}` : "";
+  spawnDanmaku(`${data.by} 对 ${data.name} 上头了${zhReason}`, "like");
+  spawnDanmaku(`"${data.by}" fell for "${data.name}"${enReason}`, "like");
 
   const profile = ranking.find((p) => p.name === data.name);
   if (profile && data.likesCount !== undefined) {
@@ -756,9 +787,10 @@ socket.on("like-event", (data) => {
 });
 
 socket.on("skip-event", (data) => {
-  const reasonPart =
-    data.label && data.reason ? `  因为[${data.label}]它觉得 / thinks: ${data.reason}` : "";
-  spawnDanmaku(`${data.by} 划走了 ${data.name}  "${data.by}" skipped "${data.name}"${reasonPart}`, "skip");
+  const zhReason = data.label && data.reason ? `  因为[${data.label}]：${data.reason}` : "";
+  const enReason = data.label && data.reason ? `  [${data.label}]: ${data.reason}` : "";
+  spawnDanmaku(`${data.by} 划走了 ${data.name}${zhReason}`, "skip");
+  spawnDanmaku(`"${data.by}" skipped "${data.name}"${enReason}`, "skip");
 });
 
 socket.on("interpretation-event", (data) => {
@@ -786,6 +818,7 @@ socket.on("interpretation-event", (data) => {
 
   const b = document.createElement('span');
   b.className = 'web-interp-bubble';
+  b.dataset.interpIndex = i;
   b.textContent = data.text;
 
   const angle = (i / Math.max(n, 1)) * 2 * Math.PI;
@@ -806,7 +839,22 @@ socket.on("interpretation-event", (data) => {
   b.style.setProperty('--dy', dy + 'px');
   el.appendChild(b);
 
-  spawnDanmaku(`${data.addedBy} 评价了 ${current.name || current.username} 的[${data.field}]  "${data.addedBy}" commented on "${current.name || current.username}"'s [${data.field}]`, "comment");
+  const cName = current.name || current.username;
+  spawnDanmaku(`${data.addedBy} 评价了 ${cName} 的[${data.field}]`, "comment");
+  spawnDanmaku(`"${data.addedBy}" commented on "${cName}"'s [${data.field}]`, "comment");
+});
+
+socket.on("interpretation-agree-event", (data) => {
+  const current = ranking[currentIdx];
+  if (!current || current.username !== data.profileUsername) return;
+
+  const el = document.querySelector(`#spotlight [data-field="${data.field}"]`);
+  if (!el) return;
+
+  const bubble = el.querySelector(`.web-interp-bubble[data-interp-index="${data.interpIndex}"]`);
+  if (!bubble) return;
+
+  bubble.style.fontSize = 44 + data.agrees * 10 + 'px';
 });
 
 // ── 工具函数 ──────────────────────────────────────────

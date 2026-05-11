@@ -1241,18 +1241,21 @@ li.other .words {
   width: 78px;
   height: 78px;
   border-radius: 50%;
-  border: 2.5px solid rgba(46, 54, 40, 0.88);
+  border: 2.5px solid rgba(46, 54, 40, 0.70);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 1px;
   transform: rotate(-14deg);
-  background: transparent;
+  background: var(--c-bg);
   pointer-events: none;
   z-index: 2;
   opacity: 0.92;
-  filter: drop-shadow(1px 1px 0 rgba(40,48,35,0.28));
+  box-shadow:
+    inset 3px 3px 6px rgba(0,0,0,0.22),
+    inset -1px -1px 3px rgba(255,255,255,0.18),
+    0 1px 0 rgba(255,255,255,0.30);
 }
 .profile-score-stamp::after {
   content: "";
@@ -1449,7 +1452,11 @@ li.other .words {
   margin-top: 10px;
   padding: 10px;
   background: var(--c-bg);
-  border: 2px solid rgba(55, 63, 48, 0.45);
+  border: 2px solid rgba(55, 63, 48, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(55, 63, 48, 0.18),
+    inset 3px 3px 0 rgba(0,0,0,0.12),
+    inset -2px -2px 0 rgba(255,255,255,0.22);
   display: flex;
   gap: 10px;
   justify-content: center;
@@ -1465,7 +1472,12 @@ li.other .words {
   overflow-y: scroll;
   text-align: center;
   border: 2px solid rgba(55, 63, 48, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(55, 63, 48, 0.18),
+    inset 2px 2px 0 rgba(0,0,0,0.14),
+    inset -1px -1px 0 rgba(255,255,255,0.18);
   background: var(--c-bg);
+  background-image: var(--grid-dark);
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   scroll-snap-type: y mandatory;
@@ -1476,8 +1488,10 @@ li.other .words {
   padding: 6px 0;
   font-size: 14px;
   scroll-snap-align: center;
-  border-bottom: 1px solid rgba(55, 63, 48, 0.20);
+  border-bottom: 1px solid rgba(55, 63, 48, 0.15);
   box-sizing: border-box;
+  color: var(--c-text);
+  background: transparent;
 }
 
 .wheel div:last-child {
@@ -1485,8 +1499,11 @@ li.other .words {
 }
 
 .wheel div.selected {
-  background: rgba(55, 63, 48, 1);
-  color: #e0e8d0;
+  background: rgba(55, 63, 48, 0.18);
+  color: var(--c-text);
+  font-weight: bold;
+  border-top: 2px solid rgba(55, 63, 48, 0.45);
+  border-bottom: 2px solid rgba(55, 63, 48, 0.45);
 }
 
 /* ── 画图区域 ── */
@@ -2457,11 +2474,12 @@ li.other .words {
   box-shadow: 1px 1px 0 rgba(40,48,35,0.20);
 }
 
-.mbti-char-btn:hover,
+.mbti-char-btn:hover {
+  background: rgba(55, 63, 48, 0.08);
+}
+
 .mbti-char-btn.active {
-  background: var(--c-btn-shadow);
-  color: var(--c-btn-text);
-  border-color: rgba(55, 63, 48, 0.45);
+  background: rgba(55, 63, 48, 0.22);
 }
 
 /* MBTI option buttons (E/I/S/N etc.) */
@@ -2498,11 +2516,11 @@ li.other .words {
 }
 
 .mbti-opt-btn.selected {
-  background-color: #8a9878;
-  color: #f0f4e8;
-  transform: translate(3px, 3px);
-  box-shadow: inset 1px 1px 0 rgba(0,0,0,0.15);
-  border-color: rgba(55, 63, 48, 0.85);
+  background-color: rgba(55, 63, 48, 0.20);
+  background-image: var(--grid-dark);
+  color: var(--c-text);
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.18), inset -1px -1px 0 rgba(255,255,255,0.10);
+  border-color: rgba(55, 63, 48, 0.65);
 }
 
 .mbti-opt-label {
@@ -2515,9 +2533,6 @@ li.other .words {
   font-size: 11px !important;
   min-width: unset;
   padding: 6px 10px;
-  border-color: rgba(55, 63, 48, 0.45) !important;
-  color: var(--c-text) !important;
-  opacity: 0.7;
 }
 
 .mbti-custom-btn:hover {

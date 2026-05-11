@@ -295,6 +295,7 @@ app.post("/interpretation/agree", function (req, res) {
   interp.agrees = (interp.agrees || 0) + 1;
 
   fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
+  io.emit("interpretation-agree-event", { profileUsername, field, interpIndex, agrees: interp.agrees });
   res.json({ success: true, agrees: interp.agrees });
 });
 

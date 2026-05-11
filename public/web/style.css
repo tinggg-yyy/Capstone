@@ -620,8 +620,8 @@ html, body {
 
 .ticker-item-alert,
 .ticker-item-like  {
-  color: #cc1e1e;
-  text-shadow: 4px 4px 0 rgba(160,20,20,0.58), -1px -1px 0 rgba(255,255,255,0.25);
+  color: var(--green);
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.58), -1px -1px 0 rgba(255,255,255,0.25);
 }
 
 /* ── FOOTER ── */
@@ -646,22 +646,8 @@ html, body {
   animation: fly-left 16s linear forwards;
 }
 
-.danmaku-like {
-  color: #283023;
-  text-shadow: 4px 4px 0 rgba(40,48,35,0.52), -1px -1px 0 rgba(255,255,255,0.10);
-  border: 6px solid #4a6840;
-  background: var(--cell);
-  box-shadow: 0 0 0 3px rgba(74,104,64,0.35), 6px 10px 0 rgba(0,0,0,0.38);
-}
-
-.danmaku-skip {
-  color: #4a5244;
-  text-shadow: 4px 4px 0 rgba(40,48,35,0.35), -1px -1px 0 rgba(255,255,255,0.10);
-  border: 6px solid rgba(74,82,68,0.55);
-  background: var(--cell);
-  box-shadow: 0 0 0 3px rgba(74,82,68,0.25), 6px 10px 0 rgba(0,0,0,0.38);
-}
-
+.danmaku-like,
+.danmaku-skip,
 .danmaku-comment {
   color: #283023;
   text-shadow: 4px 4px 0 rgba(40,48,35,0.52), -1px -1px 0 rgba(255,255,255,0.10);

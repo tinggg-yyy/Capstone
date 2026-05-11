@@ -76,9 +76,9 @@
           "addedBy": "kk",
           "agreedBy": {
             "kk": 2,
-            "ttt": 1
+            "ttt": 2
           },
-          "agrees": 3
+          "agrees": 4
         }
       ],
       "orientation": [
@@ -107,9 +107,9 @@
           "addedBy": "kk",
           "agreedBy": {
             "kk": 2,
-            "ttt": 1
+            "ttt": 2
           },
-          "agrees": 3
+          "agrees": 4
         }
       ],
       "mbti": [
@@ -117,9 +117,9 @@
           "text": "🥰",
           "addedBy": "kk",
           "agreedBy": {
-            "ttt": 1
+            "ttt": 2
           },
-          "agrees": 1
+          "agrees": 2
         }
       ],
       "income": [
@@ -130,6 +130,18 @@
             "ttt": 2
           },
           "agrees": 2
+        }
+      ],
+      "hobby": [
+        {
+          "text": "无聊",
+          "addedBy": "ttt"
+        }
+      ],
+      "gender": [
+        {
+          "text": "莫？",
+          "addedBy": "ttt"
         }
       ]
     },
@@ -292,6 +304,12 @@
         {
           "text": "哈哈",
           "addedBy": "恶比"
+        }
+      ],
+      "height": [
+        {
+          "text": "short",
+          "addedBy": "ttt"
         }
       ]
     },
@@ -2811,6 +2829,12 @@
       "otherCityPartner": [
         {
           "text": "？",
+          "addedBy": "ttt"
+        }
+      ],
+      "occupation": [
+        {
+          "text": "🤥",
           "addedBy": "ttt"
         }
       ]

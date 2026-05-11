@@ -1569,16 +1569,16 @@ function addOptionIfMissing(sel, value, text) {
 // ── Province → City data ─────────────────────────────────
 const CITY_DATA = {
   china: [
-    { zh:"上海市", en:"Shanghai", cities:[
+    { zh:"上海市", en:"Shanghai", municipality:true, cities:[
       {zh:"上海",en:"Shanghai"},{zh:"浦东新区",en:"Pudong"},{zh:"嘉定",en:"Jiading"},{zh:"松江",en:"Songjiang"},{zh:"青浦",en:"Qingpu"},{zh:"金山",en:"Jinshan"},
     ]},
-    { zh:"北京市", en:"Beijing", cities:[
+    { zh:"北京市", en:"Beijing", municipality:true, cities:[
       {zh:"北京",en:"Beijing"},{zh:"海淀区",en:"Haidian"},{zh:"朝阳区",en:"Chaoyang"},{zh:"西城区",en:"Xicheng"},{zh:"通州区",en:"Tongzhou"},{zh:"顺义区",en:"Shunyi"},
     ]},
-    { zh:"天津市", en:"Tianjin", cities:[
+    { zh:"天津市", en:"Tianjin", municipality:true, cities:[
       {zh:"天津",en:"Tianjin"},{zh:"滨海新区",en:"Binhai"},{zh:"武清",en:"Wuqing"},{zh:"宝坻",en:"Baodi"},
     ]},
-    { zh:"重庆市", en:"Chongqing", cities:[
+    { zh:"重庆市", en:"Chongqing", municipality:true, cities:[
       {zh:"重庆",en:"Chongqing"},{zh:"渝中区",en:"Yuzhong"},{zh:"江北区",en:"Jiangbei"},{zh:"南岸区",en:"Nan'an"},{zh:"渝北区",en:"Yubei"},{zh:"九龙坡区",en:"Jiulongpo"},
     ]},
     { zh:"广东省", en:"Guangdong", cities:[
@@ -1756,25 +1756,43 @@ function onProvinceSelectChange(prefix) {
   if (customInput) customInput.classList.add("hidden");
 
   let cities = [];
+  let isMunicipality = false;
+  let municipalityCity = null;
   if (val.startsWith("cn:")) {
     const zhName = val.slice(3);
     const prov = CITY_DATA.china.find(p => p.zh === zhName);
-    if (prov) cities = prov.cities;
+    if (prov) {
+      cities = prov.cities;
+      isMunicipality = !!prov.municipality;
+      if (isMunicipality) municipalityCity = prov.cities[0]; // e.g. {zh:"上海", en:"Shanghai"}
+    }
   } else if (val.startsWith("os:")) {
     const groupName = val.slice(3);
     const region = CITY_DATA.overseas.find(r => r.group === groupName);
     if (region) cities = region.cities;
   }
 
-  citySel.innerHTML = `<option value="" disabled selected hidden>选城市 / Select City...</option>`;
-  cities.forEach(c => {
+  if (isMunicipality && municipalityCity) {
+    // Auto-set city value into the select (hidden), skip showing the dropdown
+    if (cityWrap) cityWrap.classList.add("hidden");
+    if (customInput) customInput.classList.add("hidden");
+    citySel.innerHTML = "";
     const opt = document.createElement("option");
-    opt.value = c.zh;
-    opt.textContent = `${c.zh} ${c.en}`;
+    opt.value = municipalityCity.zh;
+    opt.textContent = `${municipalityCity.zh} ${municipalityCity.en}`;
     citySel.appendChild(opt);
-  });
-  if (cityWrap) cityWrap.classList.remove("hidden");
-  citySel.value = "";
+    citySel.value = municipalityCity.zh;
+  } else {
+    citySel.innerHTML = `<option value="" disabled selected hidden>选城市 / Select City...</option>`;
+    cities.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.zh;
+      opt.textContent = `${c.zh} ${c.en}`;
+      citySel.appendChild(opt);
+    });
+    if (cityWrap) cityWrap.classList.remove("hidden");
+    citySel.value = "";
+  }
   onCitySelectChange(prefix);
 }
 
@@ -5282,7 +5300,7 @@ function attachLabelHandlers(profileUsername, containerEl) {
             bubble.dataset.myAgrees = myAgrees + 1;
             bubble.dataset.agrees = data.agrees;
             const base = parseFloat(bubble.dataset.baseFontSize || "11");
-            bubble.style.fontSize = base + data.agrees * 2.5 + "px";
+            bubble.style.fontSize = base + data.agrees * 5 + "px";
             const arr = currentProfileInterpretations[field];
             if (Array.isArray(arr) && arr[interpIndex]) {
               arr[interpIndex].agrees = data.agrees;
@@ -5324,7 +5342,7 @@ function attachLabelHandlers(profileUsername, containerEl) {
       b.dataset.agrees = savedAgrees;
       b.dataset.myAgrees = myAgrees;
       b.dataset.baseFontSize = "11";
-      if (savedAgrees > 0) b.style.fontSize = 11 + savedAgrees * 2.5 + "px";
+      if (savedAgrees > 0) b.style.fontSize = 11 + savedAgrees * 5 + "px";
 
       const n = interpList.length;
       // Evenly distribute on an ellipse so starting positions are already spread
@@ -8210,6 +8228,8 @@ function _openMyProfileEdit(u) {
   if (container) {
     container.innerHTML = renderCardHTML(u);
     attachSectionDragScroll(container);
+    currentProfileInterpretations = u.interpretations || {};
+    attachLabelHandlers(u.username, container);
   }
   document.getElementById("profile-edit").classList.remove("hidden");
 }
