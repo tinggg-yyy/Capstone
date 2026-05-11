@@ -365,20 +365,19 @@ function startCycle() {
   }, 45000);
 }
 
-// Re-rank and refresh every 20s: picks up new high-score profiles, score
-// changes, and any interpretations missed by socket events.
-setInterval(async () => {
+const calcScore = (p) => Math.max(0, (p.score ?? 60) - (p.skips?.length || 0));
+
+async function refreshRanking(thenShowUsername) {
   try {
     const res = await fetch("/profiles");
     const data = await res.json();
 
-    const calcScore = (p) => Math.max(0, (p.score ?? 60) - (p.skips?.length || 0));
     const newRanking = data
       .filter((p) => p.name)
       .sort((a, b) => calcScore(b) - calcScore(a))
       .slice(0, 10);
 
-    // Merge fresh data into existing ranking entries to preserve in-memory state
+    // Merge fresh data into existing entries; add new entries
     newRanking.forEach(fresh => {
       const existing = ranking.find(p => p.username === fresh.username);
       if (existing) {
@@ -386,18 +385,27 @@ setInterval(async () => {
       }
     });
 
-    // Find if the currently displayed profile is still in the new ranking
     const currentUsername = ranking[currentIdx]?.username;
     const newIdx = newRanking.findIndex(p => p.username === currentUsername);
 
-    // Rebuild ranking array in-place
     ranking.length = 0;
     newRanking.forEach(p => ranking.push(p));
 
-    // Keep currentIdx pointing at the same profile if it survived; else clamp
     currentIdx = newIdx >= 0 ? newIdx : Math.min(currentIdx, ranking.length - 1);
+
+    // If a specific profile triggered this refresh, jump to it now
+    if (thenShowUsername) {
+      const jumpIdx = ranking.findIndex(p => p.username === thenShowUsername);
+      if (jumpIdx >= 0) {
+        showSpotlight(jumpIdx);
+        startCycle();
+      }
+    }
   } catch (_) {}
-}, 20000);
+}
+
+// Re-rank every 20s to pick up new profiles and score changes
+setInterval(() => refreshRanking(), 20000);
 
 function resetProgress() {
   const bar = document.getElementById("progressBar");
@@ -802,16 +810,21 @@ socket.on("like-event", (data) => {
   spawnDanmaku(`"${data.by}" fell for "${data.name}"${enReason}`, "like");
 
   const profile = ranking.find((p) => p.name === data.name);
-  if (profile && data.likesCount !== undefined) {
-    profile.likes = new Array(data.likesCount);
-    if (ranking[currentIdx]?.name === data.name) {
-      const box = document.querySelector(".emoji-pile");
-      if (box) {
-        const h = getPixelHeartUrl();
-        box.innerHTML = data.likesCount === 0
-          ? '<span class="stat-empty">—</span>'
-          : Array(Math.min(data.likesCount, 60)).fill(`<img src="${h}" class="pixel-emoji">`).join("");
+  if (data.likesCount !== undefined) {
+    if (profile) {
+      profile.likes = new Array(data.likesCount);
+      if (ranking[currentIdx]?.name === data.name) {
+        const box = document.querySelector(".avatar-stats-likes");
+        if (box) {
+          const h = getPixelHeartUrl();
+          box.innerHTML = data.likesCount === 0
+            ? '<span class="stat-empty">—</span>'
+            : Array(Math.min(data.likesCount, 60)).fill(`<img src="${h}" class="pixel-emoji">`).join("");
+        }
       }
+    } else {
+      // Profile not in ranking yet — re-rank immediately so it can enter top 10
+      refreshRanking();
     }
   }
 
@@ -835,7 +848,11 @@ socket.on("interpretation-event", (data) => {
   spawnDanmaku(`${data.addedBy} 评价了 ${tName} 的[${data.field}]`, "comment");
   spawnDanmaku(`"${data.addedBy}" commented on "${tName}"'s [${data.field}]`, "comment");
 
-  if (!targetProfile) return;
+  if (!targetProfile) {
+    // Profile not in ranking yet — re-rank immediately, then jump to it
+    refreshRanking(data.profileUsername);
+    return;
+  }
 
   // Save interpretation into the ranking data
   if (!targetProfile.interpretations) targetProfile.interpretations = {};

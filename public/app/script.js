@@ -1,5 +1,33 @@
 let currentUser = null;
 
+// ── Socket.io real-time notifications ─────────────────────────
+const _appSocket = io();
+
+_appSocket.on("like-event", (data) => {
+  if (!currentUser) return;
+  if (data.username !== currentUser.username) return;
+  currentUser.likes = new Array(data.likesCount);
+  showToast(`有人喜欢你了！/ Someone liked you!`, "heart");
+  _refreshMyProfileCard();
+});
+
+_appSocket.on("skip-event", (data) => {
+  if (!currentUser) return;
+  if (data.username !== currentUser.username) return;
+  currentUser.skips = new Array(data.skipsCount);
+  _refreshMyProfileCard();
+});
+
+function _refreshMyProfileCard() {
+  const overlay = document.getElementById("profile-edit");
+  const myCard = document.getElementById("my-profile-card-body");
+  if (!myCard || overlay?.classList.contains("hidden")) return;
+  myCard.innerHTML = renderCardHTML(currentUser);
+  attachSectionDragScroll(myCard);
+  currentProfileInterpretations = currentUser.interpretations || {};
+  attachLabelHandlers(currentUser.username, myCard);
+}
+
 // Login Function
 function handleLogin() {
   const username = document.getElementById("username").value.trim();

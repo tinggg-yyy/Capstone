@@ -130,6 +130,7 @@ app.post("/like", function (req, res) {
   // 实时广播 like 事件
   io.emit("like-event", {
     name: likedProfile.name,
+    username: likedProfile.username,
     by: likerPetName,
     likesCount: likedProfile.likes.length,
     label: req.body.label || "",
@@ -151,7 +152,9 @@ app.post("/skip", function (req, res) {
     fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
     io.emit("skip-event", {
       name: skippedProfile.name,
+      username: skippedProfile.username,
       by: skipperPetName,
+      skipsCount: skippedProfile.skips.length,
       label: req.body.label || "",
       reason: req.body.reason || "",
     });
