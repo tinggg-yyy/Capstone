@@ -362,7 +362,7 @@ function startCycle() {
   cycleTimer = setInterval(() => {
     const next = (currentIdx + 1) % ranking.length;
     showSpotlight(next);
-  }, 45000);
+  }, 30000);
 }
 
 const calcScore = (p) => Math.max(0, (p.score ?? 60) - (p.skips?.length || 0));
