@@ -794,10 +794,16 @@ socket.on("skip-event", (data) => {
 });
 
 socket.on("interpretation-event", (data) => {
+  // Danmaku always fires regardless of which profile is on spotlight
+  const targetProfile = ranking.find(p => p.username === data.profileUsername);
+  const tName = targetProfile?.name || data.profileUsername;
+  spawnDanmaku(`${data.addedBy} 评价了 ${tName} 的[${data.field}]`, "comment");
+  spawnDanmaku(`"${data.addedBy}" commented on "${tName}"'s [${data.field}]`, "comment");
+
+  // Bubble injection only if this profile is currently on spotlight
   const current = ranking[currentIdx];
   if (!current || current.username !== data.profileUsername) return;
 
-  // Update in-memory profile so future spotlight renders include it
   if (!current.interpretations) current.interpretations = {};
   if (!Array.isArray(current.interpretations[data.field])) {
     current.interpretations[data.field] = current.interpretations[data.field]
@@ -806,7 +812,6 @@ socket.on("interpretation-event", (data) => {
   }
   current.interpretations[data.field].push({ text: data.text, addedBy: data.addedBy });
 
-  // Inject bubble live into the correct cell
   const el = document.querySelector(`#spotlight [data-field="${data.field}"]`);
   if (!el) return;
 
@@ -838,10 +843,6 @@ socket.on("interpretation-event", (data) => {
   b.style.setProperty('--dx', dx + 'px');
   b.style.setProperty('--dy', dy + 'px');
   el.appendChild(b);
-
-  const cName = current.name || current.username;
-  spawnDanmaku(`${data.addedBy} 评价了 ${cName} 的[${data.field}]`, "comment");
-  spawnDanmaku(`"${data.addedBy}" commented on "${cName}"'s [${data.field}]`, "comment");
 });
 
 socket.on("interpretation-agree-event", (data) => {

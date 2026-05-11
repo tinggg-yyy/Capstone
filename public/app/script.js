@@ -4563,14 +4563,13 @@ const _iconPatterns = {
     [1, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1],
   ],
-  // pixel exclamation mark (! in a box)
+  // pixel ⚠️ warning triangle with ! inside
   warn: [
-    [1, 1, 1, 1, 1],
-    [1, 0, 1, 0, 1],
-    [1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 1, 0, 1],
-    [1, 1, 1, 1, 1],
+    [0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 1, 1, 1, 0],
+    [1, 1, 1, 0, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1],
   ],
   // pixel eye
   eye: [
@@ -4706,7 +4705,7 @@ function initPixelButtons() {
   });
   // replace ⚠️ warning icon div
   const warnEl = document.getElementById("warning-icon");
-  if (warnEl) warnEl.innerHTML = iconImg("warn", 4);
+  if (warnEl) warnEl.textContent = "⚠️";
 }
 
 // Register heart_sm pattern at module level so it's always available
@@ -5897,7 +5896,7 @@ function buildWarnings(me, target) {
 
 function showLikeWarning(warnings) {
   const hasCritical = warnings.some((w) => w.level === "critical");
-  document.getElementById("warning-icon").innerHTML = iconImg("warn", 4);
+  document.getElementById("warning-icon").textContent = "⚠️";
   document.getElementById("warning-icon").className = hasCritical
     ? "warning-icon critical"
     : "warning-icon";
