@@ -5538,6 +5538,8 @@ function submitInterpretation() {
   const text = document.getElementById("interpret-input").value.trim();
   if (!text || !interpTarget.field) return;
 
+  closeInterpPopup();
+
   fetch("/interpretation", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -5547,22 +5549,7 @@ function submitInterpretation() {
       text,
       addedBy: currentUser.username,
     }),
-  })
-    .then((res) => res.json())
-    .then(() => {
-      closeInterpPopup();
-      const currentUsername = profiles[currentIndex]?.username;
-      fetch("/profiles")
-        .then((res) => res.json())
-        .then((data) => {
-          profiles = data.filter((p) => p.username !== currentUser.username);
-          const newIndex = profiles.findIndex(
-            (p) => p.username === currentUsername,
-          );
-          if (newIndex >= 0) currentIndex = newIndex;
-          showProfile();
-        });
-    });
+  });
 }
 
 // ── Risk Warning System ───────────────────────────────────────
