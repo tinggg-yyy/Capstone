@@ -80,10 +80,13 @@ try {
 }
 
 app.get("/profiles", function (req, res) {
-  // this function is being called whenever the server
-  // receives a HTTP GET request for /profiles
-  // - it returns all messages (in JSON format)
-  res.json(profiles);
+  try {
+    const data = JSON.parse(fs.readFileSync("profiles.json", "utf8"));
+    profiles = data; // keep in-memory in sync
+    res.json(data);
+  } catch (_) {
+    res.json(profiles);
+  }
 });
 
 app.post("/profiles", function (req, res) {
@@ -109,6 +112,7 @@ app.post("/profiles", function (req, res) {
 
 // POST /like — 记录一个 like
 app.post("/like", function (req, res) {
+  try { profiles = JSON.parse(fs.readFileSync("profiles.json", "utf8")); } catch (_) {}
   const { likerUsername, likerPetName, likedUsername } = req.body;
 
   // 找到被 like 的 profile
@@ -142,6 +146,7 @@ app.post("/like", function (req, res) {
 
 // POST /skip — 记录 skip，广播弹幕
 app.post("/skip", function (req, res) {
+  try { profiles = JSON.parse(fs.readFileSync("profiles.json", "utf8")); } catch (_) {}
   const { skipperPetName, skippedUsername } = req.body;
   const skippedProfile = profiles.find((p) => p.username === skippedUsername);
   if (skippedProfile) {
@@ -262,6 +267,7 @@ app.put("/profiles/:username", function (req, res) {
 
 // POST /interpretation — 给某个 profile 的某个字段添加解读
 app.post("/interpretation", function (req, res) {
+  try { profiles = JSON.parse(fs.readFileSync("profiles.json", "utf8")); } catch (_) {}
   const { profileUsername, field, text, addedBy } = req.body;
 
   let profile = profiles.find((p) => p.username === profileUsername);
@@ -283,6 +289,7 @@ app.post("/interpretation", function (req, res) {
 
 // POST /interpretation/agree — 给某个解读点赞（每人最多2次）
 app.post("/interpretation/agree", function (req, res) {
+  try { profiles = JSON.parse(fs.readFileSync("profiles.json", "utf8")); } catch (_) {}
   const { profileUsername, field, interpIndex, agreeingUser } = req.body;
   const profile = profiles.find((p) => p.username === profileUsername);
   if (!profile) return res.status(404).json({ error: "Not found" });

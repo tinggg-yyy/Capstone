@@ -1,23 +1,6 @@
 let currentUser = null;
 
-// ── Socket.io real-time notifications ─────────────────────────
-const _appSocket = io();
-
-_appSocket.on("like-event", (data) => {
-  if (!currentUser) return;
-  if (data.username !== currentUser.username) return;
-  currentUser.likes = new Array(data.likesCount);
-  showToast(`有人喜欢你了！/ Someone liked you!`, "heart");
-  _refreshMyProfileCard();
-});
-
-_appSocket.on("skip-event", (data) => {
-  if (!currentUser) return;
-  if (data.username !== currentUser.username) return;
-  currentUser.skips = new Array(data.skipsCount);
-  _refreshMyProfileCard();
-});
-
+// ── Socket.io real-time notifications (optional — won't crash if io missing) ──
 function _refreshMyProfileCard() {
   const overlay = document.getElementById("profile-edit");
   const myCard = document.getElementById("my-profile-card-body");
@@ -26,6 +9,23 @@ function _refreshMyProfileCard() {
   attachSectionDragScroll(myCard);
   currentProfileInterpretations = currentUser.interpretations || {};
   attachLabelHandlers(currentUser.username, myCard);
+}
+
+if (typeof io !== "undefined") {
+  const _appSocket = io();
+  _appSocket.on("like-event", (data) => {
+    if (!currentUser) return;
+    if (data.username !== currentUser.username) return;
+    currentUser.likes = new Array(data.likesCount);
+    _showLikeBanner(data.likesCount);
+    _refreshMyProfileCard();
+  });
+  _appSocket.on("skip-event", (data) => {
+    if (!currentUser) return;
+    if (data.username !== currentUser.username) return;
+    currentUser.skips = new Array(data.skipsCount);
+    _refreshMyProfileCard();
+  });
 }
 
 // Login Function
@@ -3357,7 +3357,49 @@ function createSwipeCard() {
       showProfile();
       goTo("swipe-page");
       startOnboarding();
+      _startProfileDataRefresh();
     });
+}
+
+let _profileRefreshTimer = null;
+function _startProfileDataRefresh() {
+  if (_profileRefreshTimer) clearInterval(_profileRefreshTimer);
+  _profileRefreshTimer = setInterval(() => {
+    fetch("/profiles")
+      .then(r => r.json())
+      .then(fresh => {
+        let currentChanged = false;
+        profiles.forEach((p, i) => {
+          const f = fresh.find(x => x.username === p.username);
+          if (!f) return;
+          const wasLikes = p.likes?.length || 0;
+          const wasInterps = JSON.stringify(p.interpretations || {});
+          p.likes = f.likes || [];
+          p.skips = f.skips || [];
+          p.interpretations = f.interpretations || {};
+          const nowLikes = p.likes.length;
+          const nowInterps = JSON.stringify(p.interpretations);
+          if (i === currentIndex && (wasLikes !== nowLikes || wasInterps !== nowInterps)) {
+            currentChanged = true;
+          }
+        });
+        // Also update currentUser likes/skips
+        if (currentUser) {
+          const me = fresh.find(x => x.username === currentUser.username);
+          if (me) {
+            const prevLikes = currentUser.likes?.length || 0;
+            currentUser.likes = me.likes || [];
+            currentUser.skips = me.skips || [];
+            currentUser.interpretations = me.interpretations || {};
+            if ((me.likes?.length || 0) > prevLikes) {
+              _showLikeBanner(me.likes.length);
+            }
+          }
+        }
+        if (currentChanged) showProfile();
+      })
+      .catch(() => {});
+  }, 30000);
 }
 
 // ── Hobby tags ────────────────────────────────────────────────
@@ -6146,9 +6188,18 @@ function checkNotifications() {
     .then((res) => res.json())
     .then((data) => {
       if (data.likesCount > 0) {
-        showToast(`${data.likesCount} 个兽人喜欢你！`, "heart");
+        _showLikeBanner(data.likesCount);
       }
     });
+}
+
+function _showLikeBanner(count) {
+  // Remove any existing banner first
+  document.getElementById("like-banner")?.remove();
+  const banner = document.createElement("div");
+  banner.id = "like-banner";
+  banner.innerHTML = `${iconImg("heart_sm", 2)} 有 <strong>${count}</strong> 只兽人喜欢你！/ <strong>${count}</strong> anthros liked you!<button onclick="document.getElementById('like-banner')?.remove()">✕</button>`;
+  document.body.appendChild(banner);
 }
 
 // ── Message System ──────────────────────────────────────────
@@ -7802,7 +7853,7 @@ function _sendRealFakeMsg(sender, content, alertStyle) {
 }
 
 function _startFloodMessages() {
-  const burstDelays = [4000, 9000, 16000, 24000, 33000, 43000, 54000, 66000];
+  const burstDelays = [20000, 45000, 80000, 130000, 190000, 260000];
   burstDelays.forEach((delay, i) => {
     const t = setTimeout(() => {
       if (!document.getElementById("swipe-page")?.classList.contains("active"))
@@ -7850,7 +7901,7 @@ function _startFloodMessages() {
         }
         scheduleNext();
       },
-      _randInt(12000, 28000),
+      _randInt(60000, 120000),
     );
     _floodTimers.push(t);
   }

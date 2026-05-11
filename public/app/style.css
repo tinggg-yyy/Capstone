@@ -2017,6 +2017,36 @@ li.other .words {
   transform: translateX(-50%) translateY(0);
 }
 
+#like-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99998;
+  background: var(--c-bg);
+  background-image: var(--grid-bg);
+  border-bottom: 2px solid rgba(55,63,48,0.45);
+  color: var(--c-text);
+  font-size: 13px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18), 0 0 14px rgba(200,40,40,0.12);
+  animation: warnFadeIn 0.2s ease;
+}
+#like-banner strong { color: var(--c-text); font-weight: bold; }
+#like-banner button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--c-text);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.6;
+}
+
 /* ── Conversation thread view ── */
 #convo-view {
   display: flex;
