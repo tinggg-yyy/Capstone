@@ -255,132 +255,11 @@
       <div class="phone setup-content">
         <label>城市 City</label>
         <div class="nes-select">
+          <select id="house-province-select" onchange="onProvinceSelectChange('house')">
+          </select>
+        </div>
+        <div class="nes-select hidden" id="house-city-select-wrap">
           <select id="house-city-select" onchange="onCitySelectChange('house')">
-            <option value="" disabled selected hidden>选择城市 Select City...</option>
-            <optgroup label="中国内地 Mainland China">
-              <option value="上海">上海 Shanghai</option>
-              <option value="北京">北京 Beijing</option>
-              <option value="深圳">深圳 Shenzhen</option>
-              <option value="广州">广州 Guangzhou</option>
-              <option value="成都">成都 Chengdu</option>
-              <option value="杭州">杭州 Hangzhou</option>
-              <option value="南京">南京 Nanjing</option>
-              <option value="武汉">武汉 Wuhan</option>
-              <option value="重庆">重庆 Chongqing</option>
-              <option value="西安">西安 Xi'an</option>
-              <option value="苏州">苏州 Suzhou</option>
-              <option value="天津">天津 Tianjin</option>
-              <option value="长沙">长沙 Changsha</option>
-              <option value="郑州">郑州 Zhengzhou</option>
-              <option value="青岛">青岛 Qingdao</option>
-              <option value="大连">大连 Dalian</option>
-              <option value="厦门">厦门 Xiamen</option>
-              <option value="福州">福州 Fuzhou</option>
-              <option value="济南">济南 Jinan</option>
-              <option value="昆明">昆明 Kunming</option>
-              <option value="哈尔滨">哈尔滨 Harbin</option>
-              <option value="沈阳">沈阳 Shenyang</option>
-              <option value="合肥">合肥 Hefei</option>
-              <option value="宁波">宁波 Ningbo</option>
-              <option value="佛山">佛山 Foshan</option>
-              <option value="东莞">东莞 Dongguan</option>
-              <option value="无锡">无锡 Wuxi</option>
-              <option value="珠海">珠海 Zhuhai</option>
-              <option value="三亚">三亚 Sanya</option>
-              <option value="乌鲁木齐">乌鲁木齐 Ürümqi</option>
-            </optgroup>
-            <optgroup label="港澳台 HK · Macau · Taiwan">
-              <option value="香港">香港 Hong Kong</option>
-              <option value="澳门">澳门 Macau</option>
-              <option value="台北">台北 Taipei</option>
-              <option value="台中">台中 Taichung</option>
-              <option value="高雄">高雄 Kaohsiung</option>
-            </optgroup>
-            <optgroup label="日韩 Japan · Korea">
-              <option value="东京">東京 Tokyo</option>
-              <option value="大阪">大阪 Osaka</option>
-              <option value="京都">京都 Kyoto</option>
-              <option value="横滨">横浜 Yokohama</option>
-              <option value="神户">神戸 Kobe</option>
-              <option value="首尔">서울 Seoul</option>
-              <option value="釜山">부산 Busan</option>
-              <option value="济州">제주 Jeju</option>
-            </optgroup>
-            <optgroup label="东南亚 Southeast Asia">
-              <option value="新加坡">新加坡 Singapore</option>
-              <option value="曼谷">กรุงเทพ Bangkok</option>
-              <option value="吉隆坡">吉隆坡 Kuala Lumpur</option>
-              <option value="雅加达">雅加达 Jakarta</option>
-              <option value="马尼拉">马尼拉 Manila</option>
-              <option value="河内">河内 Hanoi</option>
-              <option value="胡志明市">胡志明市 Ho Chi Minh City</option>
-              <option value="巴厘岛">巴厘岛 Bali</option>
-            </optgroup>
-            <optgroup label="中东 · 南亚 Middle East · South Asia">
-              <option value="迪拜">迪拜 Dubai</option>
-              <option value="阿布扎比">阿布扎比 Abu Dhabi</option>
-              <option value="孟买">孟买 Mumbai</option>
-              <option value="德里">德里 Delhi</option>
-              <option value="班加罗尔">班加罗尔 Bangalore</option>
-            </optgroup>
-            <optgroup label="欧洲 Europe">
-              <option value="伦敦">伦敦 London</option>
-              <option value="巴黎">巴黎 Paris</option>
-              <option value="柏林">柏林 Berlin</option>
-              <option value="马德里">马德里 Madrid</option>
-              <option value="罗马">罗马 Roma</option>
-              <option value="阿姆斯特丹">阿姆斯特丹 Amsterdam</option>
-              <option value="布鲁塞尔">布鲁塞尔 Brussels</option>
-              <option value="维也纳">维也纳 Wien / Vienna</option>
-              <option value="苏黎世">苏黎世 Zürich</option>
-              <option value="日内瓦">日内瓦 Genève / Geneva</option>
-              <option value="巴塞罗那">巴塞罗那 Barcelona</option>
-              <option value="慕尼黑">慕尼黑 München / Munich</option>
-              <option value="法兰克福">法兰克福 Frankfurt</option>
-              <option value="米兰">米兰 Milano / Milan</option>
-              <option value="哥本哈根">哥本哈根 København / Copenhagen</option>
-              <option value="斯德哥尔摩">斯德哥尔摩 Stockholm</option>
-              <option value="赫尔辛基">赫尔辛基 Helsinki</option>
-              <option value="奥斯陆">奥斯陆 Oslo</option>
-              <option value="华沙">华沙 Warszawa / Warsaw</option>
-              <option value="布拉格">布拉格 Praha / Prague</option>
-              <option value="布达佩斯">布达佩斯 Budapest</option>
-              <option value="莫斯科">莫斯科 Москва / Moscow</option>
-              <option value="圣彼得堡">圣彼得堡 St. Petersburg</option>
-            </optgroup>
-            <optgroup label="北美 North America">
-              <option value="纽约">纽约 New York</option>
-              <option value="洛杉矶">洛杉矶 Los Angeles</option>
-              <option value="旧金山">旧金山 San Francisco</option>
-              <option value="芝加哥">芝加哥 Chicago</option>
-              <option value="波士顿">波士顿 Boston</option>
-              <option value="西雅图">西雅图 Seattle</option>
-              <option value="迈阿密">迈阿密 Miami</option>
-              <option value="拉斯维加斯">拉斯维加斯 Las Vegas</option>
-              <option value="华盛顿">华盛顿 Washington D.C.</option>
-              <option value="多伦多">多伦多 Toronto</option>
-              <option value="温哥华">温哥华 Vancouver</option>
-              <option value="蒙特利尔">蒙特利尔 Montréal</option>
-            </optgroup>
-            <optgroup label="中南美 Latin America">
-              <option value="墨西哥城">墨西哥城 Ciudad de México</option>
-              <option value="圣保罗">圣保罗 São Paulo</option>
-              <option value="里约热内卢">里约热内卢 Rio de Janeiro</option>
-              <option value="布宜诺斯艾利斯">布宜诺斯艾利斯 Buenos Aires</option>
-            </optgroup>
-            <optgroup label="大洋洲 Oceania">
-              <option value="悉尼">悉尼 Sydney</option>
-              <option value="墨尔本">墨尔本 Melbourne</option>
-              <option value="布里斯班">布里斯班 Brisbane</option>
-              <option value="珀斯">珀斯 Perth</option>
-              <option value="奥克兰">奥克兰 Auckland</option>
-            </optgroup>
-            <optgroup label="非洲 Africa">
-              <option value="开罗">开罗 Cairo</option>
-              <option value="约翰内斯堡">约翰内斯堡 Johannesburg</option>
-              <option value="内罗毕">内罗毕 Nairobi</option>
-            </optgroup>
-            <option value="自定义">自定义 Custom</option>
           </select>
         </div>
         <input id="house-city-custom" class="nes-input hidden" type="text" placeholder="输入城市名 · Enter city name" />
@@ -476,12 +355,14 @@
           </div>
         </div>
 
-        <label>房价 Price</label>
-        <div class="dice-field-row">
-          <button class="dice-roll-btn" id="house-price-dice-btn" data-rolls="0"
-            onclick="rollHousingFieldDice('price','house')"></button>
-          <div id="house-price-display" class="dice-result-input">—</div>
-          <input id="house-price" type="hidden" value="" />
+        <div id="house-price-wrapper" class="hidden">
+          <label>房价 Price</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="house-price-dice-btn" data-rolls="0"
+              onclick="rollHousingFieldDice('price','house')"></button>
+            <div id="house-price-display" class="dice-result-input">—</div>
+            <input id="house-price" type="hidden" value="" />
+          </div>
         </div>
       </div>
       <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-housing','profile-vehicle')">▶</button>
@@ -681,65 +562,11 @@
         <div id="parents-father-wrapper" class="hidden">
           <label>父亲来自 Father's Origin</label>
           <div class="nes-select">
+            <select id="parents-father-province-select" onchange="onProvinceSelectChange('parents-father')">
+            </select>
+          </div>
+          <div class="nes-select hidden" id="parents-father-city-select-wrap">
             <select id="parents-father-city-select" onchange="onCitySelectChange('parents-father')">
-              <option value="" disabled selected hidden>选择城市 Select City...</option>
-              <optgroup label="中国内地 Mainland China">
-                <option value="上海">上海 Shanghai</option>
-                <option value="北京">北京 Beijing</option>
-                <option value="深圳">深圳 Shenzhen</option>
-                <option value="广州">广州 Guangzhou</option>
-                <option value="成都">成都 Chengdu</option>
-                <option value="杭州">杭州 Hangzhou</option>
-                <option value="南京">南京 Nanjing</option>
-                <option value="武汉">武汉 Wuhan</option>
-                <option value="重庆">重庆 Chongqing</option>
-                <option value="西安">西安 Xi'an</option>
-                <option value="苏州">苏州 Suzhou</option>
-                <option value="天津">天津 Tianjin</option>
-                <option value="长沙">长沙 Changsha</option>
-                <option value="郑州">郑州 Zhengzhou</option>
-                <option value="青岛">青岛 Qingdao</option>
-                <option value="大连">大连 Dalian</option>
-                <option value="厦门">厦门 Xiamen</option>
-                <option value="福州">福州 Fuzhou</option>
-                <option value="济南">济南 Jinan</option>
-                <option value="昆明">昆明 Kunming</option>
-                <option value="哈尔滨">哈尔滨 Harbin</option>
-                <option value="沈阳">沈阳 Shenyang</option>
-                <option value="合肥">合肥 Hefei</option>
-                <option value="宁波">宁波 Ningbo</option>
-                <option value="佛山">佛山 Foshan</option>
-                <option value="东莞">东莞 Dongguan</option>
-                <option value="无锡">无锡 Wuxi</option>
-                <option value="珠海">珠海 Zhuhai</option>
-                <option value="三亚">三亚 Sanya</option>
-                <option value="乌鲁木齐">乌鲁木齐 Ürümqi</option>
-              </optgroup>
-              <optgroup label="港澳台 HK · Macau · Taiwan">
-                <option value="香港">香港 Hong Kong</option>
-                <option value="澳门">澳门 Macau</option>
-                <option value="台北">台北 Taipei</option>
-              </optgroup>
-              <optgroup label="日韩 Japan · Korea">
-                <option value="东京">東京 Tokyo</option>
-                <option value="大阪">大阪 Osaka</option>
-                <option value="首尔">서울 Seoul</option>
-              </optgroup>
-              <optgroup label="欧洲 Europe">
-                <option value="伦敦">伦敦 London</option>
-                <option value="巴黎">巴黎 Paris</option>
-                <option value="柏林">柏林 Berlin</option>
-              </optgroup>
-              <optgroup label="北美 North America">
-                <option value="纽约">纽约 New York</option>
-                <option value="洛杉矶">洛杉矶 Los Angeles</option>
-                <option value="旧金山">旧金山 San Francisco</option>
-              </optgroup>
-              <optgroup label="大洋洲 Oceania">
-                <option value="悉尼">悉尼 Sydney</option>
-                <option value="墨尔本">墨尔本 Melbourne</option>
-              </optgroup>
-              <option value="自定义">自定义 Custom</option>
             </select>
           </div>
           <input id="parents-father-city-custom" class="nes-input hidden" type="text" placeholder="输入城市名 · Enter city name" />
@@ -748,65 +575,11 @@
         <div id="parents-mother-wrapper" class="hidden">
           <label>母亲来自 Mother's Origin</label>
           <div class="nes-select">
+            <select id="parents-mother-province-select" onchange="onProvinceSelectChange('parents-mother')">
+            </select>
+          </div>
+          <div class="nes-select hidden" id="parents-mother-city-select-wrap">
             <select id="parents-mother-city-select" onchange="onCitySelectChange('parents-mother')">
-              <option value="" disabled selected hidden>选择城市 Select City...</option>
-              <optgroup label="中国内地 Mainland China">
-                <option value="上海">上海 Shanghai</option>
-                <option value="北京">北京 Beijing</option>
-                <option value="深圳">深圳 Shenzhen</option>
-                <option value="广州">广州 Guangzhou</option>
-                <option value="成都">成都 Chengdu</option>
-                <option value="杭州">杭州 Hangzhou</option>
-                <option value="南京">南京 Nanjing</option>
-                <option value="武汉">武汉 Wuhan</option>
-                <option value="重庆">重庆 Chongqing</option>
-                <option value="西安">西安 Xi'an</option>
-                <option value="苏州">苏州 Suzhou</option>
-                <option value="天津">天津 Tianjin</option>
-                <option value="长沙">长沙 Changsha</option>
-                <option value="郑州">郑州 Zhengzhou</option>
-                <option value="青岛">青岛 Qingdao</option>
-                <option value="大连">大连 Dalian</option>
-                <option value="厦门">厦门 Xiamen</option>
-                <option value="福州">福州 Fuzhou</option>
-                <option value="济南">济南 Jinan</option>
-                <option value="昆明">昆明 Kunming</option>
-                <option value="哈尔滨">哈尔滨 Harbin</option>
-                <option value="沈阳">沈阳 Shenyang</option>
-                <option value="合肥">合肥 Hefei</option>
-                <option value="宁波">宁波 Ningbo</option>
-                <option value="佛山">佛山 Foshan</option>
-                <option value="东莞">东莞 Dongguan</option>
-                <option value="无锡">无锡 Wuxi</option>
-                <option value="珠海">珠海 Zhuhai</option>
-                <option value="三亚">三亚 Sanya</option>
-                <option value="乌鲁木齐">乌鲁木齐 Ürümqi</option>
-              </optgroup>
-              <optgroup label="港澳台 HK · Macau · Taiwan">
-                <option value="香港">香港 Hong Kong</option>
-                <option value="澳门">澳门 Macau</option>
-                <option value="台北">台北 Taipei</option>
-              </optgroup>
-              <optgroup label="日韩 Japan · Korea">
-                <option value="东京">東京 Tokyo</option>
-                <option value="大阪">大阪 Osaka</option>
-                <option value="首尔">서울 Seoul</option>
-              </optgroup>
-              <optgroup label="欧洲 Europe">
-                <option value="伦敦">伦敦 London</option>
-                <option value="巴黎">巴黎 Paris</option>
-                <option value="柏林">柏林 Berlin</option>
-              </optgroup>
-              <optgroup label="北美 North America">
-                <option value="纽约">纽约 New York</option>
-                <option value="洛杉矶">洛杉矶 Los Angeles</option>
-                <option value="旧金山">旧金山 San Francisco</option>
-              </optgroup>
-              <optgroup label="大洋洲 Oceania">
-                <option value="悉尼">悉尼 Sydney</option>
-                <option value="墨尔本">墨尔本 Melbourne</option>
-              </optgroup>
-              <option value="自定义">自定义 Custom</option>
             </select>
           </div>
           <input id="parents-mother-city-custom" class="nes-input hidden" type="text" placeholder="输入城市名 · Enter city name" />

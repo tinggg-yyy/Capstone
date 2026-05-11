@@ -149,15 +149,9 @@ function validatePage(pageId) {
     }
 
     case "profile-housing": {
-      const cityEl = document.getElementById("house-city-select");
-      const cityCustom = document.getElementById("house-city-custom");
-      const cityVal = (cityEl?.value || "").trim();
-      const cityCustomVal = (cityCustom && !cityCustom.classList.contains("hidden")) ? cityCustom.value.trim() : "";
-      if (!cityVal && !cityCustomVal) {
+      const resolvedCity = getHousingCityValue("house");
+      if (!resolvedCity) {
         showAlert("请选择城市！\nPlease select a city."); return false;
-      }
-      if (cityVal === "自定义" && !cityCustomVal) {
-        showAlert("请填写城市名！\nPlease enter a city name."); return false;
       }
       if (!document.getElementById("house-district")?.value) {
         showAlert("请摇骰子选择区域！\nPlease roll for district."); return false;
@@ -1250,9 +1244,8 @@ function updateHeightOptions2() {
 // ── Housing inputs ────────────────────────────────────────────
 
 function onCitySelectChange(prefix) {
-  const sel = document.getElementById(`${prefix}-city-select`);
-  const customInput = document.getElementById(`${prefix}-city-custom`);
-  customInput.classList.toggle("hidden", sel.value !== "自定义");
+  // city select in new two-level system never contains "自定义"
+  // custom input is handled by onProvinceSelectChange
 }
 
 function onDistrictSelectChange(prefix) {
@@ -1285,7 +1278,7 @@ function rollDistrictDice(prefix) {
       const tier = HOUSING_TIERS.districtTiers[roll];
       const picked = tier[Math.floor(Math.random() * tier.length)];
       if (hidden) hidden.value = picked;
-      display.textContent = picked;
+      display.textContent = disp(picked);
     }
   }, 70);
 }
@@ -1531,11 +1524,12 @@ function loadHouseTypeIntoSelect(prefix, savedType) {
 }
 
 function getHousingCityValue(prefix) {
+  const provSel = document.getElementById(`${prefix}-province-select`);
+  if (provSel?.value === "custom") {
+    return document.getElementById(`${prefix}-city-custom`)?.value.trim() || "";
+  }
   const sel = document.getElementById(`${prefix}-city-select`);
   if (!sel) return "";
-  if (sel.value === "自定义") {
-    return document.getElementById(`${prefix}-city-custom`).value.trim();
-  }
   return sel.value || "";
 }
 
@@ -1555,6 +1549,218 @@ function addOptionIfMissing(sel, value, text) {
     opt.textContent = text;
     sel.appendChild(opt);
   }
+}
+
+// ── Province → City data ─────────────────────────────────
+const CITY_DATA = {
+  china: [
+    { zh:"上海市", en:"Shanghai", cities:[
+      {zh:"上海",en:"Shanghai"},{zh:"浦东新区",en:"Pudong"},{zh:"嘉定",en:"Jiading"},{zh:"松江",en:"Songjiang"},{zh:"青浦",en:"Qingpu"},{zh:"金山",en:"Jinshan"},
+    ]},
+    { zh:"北京市", en:"Beijing", cities:[
+      {zh:"北京",en:"Beijing"},{zh:"海淀区",en:"Haidian"},{zh:"朝阳区",en:"Chaoyang"},{zh:"西城区",en:"Xicheng"},{zh:"通州区",en:"Tongzhou"},{zh:"顺义区",en:"Shunyi"},
+    ]},
+    { zh:"天津市", en:"Tianjin", cities:[
+      {zh:"天津",en:"Tianjin"},{zh:"滨海新区",en:"Binhai"},{zh:"武清",en:"Wuqing"},{zh:"宝坻",en:"Baodi"},
+    ]},
+    { zh:"重庆市", en:"Chongqing", cities:[
+      {zh:"重庆",en:"Chongqing"},{zh:"渝中区",en:"Yuzhong"},{zh:"江北区",en:"Jiangbei"},{zh:"南岸区",en:"Nan'an"},{zh:"渝北区",en:"Yubei"},{zh:"九龙坡区",en:"Jiulongpo"},
+    ]},
+    { zh:"广东省", en:"Guangdong", cities:[
+      {zh:"广州",en:"Guangzhou"},{zh:"深圳",en:"Shenzhen"},{zh:"佛山",en:"Foshan"},{zh:"东莞",en:"Dongguan"},{zh:"珠海",en:"Zhuhai"},{zh:"汕头",en:"Shantou"},
+      {zh:"中山",en:"Zhongshan"},{zh:"惠州",en:"Huizhou"},{zh:"江门",en:"Jiangmen"},{zh:"茂名",en:"Maoming"},{zh:"湛江",en:"Zhanjiang"},{zh:"肇庆",en:"Zhaoqing"},
+    ]},
+    { zh:"浙江省", en:"Zhejiang", cities:[
+      {zh:"杭州",en:"Hangzhou"},{zh:"宁波",en:"Ningbo"},{zh:"温州",en:"Wenzhou"},{zh:"嘉兴",en:"Jiaxing"},{zh:"湖州",en:"Huzhou"},{zh:"绍兴",en:"Shaoxing"},
+      {zh:"金华",en:"Jinhua"},{zh:"衢州",en:"Quzhou"},{zh:"舟山",en:"Zhoushan"},{zh:"台州",en:"Taizhou"},{zh:"丽水",en:"Lishui"},
+    ]},
+    { zh:"江苏省", en:"Jiangsu", cities:[
+      {zh:"南京",en:"Nanjing"},{zh:"苏州",en:"Suzhou"},{zh:"无锡",en:"Wuxi"},{zh:"南通",en:"Nantong"},{zh:"常州",en:"Changzhou"},{zh:"扬州",en:"Yangzhou"},
+      {zh:"徐州",en:"Xuzhou"},{zh:"盐城",en:"Yancheng"},{zh:"镇江",en:"Zhenjiang"},{zh:"泰州",en:"Taizhou"},{zh:"宿迁",en:"Suqian"},
+    ]},
+    { zh:"四川省", en:"Sichuan", cities:[
+      {zh:"成都",en:"Chengdu"},{zh:"绵阳",en:"Mianyang"},{zh:"德阳",en:"Deyang"},{zh:"宜宾",en:"Yibin"},{zh:"乐山",en:"Leshan"},{zh:"自贡",en:"Zigong"},
+      {zh:"泸州",en:"Luzhou"},{zh:"达州",en:"Dazhou"},{zh:"南充",en:"Nanchong"},{zh:"广安",en:"Guang'an"},{zh:"遂宁",en:"Suining"},
+    ]},
+    { zh:"湖北省", en:"Hubei", cities:[
+      {zh:"武汉",en:"Wuhan"},{zh:"宜昌",en:"Yichang"},{zh:"襄阳",en:"Xiangyang"},{zh:"荆州",en:"Jingzhou"},{zh:"黄石",en:"Huangshi"},{zh:"十堰",en:"Shiyan"},{zh:"荆门",en:"Jingmen"},
+    ]},
+    { zh:"湖南省", en:"Hunan", cities:[
+      {zh:"长沙",en:"Changsha"},{zh:"株洲",en:"Zhuzhou"},{zh:"湘潭",en:"Xiangtan"},{zh:"衡阳",en:"Hengyang"},{zh:"岳阳",en:"Yueyang"},{zh:"常德",en:"Changde"},
+    ]},
+    { zh:"陕西省", en:"Shaanxi", cities:[
+      {zh:"西安",en:"Xi'an"},{zh:"咸阳",en:"Xianyang"},{zh:"宝鸡",en:"Baoji"},{zh:"汉中",en:"Hanzhong"},{zh:"渭南",en:"Weinan"},{zh:"延安",en:"Yan'an"},
+    ]},
+    { zh:"山东省", en:"Shandong", cities:[
+      {zh:"青岛",en:"Qingdao"},{zh:"济南",en:"Jinan"},{zh:"烟台",en:"Yantai"},{zh:"潍坊",en:"Weifang"},{zh:"临沂",en:"Linyi"},{zh:"淄博",en:"Zibo"},
+      {zh:"威海",en:"Weihai"},{zh:"日照",en:"Rizhao"},{zh:"济宁",en:"Jining"},{zh:"泰安",en:"Tai'an"},
+    ]},
+    { zh:"辽宁省", en:"Liaoning", cities:[
+      {zh:"大连",en:"Dalian"},{zh:"沈阳",en:"Shenyang"},{zh:"鞍山",en:"Anshan"},{zh:"抚顺",en:"Fushun"},{zh:"本溪",en:"Benxi"},{zh:"锦州",en:"Jinzhou"},
+    ]},
+    { zh:"福建省", en:"Fujian", cities:[
+      {zh:"厦门",en:"Xiamen"},{zh:"福州",en:"Fuzhou"},{zh:"泉州",en:"Quanzhou"},{zh:"漳州",en:"Zhangzhou"},{zh:"莆田",en:"Putian"},{zh:"南平",en:"Nanping"},
+    ]},
+    { zh:"云南省", en:"Yunnan", cities:[
+      {zh:"昆明",en:"Kunming"},{zh:"大理",en:"Dali"},{zh:"丽江",en:"Lijiang"},{zh:"曲靖",en:"Qujing"},{zh:"玉溪",en:"Yuxi"},{zh:"西双版纳",en:"Xishuangbanna"},
+    ]},
+    { zh:"黑龙江省", en:"Heilongjiang", cities:[
+      {zh:"哈尔滨",en:"Harbin"},{zh:"大庆",en:"Daqing"},{zh:"齐齐哈尔",en:"Qiqihar"},{zh:"牡丹江",en:"Mudanjiang"},
+    ]},
+    { zh:"安徽省", en:"Anhui", cities:[
+      {zh:"合肥",en:"Hefei"},{zh:"芜湖",en:"Wuhu"},{zh:"马鞍山",en:"Ma'anshan"},{zh:"安庆",en:"Anqing"},{zh:"蚌埠",en:"Bengbu"},
+    ]},
+    { zh:"河南省", en:"Henan", cities:[
+      {zh:"郑州",en:"Zhengzhou"},{zh:"洛阳",en:"Luoyang"},{zh:"开封",en:"Kaifeng"},{zh:"南阳",en:"Nanyang"},{zh:"新乡",en:"Xinxiang"},{zh:"许昌",en:"Xuchang"},
+    ]},
+    { zh:"海南省", en:"Hainan", cities:[
+      {zh:"三亚",en:"Sanya"},{zh:"海口",en:"Haikou"},{zh:"琼海",en:"Qionghai"},{zh:"文昌",en:"Wenchang"},
+    ]},
+    { zh:"新疆", en:"Xinjiang", cities:[
+      {zh:"乌鲁木齐",en:"Ürümqi"},{zh:"喀什",en:"Kashgar"},{zh:"克拉玛依",en:"Karamay"},{zh:"伊宁",en:"Yining"},
+    ]},
+    { zh:"西藏", en:"Tibet", cities:[
+      {zh:"拉萨",en:"Lhasa"},{zh:"日喀则",en:"Shigatse"},{zh:"林芝",en:"Nyingchi"},
+    ]},
+    { zh:"内蒙古", en:"Inner Mongolia", cities:[
+      {zh:"呼和浩特",en:"Hohhot"},{zh:"包头",en:"Baotou"},{zh:"赤峰",en:"Chifeng"},{zh:"鄂尔多斯",en:"Ordos"},
+    ]},
+    { zh:"河北省", en:"Hebei", cities:[
+      {zh:"石家庄",en:"Shijiazhuang"},{zh:"唐山",en:"Tangshan"},{zh:"保定",en:"Baoding"},{zh:"秦皇岛",en:"Qinhuangdao"},{zh:"邯郸",en:"Handan"},
+    ]},
+    { zh:"山西省", en:"Shanxi", cities:[
+      {zh:"太原",en:"Taiyuan"},{zh:"大同",en:"Datong"},{zh:"运城",en:"Yuncheng"},{zh:"临汾",en:"Linfen"},
+    ]},
+    { zh:"吉林省", en:"Jilin", cities:[
+      {zh:"长春",en:"Changchun"},{zh:"吉林市",en:"Jilin City"},{zh:"延吉",en:"Yanji"},
+    ]},
+    { zh:"广西", en:"Guangxi", cities:[
+      {zh:"南宁",en:"Nanning"},{zh:"桂林",en:"Guilin"},{zh:"柳州",en:"Liuzhou"},{zh:"北海",en:"Beihai"},
+    ]},
+    { zh:"江西省", en:"Jiangxi", cities:[
+      {zh:"南昌",en:"Nanchang"},{zh:"赣州",en:"Ganzhou"},{zh:"景德镇",en:"Jingdezhen"},{zh:"九江",en:"Jiujiang"},
+    ]},
+    { zh:"贵州省", en:"Guizhou", cities:[
+      {zh:"贵阳",en:"Guiyang"},{zh:"遵义",en:"Zunyi"},{zh:"安顺",en:"Anshun"},
+    ]},
+    { zh:"甘肃省", en:"Gansu", cities:[
+      {zh:"兰州",en:"Lanzhou"},{zh:"天水",en:"Tianshui"},{zh:"嘉峪关",en:"Jiayuguan"},
+    ]},
+    { zh:"宁夏", en:"Ningxia", cities:[
+      {zh:"银川",en:"Yinchuan"},{zh:"石嘴山",en:"Shizuishan"},
+    ]},
+    { zh:"青海省", en:"Qinghai", cities:[
+      {zh:"西宁",en:"Xining"},{zh:"格尔木",en:"Golmud"},
+    ]},
+  ],
+  overseas: [
+    { group:"港澳台 HK · Macau · Taiwan", cities:[
+      {zh:"香港",en:"Hong Kong"},{zh:"澳门",en:"Macau"},{zh:"台北",en:"Taipei"},{zh:"台中",en:"Taichung"},{zh:"高雄",en:"Kaohsiung"},{zh:"台南",en:"Tainan"},
+    ]},
+    { group:"日韩 Japan · Korea", cities:[
+      {zh:"东京",en:"Tokyo"},{zh:"大阪",en:"Osaka"},{zh:"京都",en:"Kyoto"},{zh:"横滨",en:"Yokohama"},{zh:"神户",en:"Kobe"},{zh:"福冈",en:"Fukuoka"},
+      {zh:"首尔",en:"Seoul"},{zh:"釜山",en:"Busan"},{zh:"济州",en:"Jeju"},
+    ]},
+    { group:"东南亚 Southeast Asia", cities:[
+      {zh:"新加坡",en:"Singapore"},{zh:"曼谷",en:"Bangkok"},{zh:"吉隆坡",en:"Kuala Lumpur"},{zh:"雅加达",en:"Jakarta"},
+      {zh:"马尼拉",en:"Manila"},{zh:"河内",en:"Hanoi"},{zh:"胡志明市",en:"Ho Chi Minh City"},{zh:"巴厘岛",en:"Bali"},
+    ]},
+    { group:"中东·南亚 Middle East · South Asia", cities:[
+      {zh:"迪拜",en:"Dubai"},{zh:"阿布扎比",en:"Abu Dhabi"},{zh:"孟买",en:"Mumbai"},{zh:"德里",en:"Delhi"},{zh:"班加罗尔",en:"Bangalore"},
+    ]},
+    { group:"欧洲 Europe", cities:[
+      {zh:"伦敦",en:"London"},{zh:"巴黎",en:"Paris"},{zh:"柏林",en:"Berlin"},{zh:"马德里",en:"Madrid"},{zh:"罗马",en:"Roma"},
+      {zh:"阿姆斯特丹",en:"Amsterdam"},{zh:"布鲁塞尔",en:"Brussels"},{zh:"维也纳",en:"Wien / Vienna"},{zh:"苏黎世",en:"Zürich"},
+      {zh:"日内瓦",en:"Genève / Geneva"},{zh:"巴塞罗那",en:"Barcelona"},{zh:"慕尼黑",en:"München / Munich"},
+      {zh:"法兰克福",en:"Frankfurt"},{zh:"米兰",en:"Milano / Milan"},{zh:"哥本哈根",en:"København / Copenhagen"},
+      {zh:"斯德哥尔摩",en:"Stockholm"},{zh:"赫尔辛基",en:"Helsinki"},{zh:"奥斯陆",en:"Oslo"},
+      {zh:"华沙",en:"Warszawa / Warsaw"},{zh:"布拉格",en:"Praha / Prague"},{zh:"布达佩斯",en:"Budapest"},
+      {zh:"莫斯科",en:"Москва / Moscow"},{zh:"圣彼得堡",en:"St. Petersburg"},
+    ]},
+    { group:"北美 North America", cities:[
+      {zh:"纽约",en:"New York"},{zh:"洛杉矶",en:"Los Angeles"},{zh:"旧金山",en:"San Francisco"},{zh:"芝加哥",en:"Chicago"},
+      {zh:"波士顿",en:"Boston"},{zh:"西雅图",en:"Seattle"},{zh:"迈阿密",en:"Miami"},{zh:"拉斯维加斯",en:"Las Vegas"},
+      {zh:"华盛顿",en:"Washington D.C."},{zh:"多伦多",en:"Toronto"},{zh:"温哥华",en:"Vancouver"},{zh:"蒙特利尔",en:"Montréal"},
+    ]},
+    { group:"中南美 Latin America", cities:[
+      {zh:"墨西哥城",en:"Ciudad de México"},{zh:"圣保罗",en:"São Paulo"},{zh:"里约热内卢",en:"Rio de Janeiro"},{zh:"布宜诺斯艾利斯",en:"Buenos Aires"},
+    ]},
+    { group:"大洋洲 Oceania", cities:[
+      {zh:"悉尼",en:"Sydney"},{zh:"墨尔本",en:"Melbourne"},{zh:"布里斯班",en:"Brisbane"},{zh:"珀斯",en:"Perth"},{zh:"奥克兰",en:"Auckland"},
+    ]},
+    { group:"非洲 Africa", cities:[
+      {zh:"开罗",en:"Cairo"},{zh:"约翰内斯堡",en:"Johannesburg"},{zh:"内罗毕",en:"Nairobi"},
+    ]},
+  ],
+};
+
+function buildCitySelectors(prefix) {
+  const provSel = document.getElementById(`${prefix}-province-select`);
+  const citySel = document.getElementById(`${prefix}-city-select`);
+  const cityWrap = document.getElementById(`${prefix}-city-select-wrap`);
+  if (!provSel || !citySel) return;
+
+  // Build province options
+  provSel.innerHTML = `<option value="" disabled selected hidden>选省份 / Select Province...</option>`;
+  const chinaGroup = document.createElement("optgroup");
+  chinaGroup.label = "中国内地 Mainland China";
+  CITY_DATA.china.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = "cn:" + p.zh;
+    opt.textContent = `${p.zh} ${p.en}`;
+    chinaGroup.appendChild(opt);
+  });
+  provSel.appendChild(chinaGroup);
+
+  CITY_DATA.overseas.forEach(region => {
+    const opt = document.createElement("option");
+    opt.value = "os:" + region.group;
+    opt.textContent = region.group;
+    provSel.appendChild(opt);
+  });
+
+  const customOpt = document.createElement("option");
+  customOpt.value = "custom";
+  customOpt.textContent = "自定义 Custom";
+  provSel.appendChild(customOpt);
+}
+
+function onProvinceSelectChange(prefix) {
+  const provSel = document.getElementById(`${prefix}-province-select`);
+  const citySel = document.getElementById(`${prefix}-city-select`);
+  const cityWrap = document.getElementById(`${prefix}-city-select-wrap`);
+  const customInput = document.getElementById(`${prefix}-city-custom`);
+  if (!provSel || !citySel) return;
+
+  const val = provSel.value;
+  if (val === "custom") {
+    if (cityWrap) cityWrap.classList.add("hidden");
+    if (customInput) customInput.classList.remove("hidden");
+    return;
+  }
+  if (customInput) customInput.classList.add("hidden");
+
+  let cities = [];
+  if (val.startsWith("cn:")) {
+    const zhName = val.slice(3);
+    const prov = CITY_DATA.china.find(p => p.zh === zhName);
+    if (prov) cities = prov.cities;
+  } else if (val.startsWith("os:")) {
+    const groupName = val.slice(3);
+    const region = CITY_DATA.overseas.find(r => r.group === groupName);
+    if (region) cities = region.cities;
+  }
+
+  citySel.innerHTML = `<option value="" disabled selected hidden>选城市 / Select City...</option>`;
+  cities.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.zh;
+    opt.textContent = `${c.zh} ${c.en}`;
+    citySel.appendChild(opt);
+  });
+  if (cityWrap) cityWrap.classList.remove("hidden");
+  citySel.value = "";
+  onCitySelectChange(prefix);
 }
 
 // ── Housing & income tier data ─────────────────────────────────
@@ -1632,6 +1838,19 @@ const HOUSING_TIERS = {
     5: "1000w",
     6: "3000w+",
   },
+  // House price tiers scaled by type
+  priceRentByType: {
+    cheap:  { 1:"月租300元", 2:"月租500元",  3:"月租800元",  4:"月租1000元", 5:"月租1500元", 6:"月租2000元" },
+    mid:    { 1:"月租500元", 2:"月租1000元", 3:"月租2000元", 4:"月租3500元", 5:"月租5000元", 6:"月租8000元" },
+    high:   { 1:"月租1000元",2:"月租2000元", 3:"月租4000元", 4:"月租6000元", 5:"月租1w元",   6:"月租2w+"    },
+    luxury: { 1:"月租5000元",2:"月租8000元", 3:"月租1.5w元", 4:"月租2.5w元", 5:"月租5w元",   6:"月租10w+"   },
+  },
+  priceBuyByType: {
+    cheap:  { 1:"5w",   2:"10w",   3:"20w",   4:"30w",   5:"50w",    6:"80w"    },
+    mid:    { 1:"30w",  2:"50w",   3:"100w",  4:"200w",  5:"300w",   6:"500w"   },
+    high:   { 1:"100w", 2:"200w",  3:"350w",  4:"600w",  5:"1000w",  6:"1500w"  },
+    luxury: { 1:"300w", 2:"600w",  3:"1000w", 4:"2000w", 5:"3000w",  6:"5000w+" },
+  },
   income: {
     1: "3k以下",
     2: "3k-8k",
@@ -1649,12 +1868,12 @@ const HOUSING_TIERS = {
     6: "开放关系/Open Relationship",
   },
   pastRelCount: {
-    1: "0段/None",
-    2: "1-2段/1-2",
-    3: "3-4段/3-4",
-    4: "5-6段/5-6",
-    5: "7-10段/7-10",
-    6: "10+段/10+",
+    1: "0",
+    2: "1-2",
+    3: "3-4",
+    4: "5-6",
+    5: "7-10",
+    6: "10+",
   },
   exContact: {
     1: "完全断联/No Contact",
@@ -1681,12 +1900,12 @@ const HOUSING_TIERS = {
     6: "一直有/Always",
   },
   hasKids: {
-    1: "无/None",
-    2: "无/None",
-    3: "无/None",
-    4: "1/1",
-    5: "2/2",
-    6: "3+/3+",
+    1: "0",
+    2: "0",
+    3: "0",
+    4: "1",
+    5: "2",
+    6: "3+",
   },
   currentPartner: {
     1: "无/None",
@@ -1697,11 +1916,11 @@ const HOUSING_TIERS = {
     6: "伴侣/Partner",
   },
   ambiguousCount: {
-    1: "无/None",
-    2: "无/None",
-    3: "1个/1",
-    4: "2个/2",
-    5: "3个/3",
+    1: "0",
+    2: "0",
+    3: "1",
+    4: "2",
+    5: "3",
     6: "很多/Many",
   },
   foreignPartner: {
@@ -1721,12 +1940,12 @@ const HOUSING_TIERS = {
     6: "多个/Multiple",
   },
   partnerCount: {
-    1: "1/1",
-    2: "1/1",
-    3: "2/2",
-    4: "2/2",
-    5: "3/3",
-    6: "3+/3+",
+    1: "1",
+    2: "1",
+    3: "2",
+    4: "2",
+    5: "3",
+    6: "3+",
   },
   secretPartner: {
     1: "否/No",
@@ -1783,7 +2002,7 @@ const HOUSING_TIERS = {
   villaFloors: { 1: "1层独栋", 2: "2层别墅", 3: "2层别墅", 4: "3层别墅", 5: "3层别墅", 6: "4层及以上" },
   aptFloor:    { 1: "1-5层", 2: "6-10层", 3: "11-20层", 4: "21-30层", 5: "31-40层", 6: "40层以上" },
   aptTotal:    { 1: "6层以下", 2: "10层", 3: "18层", 4: "28层", 5: "35层", 6: "50层以上" },
-  vehicleCount: { 1: "1辆", 2: "1辆", 3: "2辆", 4: "2辆", 5: "3辆", 6: "4辆+" },
+  vehicleCount: { 1: "1", 2: "1", 3: "2", 4: "2", 5: "3", 6: "4+" },
   vehiclePrice: { 1: "5w以下", 2: "5w-15w", 3: "15w-30w", 4: "30w-80w", 5: "80w-300w", 6: "300w+" },
   vehiclePriceByType: {
     bicycle:    { 1: "500元以下", 2: "500-2000元", 3: "2000元-1w", 4: "1w-5w", 5: "5w-30w", 6: "30w+" },
@@ -1894,13 +2113,38 @@ const SCORE_DEDUCTIONS = {
   月租5000元: -1,
   月租1w元: 0,
   "月租3w+": +8,
-  // 买房价格 / Buy price — only 3000w+ gets bonus
+  // 买房价格 / Buy price
+  "5w": -15,
+  "10w": -13,
+  "20w": -11,
+  "30w": -10,
   "50w": -10,
+  "80w": -8,
   "100w": -6,
+  "200w": -4,
   "300w": -3,
+  "350w": -3,
   "500w": -1,
+  "600w": -1,
   "1000w": 0,
+  "1500w": +2,
+  "2000w": +5,
   "3000w+": +12,
+  "5000w+": +18,
+  // 月租价格 (by type)
+  "月租300元": -15,
+  "月租800元": -8,
+  "月租1500元": -5,
+  "月租2000元": -3,
+  "月租3500元": -2,
+  "月租4000元": -1,
+  "月租6000元": 0,
+  "月租8000元": +2,
+  "月租1.5w元": +4,
+  "月租2w+": +7,
+  "月租2.5w元": +9,
+  "月租5w元": +12,
+  "月租10w+": +18,
   // 月收入 / Income — only 10w+/月 gets bonus
   "3k以下": -12,
   "3k-8k": -7,
@@ -2047,29 +2291,37 @@ const DISP = {
   "滨水区": "滨水区 / Waterfront",
   "豪华住宅区": "豪华住宅区 / Luxury Zone",
   // apt floor
-  "1-5层": "1-5层 / Fl.1-5",
-  "6-10层": "6-10层 / Fl.6-10",
-  "11-20层": "11-20层 / Fl.11-20",
-  "21-30层": "21-30层 / Fl.21-30",
-  "31-40层": "31-40层 / Fl.31-40",
-  "40层以上": "40层以上 / Fl.40+",
+  "1-5层": "1-5层",
+  "6-10层": "6-10层",
+  "11-20层": "11-20层",
+  "21-30层": "21-30层",
+  "31-40层": "31-40层",
+  "40层以上": "40层+",
   // apt total floors
-  "6层以下": "6层以下 / <6F",
-  "10层": "10层 / 10F",
-  "18层": "18层 / 18F",
-  "28层": "28层 / 28F",
-  "35层": "35层 / 35F",
-  "50层以上": "50层以上 / 50F+",
+  "6层以下": "共6层以下",
+  "10层": "共10层",
+  "18层": "共18层",
+  "28层": "共28层",
+  "35层": "共35层",
+  "50层以上": "共50层+",
   // villa floors
   "1层独栋": "1层独栋 / 1-Story",
   "2层别墅": "2层别墅 / 2-Story Villa",
   "3层别墅": "3层别墅 / 3-Story Villa",
   "4层及以上": "4层及以上 / 4F+",
-  // vehicle count
-  "1辆": "1辆 / 1",
-  "2辆": "2辆 / 2",
-  "3辆": "3辆 / 3",
-  "4辆+": "4辆+ / 4+",
+  // house price (cheap tier)
+  "5w": "5w / ¥50k",
+  "10w": "10w / ¥100k",
+  "20w": "20w / ¥200k",
+  "30w": "30w / ¥300k",
+  "80w": "80w / ¥800k",
+  // house price (mid tier)
+  "200w": "200w / ¥2M",
+  "350w": "350w / ¥3.5M",
+  "600w": "600w / ¥6M",
+  "1500w": "1500w / ¥15M",
+  // house price (luxury tier)
+  "5000w+": "5000w+ / ¥50M+",
   // vehicle price (bicycle)
   "500元以下": "500元以下 / <¥500",
   "500-2000元": "500-2000元 / ¥500-2k",
@@ -2240,6 +2492,22 @@ function rollHousingFieldDice(field, prefix) {
           const totalSec = document.getElementById(`${prefix}-apt-total-section`);
           if (totalSec) totalSec.classList.add("hidden");
         }
+        // Show price wrapper and set price tier key based on house type
+        const priceTierKey = (value === "下水管道" || value === "地下室") ? "cheap"
+          : (value === "别墅" || value === "四合院" || value === "老洋房") ? "luxury"
+          : (value === "公寓" || value === "大平层" || value === "老洋房" || value === "石库门") ? "high"
+          : "mid";
+        const priceWrapper = document.getElementById(`${prefix}-price-wrapper`);
+        if (priceWrapper) {
+          priceWrapper.classList.remove("hidden");
+          priceWrapper.dataset.priceTier = priceTierKey;
+        }
+        const pBtn = document.getElementById(`${prefix}-price-dice-btn`);
+        const pDisp = document.getElementById(`${prefix}-price-display`);
+        const pInp = document.getElementById(`${prefix}-price`);
+        if (pBtn) { pBtn.dataset.rolls = "0"; pBtn.disabled = false; pBtn.classList.remove("dice-exhausted"); pBtn.innerHTML = diceFaceImg(6, 4); }
+        if (pDisp) pDisp.textContent = "—";
+        if (pInp) pInp.value = "";
       } else if (field === "garden") {
         value = HOUSING_TIERS.garden[roll];
         text = disp(value);
@@ -2288,9 +2556,9 @@ function rollHousingFieldDice(field, prefix) {
       } else if (field === "price") {
         const tenureEl = document.getElementById(`${prefix}-tenure`);
         const isRenting = !tenureEl || tenureEl.value !== "购买";
-        value = (isRenting ? HOUSING_TIERS.priceRent : HOUSING_TIERS.priceBuy)[
-          roll
-        ];
+        const priceTierKey = document.getElementById(`${prefix}-price-wrapper`)?.dataset.priceTier || "mid";
+        const tierGroup = isRenting ? HOUSING_TIERS.priceRentByType : HOUSING_TIERS.priceBuyByType;
+        value = (tierGroup[priceTierKey] || (isRenting ? HOUSING_TIERS.priceRent : HOUSING_TIERS.priceBuy))[roll];
         text = disp(value);
         document.getElementById(`${prefix}-price`).value = value;
       } else if (field === "villa-floors") {
@@ -2420,6 +2688,7 @@ function onEditHouseOwnershipChange() {
 
 function getEditHousingDescription() {
   const city = getHousingCityValue("edit-house");
+  const cityDisplay = getCityDisplayName("edit-house");
   const district = getHousingDistrictValue("edit-house");
   const type = getHouseTypeValue("edit-house");
   const villaFloors = document.getElementById("edit-house-villa-floors")?.value || "";
@@ -2437,8 +2706,8 @@ function getEditHousingDescription() {
     : document.getElementById("edit-house-mortgage").value;
 
   const parts = [];
-  if (city || district)
-    parts.push([city, district].filter(Boolean).join(" "));
+  if (cityDisplay || district)
+    parts.push([cityDisplay, disp(district)].filter(Boolean).join(" "));
   if (area) parts.push(`${area}㎡`);
   if (type)
     parts.push(type === "别墅" ? `${disp(type)}(${villaFloors})` : disp(type));
@@ -2452,8 +2721,26 @@ function getEditHousingDescription() {
   return parts.join(" ");
 }
 
+function getCityDisplayName(prefix) {
+  const provSel = document.getElementById(`${prefix}-province-select`);
+  if (provSel?.value === "custom") {
+    return document.getElementById(`${prefix}-city-custom`)?.value.trim() || "";
+  }
+  const sel = document.getElementById(`${prefix}-city-select`);
+  if (!sel?.value) return "";
+  const cityZh = sel.value;
+  const optText = sel.options[sel.selectedIndex]?.textContent.trim() || "";
+  const spaceIdx = optText.indexOf(" ");
+  if (spaceIdx > 0) {
+    const engPart = optText.slice(spaceIdx + 1);
+    return `${cityZh} / ${engPart}`;
+  }
+  return cityZh;
+}
+
 function getHousingDescription() {
   const city = getHousingCityValue("house");
+  const cityDisplay = getCityDisplayName("house");
   const district = getHousingDistrictValue("house");
   const type = getHouseTypeValue("house");
   const villaFloors = document.getElementById("house-villa-floors").value;
@@ -2469,8 +2756,8 @@ function getHousingDescription() {
     : document.getElementById("house-mortgage").value;
 
   const parts = [];
-  if (city || district)
-    parts.push([city, district].filter(Boolean).join(" "));
+  if (cityDisplay || district)
+    parts.push([cityDisplay, disp(district)].filter(Boolean).join(" "));
   if (area) parts.push(`${area}㎡`);
   if (type)
     parts.push(type === "别墅" ? `${disp(type)}(${villaFloors})` : disp(type));
@@ -2744,8 +3031,8 @@ function createCard() {
 
   const parentsData = {
     status: document.getElementById("parents-status")?.value || "",
-    fatherOrigin: getHousingCityValue("parents-father"),
-    motherOrigin: getHousingCityValue("parents-mother"),
+    fatherOrigin: getCityDisplayName("parents-father"),
+    motherOrigin: getCityDisplayName("parents-mother"),
   };
 
   const g = (id) => document.getElementById(id)?.value || "";
@@ -2821,7 +3108,7 @@ function createCard() {
   const vehicleStr = fmt([
     vehicleData.types?.length ? vehicleData.types.join(" ") : null,
     vehicleData.model || null,
-    vehicleData.count || null,
+    vehicleData.count ? disp(vehicleData.count) : null,
     vehicleData.price ? disp(vehicleData.price) : null,
   ].filter(Boolean).join(" ") || "—");
   const parentsStr = fmt([
@@ -2913,9 +3200,9 @@ function createCard() {
 }
 
 function matchesOrientation(viewer, target) {
-  const o = (viewer.orientation || "").split("/")[0]; // e.g. "异性恋"
-  const vg = (viewer.gender || "").split("/")[0]; // e.g. "雄"
-  const tg = (target.gender || "").split("/")[0]; // e.g. "雌"
+  const o = (viewer.orientation || "").split("/")[0].trim(); // e.g. "异性恋"
+  const vg = (viewer.gender || "").split("/")[0].trim(); // e.g. "雄"
+  const tg = (target.gender || "").split("/")[0].trim(); // e.g. "雌"
 
   if (o === "异性恋") {
     if (vg === "雄") return tg === "雌";
@@ -3729,19 +4016,34 @@ function buildStandardsTags(containerId) {
 }
 
 function toggleStandardTag(el) {
-  el.classList.toggle("selected");
+  if (el.classList.contains("selected")) {
+    el.classList.remove("selected");
+  } else {
+    const selected = document.querySelectorAll("#standards-tags .hobby-tag.selected");
+    if (selected.length >= 5) {
+      showAlert("太过贪心了！最多选5个\nToo greedy! Max 5 standards.");
+      el.classList.add("hobby-tag-limit-flash");
+      setTimeout(() => el.classList.remove("hobby-tag-limit-flash"), 600);
+      return;
+    }
+    el.classList.add("selected");
+  }
 }
 
 function getSelectedStandardTags() {
   return Array.from(document.querySelectorAll("#standards-tags .hobby-tag.selected"))
-    .map((el) => el.dataset.zh)
+    .map((el) => {
+      const zh = el.dataset.zh;
+      const std = MATE_STANDARDS.find((s) => s.zh === zh);
+      return std ? `${zh} / ${std.en}` : zh;
+    })
     .join(" · ");
 }
 
 function setStandardTags(tagStr) {
   buildStandardsTags("standards-tags");
   if (!tagStr) return;
-  const selected = new Set(tagStr.split(" · ").map((s) => s.trim()));
+  const selected = new Set(tagStr.split(" · ").map((s) => s.split(" / ")[0].trim()));
   document.querySelectorAll("#standards-tags .hobby-tag").forEach((el) => {
     if (selected.has(el.dataset.zh)) el.classList.add("selected");
   });
@@ -4343,6 +4645,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadCustomHobbyTags();
   buildHobbyTags("hobby-tags");
   buildStandardsTags("standards-tags");
+  buildCitySelectors("house");
+  buildCitySelectors("parents-father");
+  buildCitySelectors("parents-mother");
 });
 
 function getPixelHeartUrl() {
@@ -4507,7 +4812,7 @@ function buildTerritoryDisplay(profile) {
   if (h.price) parts.push(disp(h.price));
   if (h.ownership) parts.push(disp(h.ownership));
   if (h.mortgage) parts.push(disp(h.mortgage));
-  return parts.join(" ") || profile.hukou || "—";
+  return parts.join(" · ") || profile.hukou || "—";
 }
 
 function renderValue(profile, field, valueText, extraClass = "") {
@@ -4600,11 +4905,11 @@ function renderCardHTML(profile) {
   <div class="section">
     <span class="label">车辆 <small>Vehicles</small></span>
     ${renderValue(profile, "vehicle", [
-      profile.vehicle?.types?.length ? profile.vehicle.types.join(" ") : null,
+      profile.vehicle?.types?.length ? profile.vehicle.types.join(" · ") : null,
       profile.vehicle?.model || null,
       profile.vehicle?.count ? disp(profile.vehicle.count) : null,
       profile.vehicle?.price ? disp(profile.vehicle.price) : null,
-    ].filter(Boolean).join(" ") || "—")}
+    ].filter(Boolean).join(" · ") || "—")}
   </div>
 
   <div class="grid-3">
@@ -4705,7 +5010,7 @@ function renderCardHTML(profile) {
       profile.parents?.relationship ? disp(profile.parents.relationship) : null,
       profile.parents?.fatherOrigin ? `父(Dad) ${profile.parents.fatherOrigin}` : null,
       profile.parents?.motherOrigin ? `母(Mom) ${profile.parents.motherOrigin}` : null,
-    ].filter(Boolean).join(" ") || "—")}
+    ].filter(Boolean).join(" · ") || "—")}
   </div>
 
   ${profile.standards ? `<div class="section">
@@ -4759,6 +5064,15 @@ function showProfile() {
   attachSectionDragScroll(container);
   console.log("Showing profile:", profile);
   console.log("Current index:", currentIndex);
+
+  // Auto-advance after 1 minute
+  if (_autoAdvanceTimer) clearTimeout(_autoAdvanceTimer);
+  _autoAdvanceTimer = setTimeout(() => {
+    if (currentIndex < profiles.length) {
+      currentIndex++;
+      showProfile();
+    }
+  }, 60000);
 }
 
 function attachSectionDragScroll(cardContainer) {
@@ -6200,6 +6514,7 @@ function escapeHtml(str) {
 let _interruptTimer = null;
 let _consecutiveSkips = 0;
 let _profileShownAt = 0;
+let _autoAdvanceTimer = null;
 let _currentSwipeProfileName = "";
 let _currentSwipeProfile = null;
 
