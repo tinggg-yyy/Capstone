@@ -2844,7 +2844,7 @@ function createCard() {
 </div>
 <div class="section">
   <span class="label">物种 <small>Species</small></span>
-  <span class="value territory">${fmt(breed + (isMixed && breed2 ? ` × ${breed2}（混血 Mixed）` : ""))}</span>
+  <span class="value territory">${fmt((() => { const sp = (v) => { if(!v) return ""; const p=v.split(" · "); return p.length>1?p.slice(1).join(" · "):v; }; return sp(breed) + (isMixed && breed2 ? ` × ${sp(breed2)}（混血 Mixed）` : ""); })())}</span>
 </div>
 <div class="grid-3">
   <div class="cell"><span class="label">性别 <small>Gender</small></span><span class="value">${fmt(gender || "—")}</span></div>
@@ -2901,7 +2901,7 @@ function createCard() {
   <span class="value">${vehicleStr}</span>
 </div>
 <div class="section">
-  <span class="label">父母 <small>Parents</small></span>
+  <span class="label">家庭状况 <small>Family</small></span>
   <span class="value">${parentsStr}</span>
 </div>
 `;
@@ -3643,21 +3643,81 @@ let _editHobbyExpanded = false;
 
 // ── 择偶标准 Mate Standards ────────────────────────────────────
 const MATE_STANDARDS = [
-  { zh: "软萌",       en: "Soft & Cute" },
-  { zh: "身高要求",   en: "Height Req." },
-  { zh: "专一",       en: "Exclusive" },
-  { zh: "体贴",       en: "Considerate" },
-  { zh: "没有怪癖",   en: "No Weird Quirks" },
-  { zh: "有怪癖",     en: "Quirky OK" },
-  { zh: "无浓烈异味", en: "No Strong Odor" },
+  { zh: "软萌",         en: "Soft & Cute" },
+  { zh: "身高要求",     en: "Height Req." },
+  { zh: "专一",         en: "Exclusive" },
+  { zh: "体贴",         en: "Considerate" },
+  { zh: "没有怪癖",     en: "No Weird Quirks" },
+  { zh: "有怪癖",       en: "Quirky OK" },
+  { zh: "无浓烈异味",   en: "No Strong Odor" },
+  { zh: "气味合拍",     en: "Scent Compatible" },
   { zh: "作息昼出夜伏", en: "Nocturnal" },
-  { zh: "毛发整洁",   en: "Groomed Fur" },
-  { zh: "领地稳固",   en: "Stable Territory" },
-  { zh: "不介意杂交", en: "Mixed OK" },
-  { zh: "同物种优先", en: "Same Species Pref." },
-  { zh: "体型相近",   en: "Similar Build" },
-  { zh: "无幼崽",     en: "No Cubs" },
-  { zh: "已绝育",     en: "Sterilized" },
+  { zh: "作息昼伏夜出", en: "Diurnal" },
+  { zh: "冬眠同步",     en: "Sync Hibernation" },
+  { zh: "毛发整洁",     en: "Groomed Fur" },
+  { zh: "换毛期可接受", en: "Shedding OK" },
+  { zh: "爪子干净",     en: "Clean Claws" },
+  { zh: "尾巴好看",     en: "Nice Tail" },
+  { zh: "领地稳固",     en: "Stable Territory" },
+  { zh: "领地宽阔",     en: "Large Territory" },
+  { zh: "不介意杂交",   en: "Mixed OK" },
+  { zh: "同物种优先",   en: "Same Species Pref." },
+  { zh: "体型相近",     en: "Similar Build" },
+  { zh: "无幼崽",       en: "No Cubs" },
+  { zh: "已绝育",       en: "Sterilized" },
+  { zh: "不挑食",       en: "Not Picky Eater" },
+  { zh: "觅食能力强",   en: "Good Forager" },
+  { zh: "筑巢技能满",   en: "Master Nester" },
+  { zh: "不乱叫",       en: "Quiet" },
+  { zh: "独立性强",     en: "Highly Independent" },
+  { zh: "黏人",         en: "Clingy OK" },
+  { zh: "社交动物",     en: "Social Animal" },
+  { zh: "喜欢晒太阳",   en: "Loves Sunbathing" },
+  { zh: "接受多伴侣",   en: "Poly OK" },
+  { zh: "同巢居住",     en: "Cohabitation OK" },
+  { zh: "不咬人",       en: "Non-Biting" },
+  { zh: "食肉优先",     en: "Carnivore Pref." },
+  { zh: "食草优先",     en: "Herbivore Pref." },
+  { zh: "杂食可接受",   en: "Omnivore OK" },
+  { zh: "水栖友好",     en: "Aquatic Friendly" },
+  { zh: "体温相近",     en: "Compatible Temp." },
+  { zh: "迁徙意愿低",   en: "Low Migration" },
+  // ── 人类向 ──
+  { zh: "有稳定收入",   en: "Stable Income" },
+  { zh: "有房",         en: "Has Property" },
+  { zh: "有车",         en: "Has Car" },
+  { zh: "高学历",       en: "Highly Educated" },
+  { zh: "不催婚催生",   en: "No Marriage Pressure" },
+  { zh: "爱干净",       en: "Hygienic" },
+  { zh: "会做饭",       en: "Can Cook" },
+  { zh: "幽默感",       en: "Has Humor" },
+  { zh: "情绪稳定",     en: "Emotionally Stable" },
+  { zh: "不打游戏",     en: "No Gaming" },
+  { zh: "爱打游戏",     en: "Gamer OK" },
+  { zh: "不抽烟",       en: "Non-Smoker" },
+  { zh: "不喝酒",       en: "Non-Drinker" },
+  { zh: "爱运动",       en: "Active" },
+  { zh: "宅",           en: "Homebody" },
+  { zh: "爱旅游",       en: "Loves Travel" },
+  { zh: "同城",         en: "Same City" },
+  { zh: "愿意异地",     en: "LDR OK" },
+  { zh: "有共同爱好",   en: "Shared Hobbies" },
+  { zh: "三观相合",     en: "Compatible Values" },
+  { zh: "颜值在线",     en: "Attractive" },
+  { zh: "家庭关系简单", en: "Simple Family" },
+  { zh: "不啃老",       en: "Self-Sufficient" },
+  { zh: "经济独立",     en: "Financially Independent" },
+  { zh: "接受丁克",     en: "Childfree OK" },
+  { zh: "想要孩子",     en: "Wants Kids" },
+  { zh: "养宠物",       en: "Has Pets" },
+  { zh: "不养宠物",     en: "No Pets" },
+  { zh: "MBTI对盘",     en: "MBTI Match" },
+  { zh: "星座相合",     en: "Horoscope Match" },
+  { zh: "不看星座",     en: "Ignores Horoscope" },
+  { zh: "接受前任",     en: "Ex History OK" },
+  { zh: "无前任联系",   en: "No Ex Contact" },
+  { zh: "愿意见家长",   en: "Meet Parents OK" },
+  { zh: "不管家长",     en: "Family-Free Zone" },
 ];
 
 function buildStandardsTags(containerId) {
@@ -4300,6 +4360,8 @@ function getPixelHeartUrl() {
   c.width = 7 * px;
   c.height = 6 * px;
   const ctx = c.getContext("2d");
+  ctx.shadowColor = "rgba(40,48,35,0.65)";
+  ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2; ctx.shadowBlur = 0;
   ctx.fillStyle = "rgb(40,48,35)";
   pattern.forEach((row, ry) =>
     row.forEach((v, rx) => {
@@ -4328,6 +4390,8 @@ function getPixelVomitUrl() {
   c.width = 7 * px;
   c.height = 9 * px;
   const ctx = c.getContext("2d");
+  ctx.shadowColor = "rgba(40,48,35,0.65)";
+  ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2; ctx.shadowBlur = 0;
   ctx.fillStyle = "rgb(40,48,35)";
   pattern.forEach((row, ry) =>
     row.forEach((v, rx) => {
@@ -4485,7 +4549,10 @@ function renderCardHTML(profile) {
 
   <div class="section">
     <span class="label">物种 <small>Species</small></span>
-    ${renderValue(profile, "breed", profile.mixed && profile.breed2 ? `${profile.breed || "—"} ${profile.breed2}（混血 Mixed）` : profile.breed || "—", "territory")}
+    ${renderValue(profile, "breed", (() => {
+      const sp = (v) => { if (!v) return null; const p = v.split(" · "); return p.length > 1 ? p.slice(1).join(" · ") : v; };
+      return profile.mixed && profile.breed2 ? `${sp(profile.breed) || "—"} × ${sp(profile.breed2)}（混血 Mixed）` : sp(profile.breed) || "—";
+    })(), "territory")}
   </div>
 
   <div class="grid-3">
@@ -4631,13 +4698,8 @@ function renderCardHTML(profile) {
     ${renderValue(profile, "hobby", profile.hobby || "—")}
   </div>
 
-  ${profile.standards ? `<div class="section">
-    <span class="label">择偶标准 <small>Looking For</small></span>
-    ${renderValue(profile, "standards", profile.standards)}
-  </div>` : ""}
-
   <div class="section">
-    <span class="label">父母 <small>Parents</small></span>
+    <span class="label">家庭状况 <small>Family</small></span>
     ${renderValue(profile, "parents", [
       profile.parents?.status ? disp(profile.parents.status) : null,
       profile.parents?.relationship ? disp(profile.parents.relationship) : null,
@@ -4645,6 +4707,11 @@ function renderCardHTML(profile) {
       profile.parents?.motherOrigin ? `母(Mom) ${profile.parents.motherOrigin}` : null,
     ].filter(Boolean).join(" ") || "—")}
   </div>
+
+  ${profile.standards ? `<div class="section">
+    <span class="label">择偶标准 <small>Looking For</small></span>
+    ${renderValue(profile, "standards", profile.standards)}
+  </div>` : ""}
 
   <div class="section">
     <span class="label">被喜欢 <small>Liked</small></span>

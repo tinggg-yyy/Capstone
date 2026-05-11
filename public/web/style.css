@@ -23,8 +23,8 @@
   --dark: #828980;
   --cell: #b8c0b3;
   --grid-bg:
-    repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(255,255,255,0.22) 20px, rgba(255,255,255,0.22) 24px),
-    repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.22) 20px, rgba(255,255,255,0.22) 24px);
+    repeating-linear-gradient(0deg, transparent, transparent 7px, rgba(255,255,255,0.22) 7px, rgba(255,255,255,0.22) 8px),
+    repeating-linear-gradient(90deg, transparent, transparent 7px, rgba(255,255,255,0.22) 7px, rgba(255,255,255,0.22) 8px);
 
   /* TV HDMI colour correction — adjust these three values to taste */
   --tv-brightness: 0.68;
@@ -64,7 +64,7 @@ html, body {
   justify-content: space-between;
   padding: 30px 60px;
   border-bottom: 4px solid rgba(55, 63, 48, 0.50);
-  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.15), inset -1px -4px 0 rgba(55,63,48,0.12);
+  box-shadow: inset 8px 8px 0 rgba(255,255,255,0.28), inset -2px -10px 0 rgba(55,63,48,0.12);
   flex-shrink: 0;
 }
 .board-header .title-left,
@@ -72,7 +72,7 @@ html, body {
   font-size: 36px;
   opacity: 0.5;
   line-height: 1.6;
-  text-shadow: 1px 1px 0 rgba(40,48,35,0.30), -1px -1px 0 rgba(255,255,255,0.15);
+  text-shadow: 2px 2px 0 rgba(40,48,35,0.32), -1px -1px 0 rgba(255,255,255,0.15);
 }
 .board-header .title-main {
   font-size: 100px;
@@ -86,7 +86,7 @@ html, body {
     -1px 0 0 var(--green),
     0 1px 0 var(--green),
     0 -1px 0 var(--green),
-    3px 3px 0 rgba(40,48,35,0.35),
+    9px 9px 0 rgba(40,48,35,0.65),
     -1px -1px 0 rgba(255,255,255,0.18);
 }
 
@@ -122,7 +122,7 @@ html, body {
 .s-rank {
   font-size: 100px;
   color: var(--green);
-  text-shadow: 3px 3px 0 rgba(40,48,35,0.40), -1px -1px 0 rgba(255,255,255,0.22);
+  text-shadow: 5px 5px 0 rgba(40,48,35,0.42), -1px -1px 0 rgba(255,255,255,0.22);
   line-height: 1;
   letter-spacing: 8px;
   animation: blink-rank 2.5s step-start infinite;
@@ -137,7 +137,7 @@ html, body {
   font-size: 90px;
   color: var(--green);
   letter-spacing: 4px;
-  text-shadow: 2px 2px 0 rgba(40,48,35,0.40), -1px -1px 0 rgba(255,255,255,0.20);
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.42), -1px -1px 0 rgba(255,255,255,0.20);
   animation: blink-likes 1.6s step-start infinite;
 }
 
@@ -165,9 +165,9 @@ html, body {
   border: 8px solid rgba(55, 63, 48, 0.60);
   box-shadow:
     0 0 0 3px rgba(55, 63, 48, 0.22),
-    inset 0 0 0 3px rgba(255, 255, 255, 0.14),
-    inset 5px 5px 0 rgba(0, 0, 0, 0.16),
-    inset -4px -4px 0 rgba(255, 255, 255, 0.18);
+    inset 0 0 0 8px rgba(255, 255, 255, 0.14),
+    inset 15px 15px 0 rgba(0, 0, 0,0.3),
+    inset -10px -10px 0 rgba(255, 255, 255, 0.18);
 }
 
 .avatar {
@@ -188,7 +188,7 @@ html, body {
   word-break: break-all;
   text-align: center;
   padding: 40px;
-  text-shadow: 2px 2px 0 rgba(40,48,35,0.30), -1px -1px 0 rgba(255,255,255,0.15);
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.32), -1px -1px 0 rgba(255,255,255,0.15);
 }
 
 /* ── SCORE STAMP (circular, like app) ── */
@@ -211,7 +211,7 @@ html, body {
   pointer-events: none;
   z-index: 2;
   opacity: 0.92;
-  box-shadow: 5px 7px 0 rgba(0, 0, 0, 0.38);
+  box-shadow: 8px 12px 0 rgba(0,0,0,0.42);
 }
 .profile-score-stamp::after {
   content: "";
@@ -227,7 +227,7 @@ html, body {
   position: relative;
   z-index: 1;
   margin-top: 10px;
-  text-shadow: 1px 1px 0 rgba(255,255,255,0.20);
+  text-shadow: 3px 3px 0 rgba(255,255,255,0.37);
 }
 .profile-score-stamp .stamp-num {
   font-size: 130px;
@@ -236,7 +236,7 @@ html, body {
   line-height: 1;
   position: relative;
   z-index: 1;
-  text-shadow: 2px 2px 0 rgba(255,255,255,0.20), -1px -1px 0 rgba(0,0,0,0.10);
+  text-shadow: 6px 6px 0 rgba(255,255,255,0.37), -1px -1px 0 rgba(0,0,0,0.10);
 }
 .profile-score-stamp .stamp-lines {
   display: flex;
@@ -266,35 +266,86 @@ html, body {
 .profile-score-stamp.stamp-red .stamp-date,
 .profile-score-stamp.stamp-red .stamp-num {
   color: rgba(200, 30, 30, 0.96);
-  text-shadow: 1px 1px 0 rgba(255,255,255,0.20);
+  text-shadow: 3px 3px 0 rgba(255,255,255,0.37);
 }
 .profile-score-stamp.stamp-red .stamp-lines span {
   background: rgba(200, 30, 30, 0.92);
 }
 
 /* ── AVATAR SIDE STATS ── */
-.avatar-stats-likes {
+/* Left panel: name + species */
+.avatar-meta-left {
   flex: 1;
   order: 1;
   display: flex;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: flex-end;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 24px;
+  padding: 10px 0;
+  overflow: hidden;
+}
+
+.avatar-name-display {
+  font-size: 84px;
+  color: var(--green);
+  text-align: right;
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.42), -1px -1px 0 rgba(255,255,255,0.20);
+  letter-spacing: 4px;
+  word-break: break-all;
+  width: 100%;
+}
+
+.avatar-breed-display {
+  font-size: 40px;
+  color: var(--green-dim);
+  text-align: right;
+  text-shadow: 2px 2px 0 rgba(40,48,35,0.32), -1px -1px 0 rgba(255,255,255,0.15);
+  letter-spacing: 2px;
+  line-height: 1.2;
+  width: 100%;
+}
+
+.avatar-breed-display small {
+  display: block;
+  font-size: 0.72em;
+  opacity: 0.75;
+  text-align: right;
+}
+
+/* Right panel: likes on top, skips below */
+.avatar-stats-right {
+  flex: 1;
+  order: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 24px;
   overflow: hidden;
   padding: 10px 0;
 }
 
-.avatar-stats-skips {
-  flex: 1;
-  order: 3;
+.avatar-stats-likes {
   display: flex;
   flex-wrap: wrap;
-  align-content: center;
+  align-content: flex-start;
   justify-content: flex-start;
   gap: 12px;
   overflow: hidden;
-  padding: 10px 0;
+  width: 100%;
+}
+
+.avatar-stats-skips {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  overflow: hidden;
+  width: 100%;
+  padding-top: 20px;
+  border-top: 2px solid rgba(255, 80, 80, 0.2);
 }
 
 .emoji-pile {
@@ -325,7 +376,7 @@ html, body {
 .stat-empty {
   font-size: 80px;
   color: var(--green-dim);
-  text-shadow: 1px 1px 0 rgba(40,48,35,0.25), -1px -1px 0 rgba(255,255,255,0.12);
+  text-shadow: 2px 2px 0 rgba(40,48,35,0.26), -1px -1px 0 rgba(255,255,255,0.12);
 }
 
 /* ── CARD (info sections) ── */
@@ -348,9 +399,9 @@ html, body {
   border: 8px solid rgba(55, 63, 48, 0.60);
   box-shadow:
     0 0 0 3px rgba(55, 63, 48, 0.22),
-    inset 0 0 0 3px rgba(255, 255, 255, 0.14),
-    inset 5px 5px 0 rgba(0, 0, 0, 0.16),
-    inset -4px -4px 0 rgba(255, 255, 255, 0.18);
+    inset 0 0 0 8px rgba(255, 255, 255, 0.14),
+    inset 15px 15px 0 rgba(0, 0, 0,0.3),
+    inset -10px -10px 0 rgba(255, 255, 255, 0.18);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -371,7 +422,7 @@ html, body {
   font-size: 34px;
   color: var(--green-dim);
   letter-spacing: 2px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.40), -1px -1px 0 rgba(255,255,255,0.18);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.42), -1px -1px 0 rgba(255,255,255,0.18);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -388,7 +439,7 @@ html, body {
   font-size: 52px;
   color: var(--green);
   text-align: center;
-  text-shadow: 2px 2px 0 rgba(40,48,35,0.40), -1px -1px 0 rgba(255,255,255,0.20);
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.42), -1px -1px 0 rgba(255,255,255,0.20);
   letter-spacing: 2px;
   word-break: break-word;
   overflow-wrap: break-word;
@@ -409,6 +460,25 @@ html, body {
   line-height: 1.2;
   margin-top: 2px;
   letter-spacing: 1px;
+}
+
+/* Territory value: use block layout so <br> acts as normal line break */
+.row-2x > .section:first-child .value {
+  display: block;
+  line-height: 0.8;
+  text-align: center;
+}
+.row-2x > .section:first-child .value small {
+  margin-top: 0;
+}
+
+/* <br> inside flex column takes up space — collapse it */
+.value br {
+  display: block;
+  height: 0;
+  font-size: 0;
+  line-height: 0;
+  margin: 0;
 }
 
 .row-tall { flex: 1; }
@@ -477,7 +547,7 @@ html, body {
   background: var(--cell);
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: inset 0 3px 0 rgba(255,255,255,0.12), inset 0 -3px 0 rgba(0,0,0,0.08);
+  box-shadow: inset 0 8px 0 rgba(255,255,255,0.12), inset 0 -8px 0 rgba(0,0,0,0.08);
 }
 
 .ticker-live {
@@ -491,7 +561,7 @@ html, body {
   align-items: center;
   letter-spacing: 4px;
   font-weight: bold;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.55), -1px -1px 0 rgba(255,255,255,0.22);
+  text-shadow: 4px 4px 0 rgba(0,0,0,0.55), -1px -1px 0 rgba(255,255,255,0.22);
 }
 
 .ticker-scroll {
@@ -519,20 +589,20 @@ html, body {
   padding: 0 60px;
   letter-spacing: 2px;
   color: var(--green);
-  text-shadow: 2px 2px 0 rgba(40,48,35,0.55), -1px -1px 0 rgba(255,255,255,0.25);
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.55), -1px -1px 0 rgba(255,255,255,0.25);
 }
 
 .ticker-sep {
   font-size: 44px;
   color: var(--green-dim);
   padding: 0 20px;
-  text-shadow: 2px 2px 0 rgba(40,48,35,0.45), -1px -1px 0 rgba(255,255,255,0.20);
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.48), -1px -1px 0 rgba(255,255,255,0.20);
 }
 
 .ticker-item-alert,
 .ticker-item-like  {
   color: #cc1e1e;
-  text-shadow: 2px 2px 0 rgba(160,20,20,0.55), -1px -1px 0 rgba(255,255,255,0.25);
+  text-shadow: 4px 4px 0 rgba(160,20,20,0.58), -1px -1px 0 rgba(255,255,255,0.25);
 }
 
 /* ── FOOTER ── */
@@ -546,7 +616,7 @@ html, body {
   border-top: 2px solid rgba(55, 63, 48, 0.45);
   flex-shrink: 0;
   letter-spacing: 6px;
-  text-shadow: 1px 1px 0 rgba(40,48,35,0.30), -1px -1px 0 rgba(255,255,255,0.15);
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.55), -1px -1px 0 rgba(255,255,255,0.25), 0 0 12px rgba(40,48,35,0.18);
 }
 
 /* ── 弹幕层 ── */
@@ -571,26 +641,26 @@ html, body {
 
 .danmaku-like {
   color: #cc1e1e;
-  text-shadow: 2px 2px 0 rgba(160,20,20,0.55), -1px -1px 0 rgba(255,255,255,0.10);
+  text-shadow: 4px 4px 0 rgba(160,20,20,0.58), -1px -1px 0 rgba(255,255,255,0.10);
   border: 6px solid #cc1e1e;
   background: var(--cell);
-  box-shadow: 0 0 0 3px rgba(204,30,30,0.45), 4px 6px 0 rgba(0,0,0,0.35);
+  box-shadow: 0 0 0 3px rgba(204,30,30,0.45), 6px 10px 0 rgba(0,0,0,0.38);
 }
 
 .danmaku-skip {
   color: #cc1e1e;
-  text-shadow: 2px 2px 0 rgba(160,20,20,0.55), -1px -1px 0 rgba(255,255,255,0.10);
+  text-shadow: 4px 4px 0 rgba(160,20,20,0.58), -1px -1px 0 rgba(255,255,255,0.10);
   border: 6px solid rgba(204,30,30,0.60);
   background: var(--cell);
-  box-shadow: 0 0 0 3px rgba(204,30,30,0.30), 4px 6px 0 rgba(0,0,0,0.35);
+  box-shadow: 0 0 0 3px rgba(204,30,30,0.30), 6px 10px 0 rgba(0,0,0,0.38);
 }
 
 .danmaku-comment {
   color: #283023;
-  text-shadow: 2px 2px 0 rgba(40,48,35,0.50), -1px -1px 0 rgba(255,255,255,0.10);
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.52), -1px -1px 0 rgba(255,255,255,0.10);
   border: 6px solid rgba(46,54,40,0.50);
   background: var(--cell);
-  box-shadow: 0 0 0 3px rgba(55,63,48,0.35), 4px 6px 0 rgba(0,0,0,0.35);
+  box-shadow: 0 0 0 3px rgba(55,63,48,0.35), 6px 10px 0 rgba(0,0,0,0.38);
 }
 
 @keyframes fly-left {

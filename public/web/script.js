@@ -39,9 +39,9 @@ function getPixelHeartUrl() {
   const c = document.createElement("canvas");
   c.width = 7 * px; c.height = 6 * px;
   const ctx = c.getContext("2d");
-  ctx.shadowColor = "rgba(40,48,35,0.60)";
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 2;
+  ctx.shadowColor = "rgba(40,48,35,0.75)";
+  ctx.shadowOffsetX = 8;
+  ctx.shadowOffsetY = 8;
   ctx.shadowBlur = 0;
   ctx.fillStyle = "rgb(40,48,35)";
   pattern.forEach((row, ry) => row.forEach((v, rx) => { if (v) ctx.fillRect(rx*px, ry*px, px, px); }));
@@ -66,9 +66,9 @@ function getPixelVomitUrl() {
   const c = document.createElement("canvas");
   c.width = 7 * px; c.height = 9 * px;
   const ctx = c.getContext("2d");
-  ctx.shadowColor = "rgba(40,48,35,0.60)";
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 2;
+  ctx.shadowColor = "rgba(40,48,35,0.75)";
+  ctx.shadowOffsetX = 8;
+  ctx.shadowOffsetY = 8;
   ctx.shadowBlur = 0;
   ctx.fillStyle = "rgb(40,48,35)";
   pattern.forEach((row, ry) => row.forEach((v, rx) => { if (v) ctx.fillRect(rx*px, ry*px, px, px); }));
@@ -152,9 +152,16 @@ function showSpotlight(idx) {
     ? `<img class="avatar" src="${renderGridAsAvatar(p.grid, p.gridText)}" alt="${p.name}" />`
     : `<div class="avatar-placeholder">${getEmoji(p.breed)}</div>`;
 
+  function breedOnly(val) {
+    if (!val) return null;
+    const parts = val.split(" · ");
+    const species = parts.length > 1 ? parts.slice(1).join(" · ") : parts[0];
+    return displayBilingual(species);
+  }
+
   const breedDisplay = p.mixed && p.breed2
-    ? `${displayBilingual(p.breed)} <span class="mixed-mark">× ${displayBilingual(p.breed2)}（混血 Mixed）</span>`
-    : displayBilingual(p.breed);
+    ? `${breedOnly(p.breed)} <span class="mixed-mark">× ${breedOnly(p.breed2)}（混血 Mixed）</span>`
+    : breedOnly(p.breed);
 
   const likesCount = p.likes?.length || 0;
   const skipsCount = p.skips?.length || 0;
@@ -181,19 +188,20 @@ function showSpotlight(idx) {
     </div>
 
     <div class="avatar-row">
+      <div class="avatar-meta-left">
+        <div class="avatar-name-display">${v(p.name)}</div>
+        <div class="avatar-breed-display">${breedDisplay}</div>
+      </div>
       <div class="avatar-wrap">
         ${avatarHTML}
       </div>
-      <div class="avatar-stats-likes">${heartsHTML}</div>
-      <div class="avatar-stats-skips">${skipsHTML}</div>
+      <div class="avatar-stats-right">
+        <div class="avatar-stats-likes">${heartsHTML}</div>
+        <div class="avatar-stats-skips">${skipsHTML}</div>
+      </div>
     </div>
 
     <div class="card">
-      <div class="grid-2 row-tall">
-        <div class="cell"><span class="label">名字<br><small>Name</small></span><span class="value">${v(p.name)}</span></div>
-        <div class="cell"><span class="label">物种<br><small>Species</small></span><span class="value">${breedDisplay}</span></div>
-      </div>
-
       <div class="grid-3">
         <div class="cell"><span class="label">性别<br><small>Gender</small></span><span class="value">${displayBilingual(p.gender)}</span></div>
         <div class="cell"><span class="label">年龄<br><small>Age</small></span><span class="value">${v(p.age)}</span></div>
@@ -266,13 +274,8 @@ function showSpotlight(idx) {
         <span class="value">${displayBilingual(v(p.hobby))}</span>
       </div>
 
-      ${p.standards ? `<div class="section">
-        <span class="label">择偶标准 <small>Looking For</small></span>
-        <span class="value">${displayBilingual(p.standards)}</span>
-      </div>` : ""}
-
       <div class="section">
-        <span class="label">父母 <small>Parents</small></span>
+        <span class="label">家庭状况 <small>Family</small></span>
         <span class="value">${displayBilingual([
           p.parents?.status || null,
           p.parents?.relationship || null,
@@ -280,6 +283,11 @@ function showSpotlight(idx) {
           p.parents?.motherOrigin ? '母(Mom) ' + p.parents.motherOrigin : null,
         ].filter(Boolean).join(' ') || '—')}</span>
       </div>
+
+      ${p.standards ? `<div class="section">
+        <span class="label">择偶标准 <small>Looking For</small></span>
+        <span class="value">${displayBilingual(p.standards)}</span>
+      </div>` : ""}
     </div>
   `;
 

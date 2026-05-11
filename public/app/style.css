@@ -225,7 +225,7 @@ canvas {
   flex-direction: column;
   gap: 1rem;
   min-width: 260px;
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.5), inset 1px 1px 0 rgba(255,255,255,0.10), inset -1px -1px 0 rgba(55,63,48,0.15);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(255,255,255,0.10), inset -2px -2px 0 rgba(55,63,48,0.15);
 }
 .tut-popup-label {
   font-family: "Zpix", monospace;
@@ -274,7 +274,7 @@ canvas {
   66%       { opacity: 0.4; }
 }
 @keyframes enterPulse {
-  0%, 100% { box-shadow: 0 0 0 1px rgba(55,63,48,0.45); border-color: rgba(55,63,48,0.40); }
+  0%, 100% { box-shadow: 0 0 0 2px rgba(55,63,48,0.45); border-color: rgba(55,63,48,0.40); }
   50%       { box-shadow: 0 0 0 2px rgba(55,63,48,0.70); border-color: rgba(55,63,48,0.65); }
 }
 .tut-enter-wrap:active {
@@ -313,7 +313,7 @@ canvas {
   font-size: 11px;
   color: rgba(42,56,32,0.5);
   letter-spacing: 0.15em;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
 }
 
 .ob-title-zh {
@@ -322,7 +322,7 @@ canvas {
   color: var(--c-text);
   margin: 0;
   text-align: center;
-  text-shadow: 1px 1px 0 rgba(42,56,32,0.20);
+  text-shadow: 2px 2px 0 rgba(42,56,32,0.20);
   letter-spacing: 0.1em;
 }
 .ob-title-en {
@@ -332,7 +332,7 @@ canvas {
   margin: -1.5rem 0 0;
   text-align: center;
   letter-spacing: 0.08em;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
 }
 .ob-sub-zh {
   font-family: "Zpix", monospace;
@@ -341,7 +341,7 @@ canvas {
   margin: 0;
   text-align: center;
   line-height: 1.9;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.22);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.22);
 }
 .ob-sub-en {
   font-family: "Zpix", monospace;
@@ -350,7 +350,7 @@ canvas {
   margin: -1rem 0 0;
   text-align: center;
   line-height: 1.6;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
 }
 
 /* Interactive demo word */
@@ -367,7 +367,7 @@ canvas {
   -webkit-tap-highlight-color: transparent;
   position: relative;
   transition: opacity 0.2s;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 .ob-demo-word.ob-glitch { animation: wordGlitch 0.45s ease-out forwards; }
 .ob-demo-word.ob-done {
@@ -387,7 +387,7 @@ canvas {
   color: var(--c-text);
   pointer-events: none;
   animation: tutFloatIn 0.4s ease-out forwards;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 .ob-float-text.hidden { display: none; }
 
@@ -404,7 +404,7 @@ canvas {
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition: font-size 0.15s;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 .ob-agree-word.ob-glitch { animation: wordGlitch 0.45s ease-out forwards; }
 
@@ -413,7 +413,7 @@ canvas {
   font-size: 12px;
   color: rgba(42,56,32,0.5);
   text-align: center;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
 }
 
 /* Long-press popup inside overlay */
@@ -425,7 +425,7 @@ canvas {
   flex-direction: column;
   gap: 0.8rem;
   width: 100%;
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.5), inset 1px 1px 0 rgba(255,255,255,0.10), inset -1px -1px 0 rgba(55,63,48,0.15);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(255,255,255,0.10), inset -2px -2px 0 rgba(55,63,48,0.15);
 }
 .ob-input-wrap.hidden { display: none; }
 .ob-input-label {
@@ -433,7 +433,7 @@ canvas {
   font-size: 12px;
   color: rgba(42,56,32,0.7);
   margin: 0;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
 }
 .ob-nes-input {
   background: var(--t-bg) !important;
@@ -479,7 +479,7 @@ canvas {
   font-family: "Zpix", monospace;
   transition: opacity 0.3s, box-shadow 0.3s;
   -webkit-tap-highlight-color: transparent;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 .ob-close-btn.locked {
   opacity: 0.2;
@@ -497,7 +497,7 @@ canvas {
   font-family: "Zpix", monospace;
   font-size: 48px;
   color: var(--c-text);
-  text-shadow: 1px 1px 0 rgba(42,56,32,0.20);
+  text-shadow: 2px 2px 0 rgba(42,56,32,0.20);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -527,7 +527,7 @@ canvas {
   font-family: "Zpix", monospace;
   font-size: 22px;
   color: #cc1e1e;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -570,7 +570,7 @@ canvas {
   font-family: "Zpix", monospace;
   font-size: 28px;
   color: var(--c-text);
-  text-shadow: 1px 1px 0 rgba(42,56,32,0.20);
+  text-shadow: 2px 2px 0 rgba(42,56,32,0.20);
   letter-spacing: 0.05em;
 }
 
@@ -580,7 +580,7 @@ canvas {
   height: 250px;
   image-rendering: pixelated;
   border: 2px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.5), inset 1px 1px 0 rgba(255,255,255,0.10), inset -1px -1px 0 rgba(55,63,48,0.15);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(255,255,255,0.10), inset -2px -2px 0 rgba(55,63,48,0.15);
   transition: opacity 0.3s ease;
   display: block;
 }
@@ -612,7 +612,7 @@ canvas {
   display: inline-block;
   padding: 5px 12px;
   border: 2px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.45);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.45);
   background: var(--c-bg);
   background-image: var(--grid-bg);
   color: var(--c-text);
@@ -623,7 +623,7 @@ canvas {
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.12s, color 0.12s;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 .hobby-tag.selected {
   background: var(--c-btn-shadow);
@@ -642,7 +642,7 @@ canvas {
   display: flex;
   align-items: center;
   gap: 6px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.22);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.22);
 }
 .hobby-cat-label:first-child {
   padding-top: 0;
@@ -723,7 +723,7 @@ canvas {
 .opener-chip {
   padding: 8px 14px;
   border: 2px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.5), inset 1px 1px 0 rgba(255,255,255,0.10);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(255,255,255,0.10);
   background: var(--c-bg);
   background-image: var(--grid-bg);
   color: var(--c-text);
@@ -798,7 +798,7 @@ canvas {
   cursor: pointer;
   text-align: left;
   width: 100%;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 .hobby-cat-option:active { background: var(--c-btn-shadow); color: var(--c-btn-text); }
 .edit-hobby-collapsed {
@@ -1016,7 +1016,7 @@ canvas {
 .nes-select select {
   background-color: var(--t-bg);
   color: var(--t-text);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
   border-image: none !important;
   border: 2px solid rgba(55, 63, 48, 0.45) !important;
   border-radius: 2px !important;
@@ -1043,7 +1043,7 @@ h1,
 h2,
 label,
 p {
-  text-shadow: 1px 1px 0 rgba(46,54,40,0.22);
+  text-shadow: 2px 2px 0 rgba(46,54,40,0.22);
   letter-spacing: 1px;
 }
 
@@ -1303,7 +1303,7 @@ li.other .words {
 
 .avatar-box {
   border: 2px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.5);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.5);
   margin: 3px 0;
   overflow: hidden;
   line-height: 0;
@@ -1479,7 +1479,7 @@ li.other .words {
 .wheel div.selected {
   background: rgba(55, 63, 48, 0.75);
   color: #e0e8d0;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.30);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.30);
 }
 
 /* ── 画图区域 ── */
@@ -1514,9 +1514,43 @@ li.other .words {
 
 .has-interpretations {
   cursor: pointer;
-  border-bottom: 1px dotted rgba(46, 54, 40, 0.5);
+  position: relative;
   animation: glitch 4s infinite;
   animation-timing-function: steps(1);
+}
+
+.has-interpretations::before {
+  content: "☞";
+  display: inline;
+  font-size: 1em;
+  opacity: 0.75;
+  pointer-events: none;
+  margin-left: 0.3em;
+  animation: hand-nudge 1.4s ease-in-out infinite;
+}
+
+.has-interpretations::after {
+  content: "点 点 点";
+  position: absolute;
+  top: -1.4em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55em;
+  letter-spacing: 2px;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  animation: dots-float 2.6s ease-in-out infinite;
+}
+
+@keyframes hand-nudge {
+  0%, 100% { opacity: 0.55; margin-left: 0.3em; }
+  50%       { opacity: 0.9;  margin-left: 0.5em; }
+}
+
+@keyframes dots-float {
+  0%, 100% { opacity: 0;   transform: translateX(-50%) translateY(0); }
+  40%, 60%  { opacity: 0.7; transform: translateX(-50%) translateY(-7px); }
 }
 
 /* Interpretation explode state — floating bubbles, original text untouched */
@@ -1600,13 +1634,13 @@ li.other .words {
   gap: 12px;
   width: 88vw;
   max-width: 360px;
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.6), inset 1px 1px 0 rgba(255,255,255,0.12), inset -1px -1px 0 rgba(55,63,48,0.2);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.6), inset 2px 2px 0 rgba(255,255,255,0.12), inset -2px -2px 0 rgba(55,63,48,0.2);
 }
 .reason-box p {
   color: var(--c-text);
   font-size: 12px;
   margin: 0;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 .reason-hint {
   opacity: 0.6;
@@ -1626,7 +1660,7 @@ li.other .words {
   font-family: "Zpix", monospace;
   cursor: pointer;
   line-height: 1.4;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.22);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.22);
 }
 .reason-label-btn.selected {
   background: var(--c-btn-shadow);
@@ -1674,14 +1708,14 @@ li.other .words {
   gap: 12px;
   width: 80vw;
   max-width: 320px;
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.6), inset 1px 1px 0 rgba(255,255,255,0.12), inset -1px -1px 0 rgba(55,63,48,0.2);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.6), inset 2px 2px 0 rgba(255,255,255,0.12), inset -2px -2px 0 rgba(55,63,48,0.2);
 }
 
 .interpret-box p {
   color: var(--c-text);
   margin: 0;
   font-size: 12px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 
 .interpret-btn-row {
@@ -1755,7 +1789,7 @@ li.other .words {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.6), inset 1px 1px 0 rgba(255,255,255,0.12), inset -1px -1px 0 rgba(55,63,48,0.2);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.6), inset 2px 2px 0 rgba(255,255,255,0.12), inset -2px -2px 0 rgba(55,63,48,0.2);
   position: relative;
 }
 
@@ -1771,7 +1805,7 @@ li.other .words {
   cursor: pointer;
   line-height: 1;
   padding: 2px 6px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 
 .panel-close-btn:active {
@@ -1811,7 +1845,7 @@ li.other .words {
   background: var(--bg);
   background-image: var(--grid-bg);
   border: 2px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(0,0,0,0.10), inset -1px -1px 0 rgba(255,255,255,0.12);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(0,0,0,0.10), inset -1px -1px 0 rgba(255,255,255,0.12);
   padding: 8px 10px;
   cursor: pointer;
   transition: background 0.2s;
@@ -1833,7 +1867,7 @@ li.other .words {
   display: flex;
   align-items: center;
   gap: 4px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.12);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.12);
 }
 
 .msg-unread .msg-from::before {
@@ -1846,7 +1880,7 @@ li.other .words {
   font-size: 12px;
   margin: 4px 0;
   word-break: break-word;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.30);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.30);
 }
 
 .msg-footer {
@@ -1912,7 +1946,7 @@ li.other .words {
   z-index: 8000;
   background: var(--c-bg);
   border: 4px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.6), inset 1px 1px 0 rgba(255,255,255,0.10);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.6), inset 2px 2px 0 rgba(255,255,255,0.10);
   color: var(--c-text);
   font-family: "Zpix", monospace;
   font-size: 11px;
@@ -1922,7 +1956,7 @@ li.other .words {
   animation: interrupt-in 0.18s ease-out;
   pointer-events: all;
   image-rendering: pixelated;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 
 .swipe-interrupt .interrupt-close {
@@ -1937,7 +1971,7 @@ li.other .words {
   padding: 0;
   font-family: inherit;
   line-height: 1;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 
 .swipe-interrupt .interrupt-close:hover {
@@ -1973,7 +2007,7 @@ li.other .words {
   transition: opacity 0.3s, transform 0.3s;
   pointer-events: none;
   white-space: nowrap;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 
 #toast-notif.toast-show {
@@ -2042,24 +2076,25 @@ li.other .words {
 }
 
 .bubble-mine .bubble {
-  background: rgba(46, 54, 40, 0.52);
-  border: 1px solid rgba(55, 63, 48, 0.70);
+  background: rgba(46, 54, 40, 0.62);
+  border: 1px solid rgba(55, 63, 48, 0.80);
   border-radius: 3px 1px 3px 3px;
 }
 
 .bubble-theirs .bubble {
-  background: rgba(220, 232, 210, 0.88);
-  border: 1px solid rgba(55, 63, 48, 0.55);
+  background: rgba(188, 211, 180, 0.5);
+  border: 1px solid #373f30;
   border-radius: 1px 3px 3px 3px;
 }
 
 .bubble-text {
   color: var(--c-text);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 
 .bubble-mine .bubble-text {
-  color: var(--c-text);
+  color: #d8e8cc;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.40);
 }
 
 .bubble-time {
@@ -2067,7 +2102,7 @@ li.other .words {
   color: #373f30;
   margin-top: 3px;
   text-align: right;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.22);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.22);
 }
 
 .convo-input-row {
@@ -2113,7 +2148,7 @@ li.other .words {
 .msg-popup-box {
   background: var(--c-bg);
   border: 2px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.6), inset 1px 1px 0 rgba(255,255,255,0.12), inset -1px -1px 0 rgba(55,63,48,0.2);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.6), inset 2px 2px 0 rgba(255,255,255,0.12), inset -2px -2px 0 rgba(55,63,48,0.2);
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
@@ -2131,7 +2166,7 @@ li.other .words {
   color: var(--c-text);
   font-size: 12px;
   font-weight: bold;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 
 .msg-popup-close {
@@ -2142,7 +2177,7 @@ li.other .words {
   cursor: pointer;
   padding: 0 4px;
   font-family: inherit;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 
 .msg-popup-box.msg-alert {
@@ -2161,7 +2196,7 @@ li.other .words {
   word-break: break-word;
   border-left: 2px solid var(--c-btn-shadow);
   padding-left: 8px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 
 .msg-popup-open-btn {
@@ -2198,7 +2233,7 @@ li.other .words {
   background: var(--bg);
   background-image: var(--grid-bg);
   border: 2px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.5);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.5);
   width: min(480px, 96vw);
   max-height: 88vh;
   display: flex;
@@ -2216,7 +2251,7 @@ li.other .words {
   color: var(--c-text);
   font-size: 16px;
   cursor: pointer;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
 }
 .profile-view-content {
   overflow-y: auto;
@@ -2381,10 +2416,10 @@ li.other .words {
   padding: 0 10px;
   background: var(--t-bg);
   border: 2px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(0,0,0,0.10), inset -1px -1px 0 rgba(255,255,255,0.12);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(0,0,0,0.10), inset -1px -1px 0 rgba(255,255,255,0.12);
   font-size: 12px;
   font-family: inherit;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
   display: flex;
   align-items: center;
   min-width: 0;
@@ -2429,7 +2464,7 @@ li.other .words {
   text-align: center;
   line-height: 1;
   transition: background 0.08s;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
   box-shadow: 1px 1px 0 rgba(40,48,35,0.20);
 }
 
@@ -2456,7 +2491,7 @@ li.other .words {
   font-size: 18px;
   font-weight: bold;
   border: 3px solid rgba(55, 63, 48, 0.45);
-  box-shadow: inset -2px -2px 0 var(--c-btn-shadow), inset 1px 1px 0 rgba(255,255,255,0.12);
+  box-shadow: inset -2px -2px 0 var(--c-btn-shadow), inset 2px 2px 0 rgba(255,255,255,0.12);
   background: var(--c-bg);
   background-image: var(--grid-btn);
   color: var(--c-text);
@@ -2511,10 +2546,10 @@ li.other .words {
   height: 40px;
   background: var(--t-bg);
   border: 2px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(0,0,0,0.10), inset -1px -1px 0 rgba(255,255,255,0.12);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.5), inset 2px 2px 0 rgba(0,0,0,0.10), inset -1px -1px 0 rgba(255,255,255,0.12);
   font-size: 16px;
   font-family: monospace;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2535,8 +2570,8 @@ li.other .words {
   font-size: 11px;
   padding: 4px 8px;
   border: 2px solid rgba(55, 63, 48, 0.45);
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.5), 2px 3px 0 rgba(40,48,35,0.25);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.28);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.5), 2px 3px 0 rgba(40,48,35,0.25);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.28);
   display: none;
   pointer-events: none;
   image-rendering: pixelated;
@@ -2553,7 +2588,7 @@ li.other .words {
   color: var(--c-text);
   pointer-events: none;
   text-align: center;
-  text-shadow: 1px 1px 0 rgba(42,56,32,0.22);
+  text-shadow: 2px 2px 0 rgba(42,56,32,0.22);
   animation: score-delta-anim 1.8s ease-out forwards;
 }
 
@@ -2596,7 +2631,7 @@ li.other .words {
 #score-settlement .settle-number {
   font-size: 80px;
   line-height: 1;
-  text-shadow: 1px 1px 0 rgba(42,56,32,0.22);
+  text-shadow: 2px 2px 0 rgba(42,56,32,0.22);
 }
 
 #score-settlement .settle-suffix {
@@ -2746,7 +2781,7 @@ li.other .words {
   width: 90%;
   text-align: center;
   font-family: "Zpix", monospace;
-  box-shadow: 0 0 0 1px rgba(55,63,48,0.6), inset 1px 1px 0 rgba(255,255,255,0.12), inset -1px -1px 0 rgba(55,63,48,0.2);
+  box-shadow: 0 0 0 2px rgba(55,63,48,0.6), inset 2px 2px 0 rgba(255,255,255,0.12), inset -2px -2px 0 rgba(55,63,48,0.2);
   animation: alert-pop 0.18s ease;
 }
 @keyframes alert-pop {
@@ -2763,11 +2798,7 @@ li.other .words {
 
 /* ── 全局格子纹理 — 所有实心背景容器 ── */
 
-/* 最深格子：instruction / tutorial 页面背景 */
-.tutorial-page,
-.tut-popup-inner,
-#onboard-overlay,
-.ob-step,
+/* topbar 保留深格子 */
 #swipe-topbar {
   background-image: var(--grid-dark);
 }
