@@ -5537,17 +5537,22 @@ function submitInterpretation() {
   const text = document.getElementById("interpret-input").value.trim();
   if (!text || !interpTarget.field) return;
 
+  const field = interpTarget.field;
+  const profileUsername = interpTarget.profileUsername;
+
   closeInterpPopup();
+
+  // Optimistically add to local state so the bubble appears immediately
+  if (!currentProfileInterpretations[field]) currentProfileInterpretations[field] = [];
+  if (!Array.isArray(currentProfileInterpretations[field])) {
+    currentProfileInterpretations[field] = [currentProfileInterpretations[field]];
+  }
+  currentProfileInterpretations[field].push({ text, addedBy: currentUser.username, agrees: 0, agreedBy: {} });
 
   fetch("/interpretation", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      profileUsername: interpTarget.profileUsername,
-      field: interpTarget.field,
-      text,
-      addedBy: currentUser.username,
-    }),
+    body: JSON.stringify({ profileUsername, field, text, addedBy: currentUser.username }),
   });
 }
 
