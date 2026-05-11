@@ -795,23 +795,32 @@ socket.on("skip-event", (data) => {
 
 socket.on("interpretation-event", (data) => {
   // Danmaku always fires regardless of which profile is on spotlight
-  const targetProfile = ranking.find(p => p.username === data.profileUsername);
+  const targetIdx = ranking.findIndex(p => p.username === data.profileUsername);
+  const targetProfile = targetIdx >= 0 ? ranking[targetIdx] : null;
   const tName = targetProfile?.name || data.profileUsername;
   spawnDanmaku(`${data.addedBy} 评价了 ${tName} 的[${data.field}]`, "comment");
   spawnDanmaku(`"${data.addedBy}" commented on "${tName}"'s [${data.field}]`, "comment");
 
-  // Bubble injection only if this profile is currently on spotlight
-  const current = ranking[currentIdx];
-  if (!current || current.username !== data.profileUsername) return;
+  if (!targetProfile) return;
 
-  if (!current.interpretations) current.interpretations = {};
-  if (!Array.isArray(current.interpretations[data.field])) {
-    current.interpretations[data.field] = current.interpretations[data.field]
-      ? [current.interpretations[data.field]]
+  // Save interpretation into the ranking data
+  if (!targetProfile.interpretations) targetProfile.interpretations = {};
+  if (!Array.isArray(targetProfile.interpretations[data.field])) {
+    targetProfile.interpretations[data.field] = targetProfile.interpretations[data.field]
+      ? [targetProfile.interpretations[data.field]]
       : [];
   }
-  current.interpretations[data.field].push({ text: data.text, addedBy: data.addedBy });
+  targetProfile.interpretations[data.field].push({ text: data.text, addedBy: data.addedBy });
 
+  // If the target profile isn't on spotlight, jump to it — showSpotlight re-renders
+  // all bubbles from the updated interpretations data, so we're done.
+  if (currentIdx !== targetIdx) {
+    showSpotlight(targetIdx);
+    startCycle();
+    return;
+  }
+
+  // Profile is already on spotlight — inject the new bubble directly
   const el = document.querySelector(`#spotlight [data-field="${data.field}"]`);
   if (!el) return;
 

@@ -5549,6 +5549,11 @@ function submitInterpretation() {
   }
   currentProfileInterpretations[field].push({ text, addedBy: currentUser.username, agrees: 0, agreedBy: {} });
 
+  // Mark the label in the DOM so the red glow indicator appears immediately
+  document.querySelectorAll(`.value[data-field="${CSS.escape(field)}"]`).forEach(el => {
+    el.classList.add("has-interpretations");
+  });
+
   fetch("/interpretation", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -8083,14 +8088,10 @@ function closeReasonPopup() {
 
 function submitReason() {
   if (!selectedReasonLabel) {
-    alert("请先选择一个标签 / Please select a label");
+    showAlert("请先选择一个标签\nPlease select a label");
     return;
   }
   const reason = document.getElementById("reason-input").value.trim();
-  if (!reason) {
-    alert("请输入理由 / Please enter reason");
-    return;
-  }
   const action = pendingAction;
   const label = selectedReasonLabel;
   closeReasonPopup();
