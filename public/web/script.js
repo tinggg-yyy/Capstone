@@ -402,15 +402,9 @@ async function refreshRanking(thenShowUsername) {
           const inRanking = ranking.find(p => p.username === fresh.username);
           if (inRanking) inRanking.interpretations = fresh.interpretations || {};
         }
-        // Update like count on spotlight if this profile is showing
-        if (addedLikes > 0 && ranking[currentIdx]?.username === fresh.username) {
-          const box = document.querySelector(".avatar-stats-likes");
-          if (box) {
-            const h = getPixelHeartUrl();
-            box.innerHTML = newLikes === 0
-              ? '<span class="stat-empty">—</span>'
-              : Array(Math.min(newLikes, 60)).fill(`<img src="${h}" class="pixel-emoji">`).join("");
-          }
+        // Re-render spotlight if this is the currently shown profile and anything changed
+        if (ranking[currentIdx]?.username === fresh.username && (addedLikes || addedSkips || addedInterps)) {
+          _spotlightNeedsRedraw = true;
         }
       }
       _prevCounts[fresh.username] = { likes: newLikes, skips: newSkips, interps: newInterps };
@@ -424,6 +418,12 @@ async function refreshRanking(thenShowUsername) {
 
     currentIdx = newIdx >= 0 ? newIdx : Math.min(currentIdx, ranking.length - 1);
 
+    // Re-render the spotlight if data changed for the current profile
+    if (_spotlightNeedsRedraw && !thenShowUsername) {
+      _spotlightNeedsRedraw = false;
+      showSpotlight(currentIdx);
+    }
+
     // If a specific profile triggered this refresh, jump to it now
     if (thenShowUsername) {
       const jumpIdx = ranking.findIndex(p => p.username === thenShowUsername);
@@ -434,6 +434,8 @@ async function refreshRanking(thenShowUsername) {
     }
   } catch (_) {}
 }
+
+let _spotlightNeedsRedraw = false;
 
 // Re-rank every 10s — also serves as polling fallback when socket events are missed
 setInterval(() => refreshRanking(), 10000);
