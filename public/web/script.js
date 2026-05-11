@@ -367,6 +367,9 @@ function startCycle() {
 
 const calcScore = (p) => Math.max(0, (p.score ?? 60) - (p.skips?.length || 0));
 
+// Snapshot of counts from previous refresh, used to detect new activity
+const _prevCounts = {}; // username -> { likes, skips, interps }
+
 async function refreshRanking(thenShowUsername) {
   try {
     const res = await fetch("/profiles");
@@ -377,12 +380,40 @@ async function refreshRanking(thenShowUsername) {
       .sort((a, b) => calcScore(b) - calcScore(a))
       .slice(0, 10);
 
-    // Merge fresh data into existing entries; add new entries
+    // Detect changes vs previous snapshot → spawn danmaku as fallback
     newRanking.forEach(fresh => {
-      const existing = ranking.find(p => p.username === fresh.username);
-      if (existing) {
-        Object.assign(existing, fresh);
+      const prev = _prevCounts[fresh.username];
+      const newLikes = fresh.likes?.length || 0;
+      const newSkips = fresh.skips?.length || 0;
+      const newInterps = Object.values(fresh.interpretations || {}).reduce((s, a) => s + (Array.isArray(a) ? a.length : 1), 0);
+      if (prev) {
+        const addedLikes = newLikes - prev.likes;
+        const addedSkips = newSkips - prev.skips;
+        const addedInterps = newInterps - prev.interps;
+        for (let i = 0; i < addedLikes; i++) {
+          spawnDanmaku(`有人对 ${fresh.name} 上头了 / Someone fell for "${fresh.name}"`, "like");
+        }
+        for (let i = 0; i < addedSkips; i++) {
+          spawnDanmaku(`有人划走了 ${fresh.name} / Someone skipped "${fresh.name}"`, "skip");
+        }
+        if (addedInterps > 0) {
+          spawnDanmaku(`${fresh.name} 的档案有新评价 / New comment on "${fresh.name}"`, "comment");
+          // Also update in-memory interps for spotlight re-render
+          const inRanking = ranking.find(p => p.username === fresh.username);
+          if (inRanking) inRanking.interpretations = fresh.interpretations || {};
+        }
+        // Update like count on spotlight if this profile is showing
+        if (addedLikes > 0 && ranking[currentIdx]?.username === fresh.username) {
+          const box = document.querySelector(".avatar-stats-likes");
+          if (box) {
+            const h = getPixelHeartUrl();
+            box.innerHTML = newLikes === 0
+              ? '<span class="stat-empty">—</span>'
+              : Array(Math.min(newLikes, 60)).fill(`<img src="${h}" class="pixel-emoji">`).join("");
+          }
+        }
       }
+      _prevCounts[fresh.username] = { likes: newLikes, skips: newSkips, interps: newInterps };
     });
 
     const currentUsername = ranking[currentIdx]?.username;
@@ -404,8 +435,8 @@ async function refreshRanking(thenShowUsername) {
   } catch (_) {}
 }
 
-// Re-rank every 20s to pick up new profiles and score changes
-setInterval(() => refreshRanking(), 20000);
+// Re-rank every 10s — also serves as polling fallback when socket events are missed
+setInterval(() => refreshRanking(), 10000);
 
 function resetProgress() {
   const bar = document.getElementById("progressBar");
