@@ -594,6 +594,24 @@
             <input id="parents-relationship" type="hidden" value="" />
           </div>
         </div>
+
+        <label>兄弟姐妹 Siblings</label>
+        <div class="dice-field-row">
+          <button class="dice-roll-btn" id="parents-siblingCount-dice-btn" data-rolls="0"
+            onclick="rollParentsFieldDice('siblingCount')"></button>
+          <div id="parents-siblingCount-display" class="dice-result-input">—</div>
+          <input id="parents-siblingCount" type="hidden" value="" />
+        </div>
+
+        <div id="siblings-wealth-wrapper" class="hidden">
+          <label>兄弟姐妹状况 Siblings' Wealth</label>
+          <div class="dice-field-row">
+            <button class="dice-roll-btn" id="parents-siblingWealth-dice-btn" data-rolls="0"
+              onclick="rollParentsFieldDice('siblingWealth')"></button>
+            <div id="parents-siblingWealth-display" class="dice-result-input">—</div>
+            <input id="parents-siblingWealth" type="hidden" value="" />
+          </div>
+        </div>
       </div>
       <button class="nes-btn setup-next-btn" onclick="validateAndGoTo('profile-parents','profile-mbti')">▶</button>
     </section>

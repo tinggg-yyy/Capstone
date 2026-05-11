@@ -104,21 +104,13 @@ function showSpotlight(idx) {
 
   const v = (val) => val || "—";
 
-  function bilingualParts(arr) {
-    const zh = arr.map(p => p.split(" / ")[0].trim()).join("  ");
-    const en = arr.map(p => { const s = p.split(" / "); return s.length > 1 ? s.slice(1).join(" / ").trim() : ""; }).filter(Boolean).join("  ");
-    return en ? `${zh} <small>${en}</small>` : zh;
-  }
-
-  function displayTerritory(hukou, houseType) {
+  function displayTerritory(hukou) {
     if (!hukou) return "—";
+    if (!hukou.includes(" · ")) return displayBilingual(hukou);
     const parts = hukou.split(" · ");
-    let splitIdx = parts.findIndex(seg => seg.split(" / ")[0].trim().includes(houseType));
-    if (splitIdx === -1) return displayBilingual(hukou);
-    const line1 = bilingualParts(parts.slice(0, splitIdx + 1));
-    const rest = parts.slice(splitIdx + 1);
-    if (rest.length === 0) return line1;
-    return `${line1}<br>${bilingualParts(rest)}`;
+    const zh = parts.map(p => p.split(" / ")[0].trim()).join("  ");
+    const en = parts.map(p => { const s = p.split(" / "); return s.length > 1 ? s.slice(1).join(" / ").trim() : ""; }).filter(Boolean).join("  ");
+    return en ? `${zh}<br><small>${en}</small>` : zh;
   }
 
   function displayBilingual(val) {
@@ -221,7 +213,7 @@ function showSpotlight(idx) {
       <div class="row-2x">
         <div class="section">
           <span class="label">领地 <small>Territory</small></span>
-          <span class="value">${displayTerritory(p.hukou, p.house?.type || "")}</span>
+          <span class="value">${displayTerritory(p.hukou)}</span>
         </div>
         <div class="section">
           <span class="label">车辆 <small>Vehicles</small></span>
@@ -281,7 +273,17 @@ function showSpotlight(idx) {
           p.parents?.relationship || null,
           p.parents?.fatherOrigin ? '父(Dad) ' + p.parents.fatherOrigin : null,
           p.parents?.motherOrigin ? '母(Mom) ' + p.parents.motherOrigin : null,
-        ].filter(Boolean).join(' ') || '—')}</span>
+          (() => {
+            const cnt = p.parents?.siblingCount;
+            if (!cnt) return null;
+            if (cnt === "独生/Only Child") return "独生 / Only Child";
+            const wMap = {"经济困难":"Struggling","普通":"Average","小康":"Comfortable","富裕":"Wealthy","富裕✨":"Very Wealthy ✨"};
+            const w = p.parents?.siblingWealth;
+            const wEn = wMap[w] || "";
+            const cntEn = cnt.split("/")[1] || "";
+            return w ? `${cnt.split("/")[0]} / ${cntEn} · ${w} / ${wEn}` : `${cnt.split("/")[0]} / ${cntEn}`;
+          })(),
+        ].filter(Boolean).join(' · ') || '—')}</span>
       </div>
 
       ${p.standards ? `<div class="section">
@@ -290,6 +292,33 @@ function showSpotlight(idx) {
       </div>` : ""}
     </div>
   `;
+
+  // ── Real interpretation comments (floating red tags) ──────────
+  const spotlight = document.getElementById("spotlight");
+  const interps = p.interpretations || {};
+  const allComments = [];
+  Object.entries(interps).forEach(([field, val]) => {
+    const entries = Array.isArray(val) ? val : [val];
+    entries.forEach(e => {
+      if (e && e.text) allComments.push({ text: e.text, by: e.addedBy || "?" });
+    });
+  });
+
+  // scatter positions (top%, left%, rotation)
+  const positions = [
+    [8,  62, -6], [14, 58, 4],  [22, 64, -3], [30, 60, 5],
+    [38, 62, -5], [46, 58, 3],  [54, 64, -4], [62, 60, 6],
+    [70, 62, -3], [78, 58, 5],  [20, 55, 4],  [50, 55, -6],
+  ];
+
+  allComments.slice(0, positions.length).forEach((c, i) => {
+    const [top, left, rot] = positions[i];
+    const tag = document.createElement("div");
+    tag.className = "interp-float";
+    tag.style.cssText = `top:${top}%;left:${left}%;--r:${rot}deg;`;
+    tag.innerHTML = `<span class="interp-by">${c.by}</span><span class="interp-text">${c.text}</span>`;
+    spotlight.appendChild(tag);
+  });
 
   resetProgress();
 }
@@ -301,7 +330,7 @@ function startCycle() {
   cycleTimer = setInterval(() => {
     const next = (currentIdx + 1) % ranking.length;
     showSpotlight(next);
-  }, 5000);
+  }, 45000);
 }
 
 function resetProgress() {

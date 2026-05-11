@@ -465,11 +465,11 @@ html, body {
 /* Territory value: use block layout so <br> acts as normal line break */
 .row-2x > .section:first-child .value {
   display: block;
-  line-height: 0.8;
+  line-height: 1.2;
   text-align: center;
 }
 .row-2x > .section:first-child .value small {
-  margin-top: 0;
+  margin-top: 4px;
 }
 
 /* <br> inside flex column takes up space — collapse it */
@@ -531,7 +531,7 @@ html, body {
 }
 
 .progress-bar.running {
-  animation: progress 5s linear forwards;
+  animation: progress 45s linear forwards;
 }
 
 @keyframes progress {
@@ -666,6 +666,50 @@ html, body {
 @keyframes fly-left {
   from { transform: translateX(0); }
   to   { transform: translateX(calc(-2160px - 100%)); }
+}
+
+/* ── Floating interpretation comment tags ── */
+.interp-float {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  pointer-events: none;
+  animation: interp-bob 3.5s ease-in-out infinite alternate;
+}
+
+.interp-float:nth-child(odd)  { animation-duration: 3.2s; }
+.interp-float:nth-child(even) { animation-duration: 4.1s; animation-delay: -1.4s; }
+.interp-float:nth-child(3n)   { animation-duration: 3.7s; animation-delay: -0.8s; }
+
+@keyframes interp-bob {
+  from { transform: rotate(var(--r, 0deg)) translateY(0px); }
+  to   { transform: rotate(var(--r, 0deg)) translateY(-18px); }
+}
+
+.interp-by {
+  display: block;
+  font-size: 22px;
+  color: rgba(204, 30, 30, 0.70);
+  letter-spacing: 1px;
+  padding: 0 8px;
+}
+
+.interp-text {
+  display: block;
+  font-size: 36px;
+  color: #cc1e1e;
+  background: var(--cell);
+  border: 5px solid #cc1e1e;
+  box-shadow:
+    0 0 0 2px rgba(204,30,30,0.30),
+    5px 8px 0 rgba(0,0,0,0.45);
+  padding: 8px 20px;
+  white-space: nowrap;
+  text-shadow: 3px 3px 0 rgba(160,20,20,0.45), -1px -1px 0 rgba(255,255,255,0.12);
+  letter-spacing: 2px;
 }
 
 /* board is the only element that needs the grid bg — transparent children show it through */

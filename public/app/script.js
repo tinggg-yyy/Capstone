@@ -318,6 +318,8 @@ function getTotalProfileScore() {
     "petOrientation",
     "vehicle-price",
     "parents-status",
+    "parents-siblingCount",
+    "parents-siblingWealth",
   ];
   ids.forEach((id) => {
     const el = document.getElementById(id);
@@ -1432,8 +1434,18 @@ function rollParentsFieldDice(field) {
       btn.disabled = remaining <= 0;
       if (remaining <= 0) btn.classList.add("dice-exhausted");
       else btn.title = `还可摇 ${remaining} 次 / ${remaining} rolls left`;
-      const tierMap = field === "status" ? HOUSING_TIERS.parentsStatus : HOUSING_TIERS.parentsRelationship;
-      const value = tierMap[roll];
+      let value;
+      if (field === "status") {
+        value = HOUSING_TIERS.parentsStatus[roll];
+      } else if (field === "relationship") {
+        value = HOUSING_TIERS.parentsRelationship[roll];
+      } else if (field === "siblingCount") {
+        value = HOUSING_TIERS.siblingCount[roll];
+      } else if (field === "siblingWealth") {
+        const rawClass = (document.getElementById("petBreedClass")?.value || "").split(" / ")[0].trim();
+        const tierMap = HOUSING_TIERS.siblingWealthBySpecies[rawClass] || HOUSING_TIERS.siblingWealthBySpecies["default"];
+        value = tierMap[roll];
+      }
       document.getElementById(`parents-${field}`).value = value;
       display.textContent = disp(value);
       if (field === "status") {
@@ -1443,6 +1455,9 @@ function rollParentsFieldDice(field) {
         document.getElementById("parents-father-wrapper")?.classList.toggle("hidden", !fatherAlive);
         document.getElementById("parents-mother-wrapper")?.classList.toggle("hidden", !motherAlive);
         document.getElementById("parents-rel-wrapper")?.classList.toggle("hidden", !bothAlive);
+      } else if (field === "siblingCount") {
+        const hasSiblings = value !== "独生/Only Child";
+        document.getElementById("siblings-wealth-wrapper")?.classList.toggle("hidden", !hasSiblings);
       }
     }
   }, 70);
@@ -2052,6 +2067,23 @@ const HOUSING_TIERS = {
     5: "恩爱/Loving",
     6: "神仙眷侣/Perfect Couple ✨",
   },
+  siblingCount: {
+    1: "独生/Only Child",
+    2: "独生/Only Child",
+    3: "1个/1 Sibling",
+    4: "2个/2 Siblings",
+    5: "3个/3 Siblings",
+    6: "4个+/4+ Siblings",
+  },
+  siblingWealthBySpecies: {
+    "哺乳类": { 1:"经济困难", 2:"普通",     3:"小康",     4:"小康",   5:"富裕",   6:"富裕✨" },
+    "鸟类":   { 1:"经济困难", 2:"经济困难", 3:"普通",     4:"小康",   5:"小康",   6:"富裕"  },
+    "爬行类": { 1:"经济困难", 2:"经济困难", 3:"经济困难", 4:"普通",   5:"普通",   6:"小康"  },
+    "两栖类": { 1:"经济困难", 2:"经济困难", 3:"经济困难", 4:"普通",   5:"普通",   6:"小康"  },
+    "节肢动物":{ 1:"经济困难", 2:"经济困难", 3:"经济困难", 4:"经济困难",5:"普通",  6:"普通"  },
+    "鱼类":   { 1:"经济困难", 2:"经济困难", 3:"经济困难", 4:"普通",   5:"普通",   6:"小康"  },
+    "default":{ 1:"经济困难", 2:"经济困难", 3:"普通",     4:"普通",   5:"小康",   6:"小康"  },
+  },
   // City/region-specific housing type tiers (arrays = random pick from options)
   cityTypes: {
     "北京":    { 1:"下水管道", 2:"地下室", 3:"普通住宅", 4:"公寓", 5:"大平层", 6:["别墅","四合院"] },
@@ -2188,6 +2220,18 @@ const SCORE_DEDUCTIONS = {
   "仅父亲健在": -2,
   "仅母亲健在": -2,
   "均已故": -5,
+  // 兄弟姐妹数量 / Sibling count — only child gets bonus, many siblings = shared resources
+  "独生/Only Child": +3,
+  "1个/1 Sibling": 0,
+  "2个/2 Siblings": -2,
+  "3个/3 Siblings": -4,
+  "4个+/4+ Siblings": -6,
+  // 兄弟姐妹状况 / Sibling wealth
+  "经济困难": -3,
+  "普通": 0,
+  "小康": +2,
+  "富裕": +4,
+  "富裕✨": +6,
   // 种族大类歧视链 / Species hierarchy — only 哺乳类 gets bonus
   "哺乳类 / Mammals": +5,
   "鸟类 / Birds": 0,
@@ -2281,6 +2325,17 @@ const DISP = {
   "仅父亲健在": "仅父亲健在 / Father Alive",
   "仅母亲健在": "仅母亲健在 / Mother Alive",
   "均已故": "均已故 / Both Passed",
+  // siblings
+  "独生/Only Child": "独生 / Only Child",
+  "1个/1 Sibling": "1个 / 1 Sibling",
+  "2个/2 Siblings": "2个 / 2 Siblings",
+  "3个/3 Siblings": "3个 / 3 Siblings",
+  "4个+/4+ Siblings": "4个+ / 4+ Siblings",
+  "经济困难": "经济困难 / Struggling",
+  "普通": "普通 / Average",
+  "小康": "小康 / Comfortable",
+  "富裕": "富裕 / Wealthy",
+  "富裕✨": "富裕 ✨ / Very Wealthy ✨",
   // district / neighborhood
   "郊区": "郊区 / Suburb",
   "老城区": "老城区 / Old Town",
@@ -3033,6 +3088,8 @@ function createCard() {
     status: document.getElementById("parents-status")?.value || "",
     fatherOrigin: getCityDisplayName("parents-father"),
     motherOrigin: getCityDisplayName("parents-mother"),
+    siblingCount: document.getElementById("parents-siblingCount")?.value || "",
+    siblingWealth: document.getElementById("parents-siblingWealth")?.value || "",
   };
 
   const g = (id) => document.getElementById(id)?.value || "";
@@ -3111,11 +3168,18 @@ function createCard() {
     vehicleData.count ? disp(vehicleData.count) : null,
     vehicleData.price ? disp(vehicleData.price) : null,
   ].filter(Boolean).join(" ") || "—");
+  const siblingStr = (() => {
+    const cnt = parentsData.siblingCount;
+    if (!cnt || cnt === "独生/Only Child") return cnt ? disp(cnt) : null;
+    const wealth = parentsData.siblingWealth ? disp(parentsData.siblingWealth) : null;
+    return [disp(cnt), wealth].filter(Boolean).join(" ");
+  })();
   const parentsStr = fmt([
     parentsData.status ? disp(parentsData.status) : null,
     parentsData.fatherOrigin ? `父 ${parentsData.fatherOrigin}` : null,
     parentsData.motherOrigin ? `母 ${parentsData.motherOrigin}` : null,
-  ].filter(Boolean).join(" ") || "—");
+    siblingStr,
+  ].filter(Boolean).join(" · ") || "—");
   const rel = relationshipData;
 
   document.getElementById("petCard").innerHTML = `
@@ -5010,6 +5074,13 @@ function renderCardHTML(profile) {
       profile.parents?.relationship ? disp(profile.parents.relationship) : null,
       profile.parents?.fatherOrigin ? `父(Dad) ${profile.parents.fatherOrigin}` : null,
       profile.parents?.motherOrigin ? `母(Mom) ${profile.parents.motherOrigin}` : null,
+      (() => {
+        const cnt = profile.parents?.siblingCount;
+        if (!cnt) return null;
+        if (cnt === "独生/Only Child") return disp(cnt);
+        const wealth = profile.parents?.siblingWealth ? disp(profile.parents.siblingWealth) : null;
+        return [disp(cnt), wealth].filter(Boolean).join(" ");
+      })(),
     ].filter(Boolean).join(" · ") || "—")}
   </div>
 
@@ -5064,15 +5135,6 @@ function showProfile() {
   attachSectionDragScroll(container);
   console.log("Showing profile:", profile);
   console.log("Current index:", currentIndex);
-
-  // Auto-advance after 1 minute
-  if (_autoAdvanceTimer) clearTimeout(_autoAdvanceTimer);
-  _autoAdvanceTimer = setTimeout(() => {
-    if (currentIndex < profiles.length) {
-      currentIndex++;
-      showProfile();
-    }
-  }, 60000);
 }
 
 function attachSectionDragScroll(cardContainer) {
@@ -6514,7 +6576,6 @@ function escapeHtml(str) {
 let _interruptTimer = null;
 let _consecutiveSkips = 0;
 let _profileShownAt = 0;
-let _autoAdvanceTimer = null;
 let _currentSwipeProfileName = "";
 let _currentSwipeProfile = null;
 
