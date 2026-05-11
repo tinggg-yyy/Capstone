@@ -1349,15 +1349,10 @@ li.other .words {
   gap: 2px;
   box-sizing: border-box;
   overflow: visible;
-  cursor: grab;
 }
 .section::-webkit-scrollbar,
 .cell::-webkit-scrollbar {
   display: none;
-}
-.section:active,
-.cell:active {
-  cursor: grabbing;
 }
 
 
@@ -1527,42 +1522,20 @@ li.other .words {
 .has-interpretations {
   cursor: pointer;
   position: relative;
-  animation: glitch 4s infinite;
-  animation-timing-function: steps(1);
+  animation: interp-glow 1.6s ease-in-out infinite;
 }
 
-.has-interpretations::before {
-  content: "☞";
-  display: inline;
-  font-size: 1em;
-  opacity: 0.75;
-  pointer-events: none;
-  margin-left: 0.3em;
-  animation: hand-nudge 1.4s ease-in-out infinite;
-}
-
-.has-interpretations::after {
-  content: "点 点 点";
-  position: absolute;
-  top: -1.4em;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.55em;
-  letter-spacing: 2px;
-  opacity: 0;
-  pointer-events: none;
-  white-space: nowrap;
-  animation: dots-float 2.6s ease-in-out infinite;
-}
-
-@keyframes hand-nudge {
-  0%, 100% { opacity: 0.55; margin-left: 0.3em; }
-  50%       { opacity: 0.9;  margin-left: 0.5em; }
-}
-
-@keyframes dots-float {
-  0%, 100% { opacity: 0;   transform: translateX(-50%) translateY(0); }
-  40%, 60%  { opacity: 0.7; transform: translateX(-50%) translateY(-7px); }
+@keyframes interp-glow {
+  0%, 100% {
+    color: var(--c-text);
+    text-shadow: none;
+  }
+  50% {
+    color: #b83030;
+    text-shadow:
+      0 0 4px rgba(204, 30, 30, 0.30),
+      0 0 8px rgba(204, 30, 30, 0.15);
+  }
 }
 
 /* Interpretation explode state — floating bubbles, original text untouched */
@@ -2059,6 +2032,8 @@ li.other .words {
   gap: 6px;
   max-height: 38vh;
   padding: 4px 0;
+  background: var(--bg);
+  background-image: var(--grid-bg);
 }
 
 .convo-empty {
@@ -2085,36 +2060,38 @@ li.other .words {
   padding: 7px 10px;
   font-size: 12px;
   word-break: break-word;
+  background: var(--c-bg);
+  border: 2px solid rgba(55, 63, 48, 0.58);
+  box-shadow:
+    0 0 0 1px rgba(55, 63, 48, 0.18),
+    inset 0 0 0 1px rgba(255,255,255,0.10),
+    inset 3px 3px 0 rgba(0,0,0,0.18),
+    inset -2px -2px 0 rgba(255,255,255,0.22);
+  border-radius: 2px;
 }
 
 .bubble-mine .bubble {
-  background: rgba(46, 54, 40, 0.62);
-  border: 1px solid rgba(55, 63, 48, 0.80);
-  border-radius: 3px 1px 3px 3px;
+  border-color: rgba(40, 48, 35, 0.75);
 }
 
 .bubble-theirs .bubble {
-  background: rgba(188, 211, 180, 0.5);
-  border: 1px solid #373f30;
-  border-radius: 1px 3px 3px 3px;
+  border-color: rgba(55, 63, 48, 0.58);
 }
 
 .bubble-text {
   color: var(--c-text);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.10);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.07);
 }
 
 .bubble-mine .bubble-text {
-  color: #d8e8cc;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.12);
+  color: var(--c-text);
 }
 
 .bubble-time {
   font-size: 9px;
-  color: #373f30;
+  color: rgba(40, 48, 35, 0.55);
   margin-top: 3px;
   text-align: right;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.08);
 }
 
 .convo-input-row {

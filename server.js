@@ -274,6 +274,7 @@ app.post("/interpretation", function (req, res) {
   profile.interpretations[field].push({ text, addedBy });
 
   fs.writeFileSync("profiles.json", stringifyProfiles(profiles));
+  io.emit("interpretation-event", { profileUsername, field, text, addedBy });
   res.json({ success: true });
 });
 

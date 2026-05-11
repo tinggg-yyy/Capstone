@@ -159,8 +159,22 @@ function showSpotlight(idx) {
     return displayBilingual(species);
   }
 
+  function breedZhEn(val) {
+    if (!val) return { zh: "", en: "" };
+    const parts = val.split(" · ");
+    const species = parts.length > 1 ? parts.slice(1).join(" · ") : parts[0];
+    const segs = species.split(" / ");
+    return { zh: segs[0].trim(), en: segs[1]?.trim() || "" };
+  }
+
   const breedDisplay = p.mixed && p.breed2
-    ? `${breedOnly(p.breed)} <span class="mixed-mark">× ${breedOnly(p.breed2)}（混血 Mixed）</span>`
+    ? (() => {
+        const a = breedZhEn(p.breed);
+        const b = breedZhEn(p.breed2);
+        const zh = `${a.zh} × ${b.zh}`;
+        const en = [a.en, b.en].filter(Boolean).join(" × ");
+        return en ? `${zh}<br><small>${en}</small>` : zh;
+      })()
     : breedOnly(p.breed);
 
   const likesCount = p.likes?.length || 0;
@@ -358,40 +372,126 @@ function resetProgress() {
 
 // ── 假弹幕生成系统 ────────────────────────────────────────
 
-const _ADJ = ["香", "屑", "迷", "可以", "抽象", "在线", "离谱", "真实", "猛", "怪", "稳", "炸", "秀", "可疑", "上头", "危险", "哲学", "清醒", "迷惑", "敢说", "挺好", "有趣", "一般", "不行", "震撼", "高级", "接地气", "有点东西", "说不清楚", "耐人寻味", "确实如此", "不明觉厉"];
+const _ADJ = [
+  "香 / fire", "屑 / sus", "迷 / intriguing", "可以 / solid", "抽象 / abstract",
+  "在线 / online", "离谱 / wild", "真实 / real", "猛 / bold", "怪 / odd",
+  "稳 / steady", "炸 / explosive", "秀 / impressive", "可疑 / sketchy", "上头 / hooked",
+  "危险 / dangerous", "哲学 / philosophical", "清醒 / self-aware", "迷惑 / confusing",
+  "敢说 / outspoken", "挺好 / pretty good", "有趣 / interesting", "一般 / mid",
+  "不行 / not it", "震撼 / stunning", "高级 / premium", "接地气 / relatable",
+  "有点东西 / got something", "说不清楚 / hard to place", "耐人寻味 / thought-provoking",
+  "确实如此 / fair point", "不明觉厉 / impressive somehow",
+];
 const _SKIP_REASONS = [
-  "年龄差太大", "领地距离有点远", "MBTI感觉不合", "收入那栏看了一眼就划走了",
-  "爱好完全不重合", "看了五秒感觉不是很合适", "物种匹配率太低", "第一印象太普通了",
-  "直觉告诉它不行", "好像见过面不太合拍", "感觉对方不太在线", "综合考量了一下算了",
-  "学历那栏让它犹豫了", "职业方向差太多", "想了想还是跳过", "头像看起来不太对味",
-  "婚育状态不符合预期", "感觉双方目标不一样", "无法解释 就是没感觉",
+  // 物种 Species
+  "物种匹配率太低 / species compatibility too low",
+  "看到物种就知道不合适了 / species said it all",
+  "混血加分不够 / mixed heritage bonus wasn't enough",
+  // 性别 / 性取向 Gender & Orientation
+  "性取向不符 / orientation mismatch",
+  "性别那栏看了一眼跳过 / gender tab, instant skip",
+  // 年龄 Age
+  "年龄差太大 / age gap too wide",
+  "年龄那栏让它犹豫了 / age section gave it pause",
+  // 身高 Height
+  "身高那栏直接划走了 / height column, immediate pass",
+  "身高差距有点大 / height difference too much",
+  // 婚恋 Status / 绝育
+  "婚恋状态不符合预期 / relationship status mismatch",
+  "绝育状况没达到预期 / sterilization status wasn't expected",
+  // MBTI
+  "MBTI感觉不合 / MBTI clash",
+  "MBTI看了直接跳过 / MBTI, instant skip",
+  // 星座 Horoscope
+  "星座不合 / horoscope incompatibility",
+  "星座那栏让它三思了 / horoscope made it reconsider",
+  // 领地 Territory
+  "领地距离有点远 / territory too far",
+  "领地那栏直接劝退 / territory section was a dealbreaker",
+  // 车辆 Vehicle
+  "车辆那栏没到预期 / vehicle section underwhelmed",
+  "车的情况让它犹豫了 / car situation gave it pause",
+  // 学历 Education
+  "学历那栏让它犹豫了 / edu section gave it pause",
+  "学历差距有点大 / education gap too wide",
+  // 职业 Job
+  "职业方向差太多 / careers too different",
+  "职业那栏一眼划走 / job tab, quick swipe",
+  // 月收入 Income
+  "收入那栏看了一眼就划走了 / income tab said goodbye",
+  "收入没达到预期 / income didn't meet expectations",
+  // 目的 / 期望关系 Dating Purpose & Goal
+  "来这里的目的不一样 / different reasons for being here",
+  "期望关系对不上 / relationship goals don't align",
+  "感觉双方目标不一样 / different life goals",
+  // 目前伴侣 / 伴侣数量 Current Partner & Count
+  "目前伴侣情况太复杂 / current partner situation too complex",
+  "伴侣数量那栏让它沉默了 / partner count made it go quiet",
+  // 子女 Kids
+  "子女那栏直接劝退 / kids section was a dealbreaker",
+  "对孩子的态度不一致 / different views on kids",
+  // 暗恋 / 暧昧 Crush & Ambiguous
+  "暗恋那栏有点在线 / crush section was a red flag",
+  "暧昧对象太多了 / too many ambiguous relationships",
+  // 秘密伴侣 Secret Partner
+  "秘密伴侣那栏直接再见 / secret partner section, instant goodbye",
+  // 境外 / 异地伴侣 Foreign & Long Distance
+  "还有境外伴侣 / there's a foreign partner",
+  "异地恋情太多了 / too many long-distance situations",
+  // 白月光 White Moonlight
+  "白月光那栏让它想太多了 / moonlight section stirred up thoughts",
+  "白月光情况有点复杂 / moonlight situation too complicated",
+  // 谈过 / 前任联系 Past Rels & Ex Contact
+  "谈过那栏看了心里没底 / past rels section left it uncertain",
+  "还在和前任联系 / still in contact with ex",
+  "说还爱前任那一刻就划走了 / the moment it said still loves ex",
+  // 兴趣爱好 Hobbies
+  "爱好完全不重合 / zero hobby overlap",
+  "兴趣爱好差距太大 / hobbies worlds apart",
+  // 家庭状况 Family
+  "家庭状况那栏让它犹豫了 / family section gave it pause",
+  "兄弟姐妹太多了 / too many siblings",
+  // 综合 General
+  "看了五秒感觉不是很合适 / 5 seconds, no spark",
+  "第一印象太普通了 / first impression too plain",
+  "直觉告诉它不行 / gut said no",
+  "好像见过面不太合拍 / vibe check failed",
+  "感觉对方不太在线 / they seem offline",
+  "综合考量了一下算了 / considered it all, still passing",
+  "头像看起来不太对味 / avatar wasn't its type",
+  "想了想还是跳过 / thought about it, still no",
+  "无法解释 就是没感觉 / can't explain, just no feeling",
 ];
 const _LIKE_REASONS = [
-  "物种加分项", "MBTI很对味", "爱好高度重合", "领地离得近", "学历让它心动了",
-  "职业很加分", "收入让它眼前一亮", "头像看起来很顺眼", "综合评分太高了没忍住",
-  "感觉气场相符", "看了三秒就决定了", "直觉说可以", "某个爱好标签戳到它了",
-  "无法解释 就是感觉对", "感觉对方很有品味", "档案写得很真实",
+  "物种加分项 / species bonus", "MBTI很对味 / MBTI match", "爱好高度重合 / hobbies aligned",
+  "领地离得近 / territory nearby", "学历让它心动了 / edu was a vibe",
+  "职业很加分 / career is a plus", "收入让它眼前一亮 / income caught its eye",
+  "头像看起来很顺眼 / avatar check passed", "综合评分太高了没忍住 / score too high to resist",
+  "感觉气场相符 / energy matches", "看了三秒就决定了 / decided in 3 seconds",
+  "直觉说可以 / gut said yes", "某个爱好标签戳到它了 / a hobby tag got it",
+  "无法解释 就是感觉对 / can't explain, just feels right",
+  "感觉对方很有品味 / they seem to have taste", "档案写得很真实 / profile felt genuine",
 ];
 const _COMMENT_TEMPLATES = [
-  (a, b, tag, adj) => `「${a}」评论了「${b}」的[${tag}]标签：有点${adj}`,
-  (a, b, tag, adj) => `「${a}」看了「${b}」的[${tag}]，觉得有点${adj}`,
-  (a, b, tag, adj) => `「${a}」对「${b}」的[${tag}]留下印象：${adj}`,
-  (a, b, tag, adj) => `「${a}」评价「${b}」的[${tag}]：确实有点${adj}`,
-  (a, b, tag, adj) => `「${a}」看到「${b}」写了[${tag}]，评价说：${adj}`,
+  (a, b, tag, adj) => `「${a}」评论了「${b}」的[${tag}]标签：有点${adj}  "${a}" on "${b}"'s [${tag}]: kinda ${adj}`,
+  (a, b, tag, adj) => `「${a}」看了「${b}」的[${tag}]，觉得有点${adj}  "${a}" saw [${tag}], thought: ${adj}`,
+  (a, b, tag, adj) => `「${a}」对「${b}」的[${tag}]留下印象：${adj}  "${a}" was struck by "${b}"'s [${tag}]: ${adj}`,
+  (a, b, tag, adj) => `「${a}」评价「${b}」的[${tag}]：确实有点${adj}  "${a}" rates "${b}"'s [${tag}]: genuinely ${adj}`,
+  (a, b, tag, adj) => `「${a}」看到「${b}」写了[${tag}]，评价说：${adj}  "${a}" read [${tag}] on "${b}"'s profile: ${adj}`,
 ];
 const _LIKE_TEMPLATES = [
   (a, b, reason) => `「${a}」喜欢了「${b}」· ${reason}`,
-  (a, b, reason) => `「${a}」对「${b}」上头  原因：${reason}`,
-  (a, b, reason) => `「${a}」给「${b}」点了喜欢  ${reason}`,
-  (a, b, reason) => `「${a}」→「${b}」✓  ${reason}`,
-  (a, b, reason) => `「${a}」[心]「${b}」· ${reason}`,
+  (a, b, reason) => `「${a}」对「${b}」上头  "${a}" fell for "${b}"  ${reason}`,
+  (a, b, reason) => `「${a}」给「${b}」点了喜欢  "${a}" liked "${b}"  ${reason}`,
+  (a, b, reason) => `「${a}」→「${b}」✓  "${a}" chose "${b}"  ${reason}`,
+  (a, b, reason) => `「${a}」[心]「${b}」· "${a}" hearts "${b}"  ${reason}`,
 ];
 const _SKIP_TEMPLATES = [
   (a, b, reason) => `「${a}」跳过了「${b}」· ${reason}`,
-  (a, b, reason) => `「${a}」划走了「${b}」· ${reason}`,
-  (a, b, reason) => `「${a}」→「${b}」✗  ${reason}`,
-  (a, b, reason) => `「${a}」跳过「${b}」· ${reason}`,
-  (a, b, reason) => `「${a}」没有选择「${b}」· ${reason}`,
+  (a, b, reason) => `「${a}」划走了「${b}」· "${a}" swiped past "${b}"  ${reason}`,
+  (a, b, reason) => `「${a}」→「${b}」✗  "${a}" passed on "${b}"  ${reason}`,
+  (a, b, reason) => `「${a}」跳过「${b}」· "${a}" skipped "${b}"  ${reason}`,
+  (a, b, reason) => `「${a}」没有选择「${b}」· "${a}" didn't pick "${b}"  ${reason}`,
 ];
 
 function _rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -633,8 +733,8 @@ function pushTickerMessage(text, type = "alert") {
 
 socket.on("like-event", (data) => {
   const reasonPart =
-    data.label && data.reason ? ` 因为[${data.label}]它觉得 thinks: ${data.reason}` : "";
-  spawnDanmaku(`${data.by} 对 ${data.name} 上头 fell for them${reasonPart}`, "like");
+    data.label && data.reason ? `  因为[${data.label}]它觉得 / thinks: ${data.reason}` : "";
+  spawnDanmaku(`${data.by} 对 ${data.name} 上头了  "${data.by}" fell for "${data.name}"${reasonPart}`, "like");
 
   const profile = ranking.find((p) => p.name === data.name);
   if (profile && data.likesCount !== undefined) {
@@ -651,14 +751,62 @@ socket.on("like-event", (data) => {
   }
 
   if (data.likesCount && data.likesCount % 5 === 0) {
-    pushTickerMessage(`「${data.name}」累计 total ${data.likesCount} 个喜欢 likes`, "like");
+    pushTickerMessage(`「${data.name}」累计收到 ${data.likesCount} 个喜欢  "${data.name}" has ${data.likesCount} likes and counting`, "like");
   }
 });
 
 socket.on("skip-event", (data) => {
   const reasonPart =
-    data.label && data.reason ? ` 因为[${data.label}]它觉得 thinks: ${data.reason}` : "";
-  spawnDanmaku(`${data.by} 跳过 skipped ${data.name}${reasonPart}`, "skip");
+    data.label && data.reason ? `  因为[${data.label}]它觉得 / thinks: ${data.reason}` : "";
+  spawnDanmaku(`${data.by} 划走了 ${data.name}  "${data.by}" skipped "${data.name}"${reasonPart}`, "skip");
+});
+
+socket.on("interpretation-event", (data) => {
+  const current = ranking[currentIdx];
+  if (!current || current.username !== data.profileUsername) return;
+
+  // Update in-memory profile so future spotlight renders include it
+  if (!current.interpretations) current.interpretations = {};
+  if (!Array.isArray(current.interpretations[data.field])) {
+    current.interpretations[data.field] = current.interpretations[data.field]
+      ? [current.interpretations[data.field]]
+      : [];
+  }
+  current.interpretations[data.field].push({ text: data.text, addedBy: data.addedBy });
+
+  // Inject bubble live into the correct cell
+  const el = document.querySelector(`#spotlight [data-field="${data.field}"]`);
+  if (!el) return;
+
+  const existingBubbles = el.querySelectorAll('.web-interp-bubble');
+  const i = existingBubbles.length;
+  const n = i + 1;
+
+  el.classList.add('has-web-bubbles');
+
+  const b = document.createElement('span');
+  b.className = 'web-interp-bubble';
+  b.textContent = data.text;
+
+  const angle = (i / Math.max(n, 1)) * 2 * Math.PI;
+  const ringR = Math.max(140, n * 70);
+  const sx = Math.cos(angle) * ringR * 0.6 + (Math.random() - 0.5) * 20;
+  const sy = Math.sin(angle) * ringR * 0.35 + (Math.random() - 0.5) * 12;
+  const fAngle = angle + 0.25 * (Math.random() - 0.5);
+  const fDist = Math.max(110, n * 55);
+  const fx = Math.cos(fAngle) * fDist * 0.7;
+  const fy = Math.sin(fAngle) * fDist * 0.38;
+  const dx = (Math.random() - 0.5) * 28;
+  const dy = (Math.random() - 0.5) * 18;
+  b.style.setProperty('--sx', sx + 'px');
+  b.style.setProperty('--sy', sy + 'px');
+  b.style.setProperty('--fx', fx + 'px');
+  b.style.setProperty('--fy', fy + 'px');
+  b.style.setProperty('--dx', dx + 'px');
+  b.style.setProperty('--dy', dy + 'px');
+  el.appendChild(b);
+
+  spawnDanmaku(`${data.addedBy} 评价了 ${current.name || current.username} 的[${data.field}]  "${data.addedBy}" commented on "${current.name || current.username}"'s [${data.field}]`, "comment");
 });
 
 // ── 工具函数 ──────────────────────────────────────────

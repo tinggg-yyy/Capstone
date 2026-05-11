@@ -2327,10 +2327,10 @@ const DISP = {
   "均已故": "均已故 / Both Passed",
   // siblings
   "独生/Only Child": "独生 / Only Child",
-  "1个/1 Sibling": "1个 / 1 Sibling",
-  "2个/2 Siblings": "2个 / 2 Siblings",
-  "3个/3 Siblings": "3个 / 3 Siblings",
-  "4个+/4+ Siblings": "4个+ / 4+ Siblings",
+  "1个/1 Sibling": "1个兄弟姐妹 / 1 Sibling",
+  "2个/2 Siblings": "2个兄弟姐妹 / 2 Siblings",
+  "3个/3 Siblings": "3个兄弟姐妹 / 3 Siblings",
+  "4个+/4+ Siblings": "4个+兄弟姐妹 / 4+ Siblings",
   "经济困难": "经济困难 / Struggling",
   "普通": "普通 / Average",
   "小康": "小康 / Comfortable",
@@ -5197,8 +5197,8 @@ let interpTarget = { field: null, profileUsername: null, labelText: null };
 let touchStartX = 0;
 let touchStartY = 0;
 
-function attachLabelHandlers(profileUsername) {
-  const container = document.getElementById("swipe-container");
+function attachLabelHandlers(profileUsername, containerEl) {
+  const container = containerEl || document.getElementById("swipe-container");
 
   // Remove old listeners by replacing the container node's cloned handlers
   // (simpler: just use a flag so we don't double-bind across showProfile calls)
@@ -5270,7 +5270,7 @@ function attachLabelHandlers(profileUsername) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          profileUsername: _currentSwipeProfile?.username,
+          profileUsername,
           field,
           interpIndex,
           agreeingUser: currentUser.username,
@@ -6397,22 +6397,12 @@ function openConvoView(username, name) {
   setConvoBg(username);
 }
 
-function setConvoBg(username) {
-  fetch("/profiles")
-    .then((r) => r.json())
-    .then((data) => {
-      const p = data.find((u) => u.username === username);
-      const bubbles = document.getElementById("convo-bubbles");
-      if (p && p.grid) {
-        const avatarUrl = renderGridAsAvatar(p.grid, p.gridText);
-        bubbles.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.78), rgba(0,0,0,0.78)), url(${avatarUrl})`;
-        bubbles.style.backgroundSize = "cover";
-        bubbles.style.backgroundPosition = "center";
-        bubbles.style.backgroundRepeat = "no-repeat";
-      } else {
-        bubbles.style.backgroundImage = "";
-      }
-    });
+function setConvoBg(_username) {
+  const bubbles = document.getElementById("convo-bubbles");
+  bubbles.style.backgroundImage = "";
+  bubbles.style.backgroundSize = "";
+  bubbles.style.backgroundPosition = "";
+  bubbles.style.backgroundRepeat = "";
 }
 
 function closeConvoView() {
@@ -8017,19 +8007,39 @@ function openReasonPopup(action) {
   selectedReasonLabel = null;
 
   const p = profiles[currentIndex];
+  const rel = p.relationship || {};
   const fields = [
     { label: "物种/Species", value: p.breed },
-    { label: "身高/Height", value: p.height },
     { label: "性别/Gender", value: p.gender },
     { label: "年龄/Age", value: p.age },
-    { label: "领地/Territory", value: p.hukou },
+    { label: "身高/Height", value: p.height },
     { label: "性取向/Orientation", value: p.orientation },
+    { label: "婚恋/Status", value: p.sterilized },
     { label: "MBTI", value: p.mbti },
-    { label: "婚育/Status", value: p.sterilized },
+    { label: "星座/Horoscope", value: p.horoscope },
+    { label: "领地/Territory", value: p.hukou },
+    { label: "车/Vehicle", value: p.vehicle },
     { label: "学历/Education", value: p.edu },
     { label: "职业/Job", value: p.occupation },
     { label: "月收入/Income", value: p.income },
+    { label: "目的/Here For", value: rel.datingPurpose },
+    { label: "期望关系/Looking For", value: rel.relationshipGoal },
+    { label: "目前伴侣/Partner", value: rel.currentPartner },
+    { label: "伴侣数量/# Partners", value: rel.partnerCount },
+    { label: "子女/Kids", value: rel.kids },
+    { label: "暗恋/Crush", value: rel.crush },
+    { label: "暧昧/Ambiguous", value: rel.ambiguous },
+    { label: "秘密伴侣/Secret", value: rel.secretPartner },
+    { label: "境外伴侣/Foreign", value: rel.foreignPartner },
+    { label: "异地伴侣/Long Dist", value: rel.otherCityPartner },
+    { label: "白月光/Moonlight", value: rel.whiteMoonlight },
+    { label: "谈过/Past Rels", value: rel.pastRelCount },
+    { label: "前任联系/Ex Contact", value: rel.exContact },
+    { label: "还爱前任/Still Love Ex", value: rel.stillLoveEx },
     { label: "爱好/Hobbies", value: p.hobby },
+    { label: "家庭状况/Family", value: p.parents?.status },
+    { label: "兄弟姐妹/Siblings", value: p.parents?.siblingCount },
+    { label: "择偶标准/Standards", value: p.standards },
   ].filter((f) => f.value);
 
   document.getElementById("reason-popup-title").innerHTML =
@@ -8435,6 +8445,8 @@ function showProfileView(p) {
   const container = document.getElementById("profile-view-content");
   container.innerHTML = renderCardHTML(p);
   attachSectionDragScroll(container);
+  currentProfileInterpretations = p.interpretations || {};
+  attachLabelHandlers(p.username, container);
   document.getElementById("profile-view-overlay").classList.remove("hidden");
 }
 

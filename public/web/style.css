@@ -647,19 +647,19 @@ html, body {
 }
 
 .danmaku-like {
-  color: #cc1e1e;
-  text-shadow: 4px 4px 0 rgba(160,20,20,0.58), -1px -1px 0 rgba(255,255,255,0.10);
-  border: 6px solid #cc1e1e;
+  color: #283023;
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.52), -1px -1px 0 rgba(255,255,255,0.10);
+  border: 6px solid #4a6840;
   background: var(--cell);
-  box-shadow: 0 0 0 3px rgba(204,30,30,0.45), 6px 10px 0 rgba(0,0,0,0.38);
+  box-shadow: 0 0 0 3px rgba(74,104,64,0.35), 6px 10px 0 rgba(0,0,0,0.38);
 }
 
 .danmaku-skip {
-  color: #cc1e1e;
-  text-shadow: 4px 4px 0 rgba(160,20,20,0.58), -1px -1px 0 rgba(255,255,255,0.10);
-  border: 6px solid rgba(204,30,30,0.60);
+  color: #4a5244;
+  text-shadow: 4px 4px 0 rgba(40,48,35,0.35), -1px -1px 0 rgba(255,255,255,0.10);
+  border: 6px solid rgba(74,82,68,0.55);
   background: var(--cell);
-  box-shadow: 0 0 0 3px rgba(204,30,30,0.30), 6px 10px 0 rgba(0,0,0,0.38);
+  box-shadow: 0 0 0 3px rgba(74,82,68,0.25), 6px 10px 0 rgba(0,0,0,0.38);
 }
 
 .danmaku-comment {
