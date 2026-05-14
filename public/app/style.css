@@ -930,6 +930,7 @@ canvas {
 
 #p5-canvas-container {
   position: relative;
+  touch-action: none;
   border: 2px solid rgba(55, 63, 48, 0.45);
   box-shadow:
     0 0 0 1px rgba(55,63,48,0.5),
@@ -1509,6 +1510,13 @@ li.other .words {
 /* ── 画图区域 ── */
 .pixeldraw {
   padding: 12px;
+}
+
+/* 画图页面允许整体滚动，但画布本身不触发滚动 */
+#profile-photo .phone {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 #tools {
